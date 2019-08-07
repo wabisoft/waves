@@ -3,6 +3,7 @@
 #include "constants.hpp"
 #include "game.hpp"
 #include "graphics.hpp"
+#include "printing.hpp"
 #include "stage.hpp"
 #include "util.hpp"
 #include "vector2.hpp"
@@ -10,13 +11,15 @@
 int main(){
 	Stage stage(13.3f);
 	runStage(stage);
- 	// int blah [10] = {1, 2, 5, 7, 10, 22, 6, 3, 8, 9};
- 	// for (int i = 0; i< 10; i++)
- 	// 	std::cout << blah[i] << " ";
- 	// std::cout << std::endl;
- 	// insertion_sort(blah, 10);
- 	// for (int i = 0; i< 10; i++)
- 	// 	std::cout << blah[i] << " ";
- 	// std::cout << std::endl;
-	// return 0;
+ 	// int blah [10] = {1, 2, 5, 7, 9}; 
+	// size_t blah_size = 5;
+	// std::cout << "Pre-sort" << std::endl;
+	// print_array(blah, blah_size);
+ 	// insertion_sort(blah, blah_size);
+	// std::cout << "Post-sort" << std::endl;
+	// print_array(blah, blah_size);
+	// sorted_insert(4, blah, blah_size);
+	// std::cout << "Insert 4" << std::endl;
+	// print_array(blah, blah_size);
+	return 0;
 }

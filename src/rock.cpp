@@ -33,7 +33,7 @@ int createRock(Stage& stage, Vector2 position, float radius){
 	new_rock->velocity = { 0.f, 0.f };
 	new_rock->radius = radius;
 	stage.numRocks++;
-	insertion_sort(stage.rocks, stage.numRocks, [](Rock a, Rock b) { return aabb(a).lower.x > aabb(b).lower.x; });
+	// insertion_sort(stage.rocks, stage.numRocks, [](Rock a, Rock b) { return aabb(a).lower.x < aabb(b).lower.x; });
 	return new_rock->id;
 }
 

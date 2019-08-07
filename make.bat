@@ -1,4 +1,4 @@
-:: @echo off
+@echo off
 
 
 if /i [%1] == [clean] (

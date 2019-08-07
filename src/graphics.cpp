@@ -46,9 +46,9 @@ void drawInfoText(Graphics& graphics, const Stage& stage) {
 	text.setFillColor(sf::Color::White);
 	text.setCharacterSize(15);
 	std::stringstream infostream;
-	infostream << "FrameRate(Hz): " << 1/graphics.deltaTime <<std::endl;
-	infostream << "Simulation Frequency(Hz): " << 1/graphics.fixedDeltaTime <<std::endl;
-	infostream << "Loops/SimulationStep(Hz): " << graphics.loopsPerFixedUpdate <<std::endl;
+	infostream << "FrameRate(Hz): 				" << 1/graphics.deltaTime <<std::endl;
+	infostream << "Simulation Frequency(Hz): 	" << 1/graphics.fixedDeltaTime <<std::endl;
+	infostream << "Loops/SimulationStep: 		" << graphics.loopsPerFixedUpdate <<std::endl;
 	text.setString(infostream.str());
 	text.setPosition(3, 3);
 	graphics.window.draw(text);
@@ -79,7 +79,7 @@ inline void draw(Graphics& graphics, const Rock* rocks, int numRocks) {
 		circle.setOrigin(adjustedRadius, adjustedRadius);
 		graphics.window.draw(circle);
 		idText.setPosition(RockPosition);
-		idText.setString(std::to_string(i));
+		idText.setString(std::to_string(rocks[i].id));
 		bounds = idText.getGlobalBounds();
 		idText.setOrigin(bounds.width/2, bounds.height/2);
 		graphics.window.draw(idText);
