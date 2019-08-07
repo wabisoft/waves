@@ -14,7 +14,6 @@ find_package(SFML 2.5 COMPONENTS system window graphics audio REQUIRED)
 find_library (SFML REQUIRED sfml-window sfml-system sfml-graphics sfml-audio)
 include_directories(${SFML_INCLUDE_DIR})
 
-add_subdirectory(wabi)
 
 file(GLOB wavesSource 
     "*.hpp"
@@ -24,4 +23,4 @@ file(GLOB wavesSource
 add_executable(waves main.cpp ${wavesSource})
 
 target_compile_definitions(waves PRIVATE SFML_STATIC)
-target_link_libraries(waves libwabi sfml-window sfml-system sfml-graphics sfml-audio)
+target_link_libraries(waves sfml-window sfml-system sfml-graphics sfml-audio)

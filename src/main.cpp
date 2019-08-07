@@ -1,17 +1,22 @@
 #include <iostream>
-
-#include "wabi/vector2.hpp"
+#include "clock.hpp"
+#include "constants.hpp"
+#include "game.hpp"
+#include "graphics.hpp"
+#include "stage.hpp"
+#include "util.hpp"
+#include "vector2.hpp"
 
 int main(){
-	wabi::Vector2 v(0, 0);
-	wabi::Vector2 v1(1, 1);
-	std::cout << v << std::endl;
-	std::cout << v.dot(v1) << std::endl; 
-	std::cout << v1.magnitude() << std::endl; 
-	std::cout << v1.normalized() << std::endl; 
-	std::cout << v1 << std::endl;
-	v1.normalize();
-	std::cout << v1 << std::endl;
-	std::cout << v1.magnitude() << std::endl; 
-	return 0;
+	Stage stage(13.3f);
+	runStage(stage);
+ 	// int blah [10] = {1, 2, 5, 7, 10, 22, 6, 3, 8, 9};
+ 	// for (int i = 0; i< 10; i++)
+ 	// 	std::cout << blah[i] << " ";
+ 	// std::cout << std::endl;
+ 	// insertion_sort(blah, 10);
+ 	// for (int i = 0; i< 10; i++)
+ 	// 	std::cout << blah[i] << " ";
+ 	// std::cout << std::endl;
+	// return 0;
 }
