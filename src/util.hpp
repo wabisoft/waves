@@ -2,17 +2,9 @@
 
 #include <algorithm>
 
-enum EntityType{		
-	SEA 		= 1 << 0,
-	WAVE 		= 1 << 1,
-	PLATFORM 	= 1 << 2,
-	ROCK 		= 1 << 3,
-	SHIP		= 1 << 4,
-};
-
 
 template<typename T, typename Pred>
-inline void insertion_sort(T* t, size_t count, Pred predicate) {
+inline void insertion_sort(T* t, const size_t count, Pred predicate) {
 	for(size_t i = 1; i<count; ++i) {
 		for(size_t j = i; predicate(t[j], t[j-1]) && j>0; --j) {
 			T swap = t[j];
@@ -23,16 +15,26 @@ inline void insertion_sort(T* t, size_t count, Pred predicate) {
 }
 
 template<typename T>
-inline void insertion_sort(T* t, size_t count) {
+inline void insertion_sort(T* t, const size_t count) {
 	return insertion_sort(t, count, [](T a, T b) { return a<b; });
 }
 
 template <typename T, typename Pred>
 inline void sorted_insert(T t_item, T* t, size_t& count, Pred predicate) {
+	if (count == 0) {
+		t[0] = t_item;
+		++count;
+		return;
+	}
 	for(size_t i = 0; i<count; ++i){
-		if(predicate(t[i],t_item))
+		if(predicate(t[i],t_item)) {
+			if (i == count - 1) { // at the end of array
+				t[i+1] = t_item;
+				++count;
+				return;
+			}
 			continue;
-		else {
+		} else {
 			T swap;
 			swap = t[i];
 			t[i] = t_item;
@@ -50,4 +52,30 @@ inline void sorted_insert(T t_item, T* t, size_t& count, Pred predicate) {
 template <typename T>
 inline void sorted_insert(T t_item, T* t, size_t& count) {
 	return sorted_insert(t_item, t, count, [](T a, T b) { return a<b; });
+}
+
+template <typename T, typename BinaryPred>
+inline size_t find_where(const T t_item, const T* const t, const size_t count, BinaryPred predicate) {
+	for (size_t i = 0; i<count; ++i) {
+		if(predicate(t[i], t_item)) { 
+			return i;
+		}
+	}
+	return SIZE_MAX;
+}
+
+
+template <typename T>
+inline size_t find_where(const T t_item, const T* const t, const size_t count) {
+	return find_where(t_item, t, count, [](T a, T b) { return a==b; });
+}
+
+template <typename T, typename UnaryPred>
+inline size_t find_where(const T* const t, const size_t count, UnaryPred predicate) {
+	for (size_t i = 0; i<count; ++i) {
+		if(predicate(t[i])) { 
+			return i;
+		}
+	}
+	return SIZE_MAX;
 }

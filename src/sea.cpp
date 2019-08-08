@@ -12,3 +12,4 @@ float heightAtX(const Sea& sea, float x) {
 }
 
 void fixedUpdate(Sea& sea) {}
+

@@ -5,7 +5,7 @@
 #include "stage.hpp"
 
 
-void fixedUpdate(Rock * rocks, int& numRocks) {
+void fixedUpdate(Rock * rocks, size_t& numRocks) {
 	for (int i = 0; i < numRocks; ++i) {
 		if (rocks[i].position.x < 0 || rocks[i].position.x > STAGE_WIDTH || rocks[i].position.y < 0 || rocks[i].position.y > STAGE_HEIGHT) {
 			rocks[i].active = false;
@@ -25,7 +25,7 @@ int createRock(Stage& stage, Vector2 position, float radius){
 		// but just incase
 		return -1;
 	}
-	int new_rock_idx = stage.numRocks;
+	size_t new_rock_idx = stage.numRocks;
 	Rock* new_rock = stage.rocks + new_rock_idx;
 	new_rock->active = true;
 	new_rock->id = ++stage.id_src;
@@ -40,7 +40,7 @@ int createRock(Stage& stage, Vector2 position, float radius){
 int deleteRock(Stage& stage, int rock_id){
 	int rock_idx = -1;
 	Rock * rocks = stage.rocks;
-	for(int i = 0; i < stage.numRocks; i++){
+	for(size_t i = 0; i < stage.numRocks; i++){
 		if (rocks[i].id == rock_id){
 			rock_idx = i;
 		} else if(rock_idx > 0){

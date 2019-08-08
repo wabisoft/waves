@@ -1,9 +1,14 @@
 #pragma once
 
-struct Vector2;
 struct AABB;
-struct Stage;
-struct Wave;
+struct Game;
 struct Platform;
 struct Rock;
 struct Ship;
+struct Stage;
+struct Vector2;
+struct Wave;
+
+
+
+

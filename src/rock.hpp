@@ -27,6 +27,6 @@ inline AABB aabb(const Rock& rock) {
 	return AABB(rock.position - diag, rock.position + diag, ROCK, rock.id);
 }
 
-void fixedUpdate(Rock* rocks, int& numRocks);
+void fixedUpdate(Rock* rocks, size_t& numRocks);
 int createRock(Stage& stage, Vector2 position, float radius);
 int deleteRock(Stage& stage, int rock_id);

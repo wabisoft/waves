@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "constants.hpp"
 #include "platform.hpp"
 #include "rock.hpp"
 #include "sea.hpp"
@@ -14,8 +15,8 @@ struct Stage{
 	Rock rocks[MAX_ROCKS];
 	Platform platforms[MAX_PLATFORMS];
 	int id_src = 0;
-	int numRocks = 0;
-	int numPlatforms = 0;
+	size_t numRocks = 0;
+	size_t numPlatforms = 0;
 	bool paused = false;
 };
 
@@ -23,5 +24,6 @@ struct Stage{
 	// TODO: dispatch event and do things
 // }
 //
+
 void fixedUpdate(Stage& stage, float deltaTime);	
-void resolveCollisions(Stage& stage);
+void resolveCollisionste(Stage& stage);

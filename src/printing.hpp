@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include "vector2.hpp"
+#include "prelude.hpp"
 
 
 template <typename Container>
@@ -22,7 +22,7 @@ void print_array(T*t, size_t count) {
 }
 
 
-// std::ostream& operator<<(std::ostream& os, Vector2& v) {
-// 	return os << "(" << v[0] << ", " << v[1] << ")";
-// }
+std::ostream& operator<<(std::ostream& os, const Vector2& v);
+std::ostream& operator<<(std::ostream& os, const AABB& aabb);
+
 

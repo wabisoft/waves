@@ -1,9 +1,13 @@
+#include "collision.hpp"
+#include "constants.hpp"
 #include "platform.hpp"
+#include "printing.hpp"
 #include "rock.hpp"
 #include "sea.hpp"
 #include "ship.hpp"
 #include "stage.hpp"
 #include "wave.hpp"
+#include "util.hpp"
 
 
 
@@ -11,6 +15,7 @@ void fixedUpdate(Stage& stage, float deltaTime){
 	if (stage.paused) {
 		return;
 	}
+	resolveCollisions(stage);
 	// TODO: check for collisions of all AABBs
 	fixedUpdate(stage.rocks, stage.numRocks);
 	// for (int i = 0; i < stage.numRocks; i++){
@@ -20,6 +25,3 @@ void fixedUpdate(Stage& stage, float deltaTime){
 	fixedUpdate(stage.ship);
 }
 
-void resolveCollisions(Stage& stage) {
-
-}
