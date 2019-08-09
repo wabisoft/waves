@@ -7,7 +7,7 @@ if /i [%1] == [clean] (
 	mkdir build
 	pushd build\
 	cmake ../src -DSFML_DIR=C:\Users\Public\Libraries\SFML-2.5.1
-	msbuild waves.sln 
+	call msbuild waves.sln 	
 	popd
 	cp -r assets build\Debug\
 	call "build/Debug/waves.exe"
@@ -18,6 +18,7 @@ if /i [%1] == [clean] (
 	msbuild waves.sln /p:Configuration=Release
 	popd
 	cp -r assets build\Release\
+
 	call "build/Release/waves.exe"
 ) else if /i [%1] == [tags] (
 	echo "updating tags"

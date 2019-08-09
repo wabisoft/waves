@@ -1,5 +1,7 @@
 #include <iostream>
 #include <sstream>
+#include <SFML/System.hpp>
+#include <SFML/Graphics.hpp>
 
 
 #include "constants.hpp"
@@ -7,6 +9,7 @@
 #include "printing.hpp"
 #include "sea.hpp"
 #include "stage.hpp"
+
 
 #ifdef _WIN32
 #include <windows.h>
@@ -35,8 +38,8 @@ void initGraphics(Graphics & graphics, const char * title) {
 
 void draw(Graphics& graphics, const Stage& stage) {
 	graphics.window.clear(sf::Color::Black);
-	draw(graphics, stage.sea);
 	draw(graphics, stage.rocks, stage.numRocks);
+	draw(graphics, stage.sea);
 	drawInfoText(graphics, stage);
 }
 
@@ -49,7 +52,11 @@ void drawInfoText(Graphics& graphics, const Stage& stage) {
 	infostream << "FrameRate(Hz): 				" << 1/graphics.deltaTime <<std::endl;
 	infostream << "Simulation Frequency(Hz): 	" << 1/graphics.fixedDeltaTime <<std::endl;
 	infostream << "Loops/SimulationStep: 		" << graphics.loopsPerFixedUpdate <<std::endl;
+	infostream << std::endl;
+	infostream << "numRocks: 					" << stage.numRocks << std::endl;
+	infostream << "numWaves: 					" << stage.sea.numWaves << std::endl;
 	text.setString(infostream.str());
+	text.setPosition(3, 3);
 	text.setPosition(3, 3);
 	graphics.window.draw(text);
 
@@ -79,7 +86,7 @@ inline void draw(Graphics& graphics, const Rock* rocks, int numRocks) {
 		circle.setOrigin(adjustedRadius, adjustedRadius);
 		graphics.window.draw(circle);
 		idText.setPosition(RockPosition);
-		idText.setString(std::to_string(rocks[i].id));
+		idText.setString((sf::String)std::to_string(rocks[i].id));
 		bounds = idText.getGlobalBounds();
 		idText.setOrigin(bounds.width/2, bounds.height/2);
 		graphics.window.draw(idText);

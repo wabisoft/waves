@@ -11,7 +11,7 @@ struct Collision {
 };
 
 void resolveCollisions(Stage& stage);
-void dispatchPotentialCollision(Stage& stage, const AABB& a, const AABB& b);
+void dispatchPotentialCollision(Stage& stage, const Collision& collision);
 
 // Rocks Collide with things:
 //  - Sea

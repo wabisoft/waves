@@ -8,6 +8,7 @@ void runStage(Stage& stage){
 	bool mousePressed = false;
 	Vector2 mousePosition;
 	int loopsPerFixedUpdate = 0;
+	float slowDown = 1.f;
 	while(graphics.window.isOpen()){
 		sf::Event event;
 		while (graphics.window.pollEvent(event))
@@ -26,11 +27,22 @@ void runStage(Stage& stage){
 			} else if (event.type == sf::Event::KeyPressed) {
 				if(event.key.code == sf::Keyboard::Key::P){
 					stage.paused = !stage.paused;
+				} else if(event.key.code == sf::Keyboard::Key::Num1){
+					slowDown = 1.f;
+				} else if(event.key.code == sf::Keyboard::Key::Num2){
+					slowDown = 2.f;
+				} else if(event.key.code == sf::Keyboard::Key::Num3){
+					slowDown = 3.f;
+				} else if(event.key.code == sf::Keyboard::Key::Num4){
+					slowDown = 4.f;
 				}
+
+
+
 			}
 		}
 		float fixedUpdateElapsedTime = fixedUpdateClock.getElapsedTime().asSeconds();
-		if (fixedUpdateElapsedTime >= FIXED_TIMESTEP) {
+		if (fixedUpdateElapsedTime >= FIXED_TIMESTEP * slowDown) {
 			graphics.fixedDeltaTime = fixedUpdateElapsedTime;
 			graphics.loopsPerFixedUpdate = loopsPerFixedUpdate;
 			fixedUpdate(stage, fixedUpdateElapsedTime);

@@ -11,7 +11,8 @@ struct AABB{
 	Vector2 lower = {0,0};
 	Vector2 upper = {0,0};
 	EntityType type = NONE;
-	// void * entity = nullptr; // using type we can cast to whatever entity maybe?
+
+	void * entity = nullptr; // using type we can cast to whatever entity maybe? TODO this feel awkward and I'm not sure
 	int id = -1;
 };
 

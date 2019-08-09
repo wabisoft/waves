@@ -1,6 +1,7 @@
 #pragma once
 
-#include <algorithm>
+// #include <algorithm>
+#include "constants.hpp"
 
 
 template<typename T, typename Pred>

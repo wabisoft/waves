@@ -21,7 +21,7 @@ void fixedUpdate(Stage& stage, float deltaTime){
 	// for (int i = 0; i < stage.numRocks; i++){
 	// 	fixedUpdate(stage.rocks[i]);
 	// }
-	fixedUpdate(stage.sea);
+	fixedUpdateWaves(stage.sea);
 	fixedUpdate(stage.ship);
 }
 
