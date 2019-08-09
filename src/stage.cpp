@@ -17,7 +17,7 @@ void fixedUpdate(Stage& stage, float deltaTime){
 	}
 	resolveCollisions(stage);
 	// TODO: check for collisions of all AABBs
-	fixedUpdate(stage.rocks, stage.numRocks);
+	fixedUpdateRocks(stage);
 	// for (int i = 0; i < stage.numRocks; i++){
 	// 	fixedUpdate(stage.rocks[i]);
 	// }

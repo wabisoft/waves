@@ -1,19 +1,28 @@
 #include <iostream>
+
+#include "collision.hpp"
 #include "constants.hpp"
 #include "gravity.hpp"
 #include "rock.hpp"
 #include "stage.hpp"
 
 
-void fixedUpdate(Rock * rocks, size_t& numRocks) {
-	for (int i = 0; i < numRocks; ++i) {
+void fixedUpdateRocks(Stage& stage) {
+	Rock* rocks = stage.rocks;
+	for (size_t i = 0; i < stage.numRocks; ++i) {
 		if (rocks[i].position.x < 0 || rocks[i].position.x > STAGE_WIDTH || rocks[i].position.y < 0 || rocks[i].position.y > STAGE_HEIGHT) {
 			rocks[i].active = false;
-			for (int j = i; j < numRocks-1; j++){
+			for (size_t j = i; j < stage.numRocks-1; j++){
 				rocks[j] = rocks[j+1];
 			}
-			--numRocks;
+			--stage.numRocks;
 		}
+		if(rocks[i].position.y - rocks[i].radius < heightAtX(stage.sea, rocks[i].position.x)) { 
+			// collision detection with sea is very easy on a per rock basis, and only complicates the collision detection broad phase if done there.
+			// so instead we do it here.
+			collide(rocks[i], stage.sea);
+		}
+		
 		rocks[i].velocity += GRAVITY * FIXED_TIMESTEP;
 		rocks[i].position += rocks[i].velocity;
 	}

@@ -26,4 +26,3 @@ struct Stage{
 //
 
 void fixedUpdate(Stage& stage, float deltaTime);	
-void resolveCollisionste(Stage& stage);

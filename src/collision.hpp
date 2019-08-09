@@ -5,6 +5,11 @@
 #include "util.hpp"
 
 
+struct Collision {
+	AABB a;
+	AABB b;
+};
+
 void resolveCollisions(Stage& stage);
 void dispatchPotentialCollision(Stage& stage, const AABB& a, const AABB& b);
 
