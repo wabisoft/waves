@@ -9,19 +9,19 @@
 
 void resolveCollisions(Stage& stage) {
 	// NOTE (owen): if it starts to get slow this is definately a place we can optimize
-	//
 	// OPTMZ : keep aabbs attached to stage struct and manage it with the lifetime of other objects?
-
-	AABB aabbs[MAX_AABBS];
-	size_t numAABBs = 0;
+	
+	size_t& numAABBs = stage.numAABBS;
+	AABB* aabbs = stage.aabbs;
 	auto aabbSortPredicate = [](AABB a, AABB b) { return a.lower.x < b.lower.x; };
-	for (size_t i = 0; i < stage.numRocks; ++i) {
-		sorted_insert(aabb(stage.rocks[i]), aabbs, numAABBs, aabbSortPredicate);
+	for(size_t i = 0; i < numAABBs; ++i) {
+		// TODO: update aabbs with their callback;
+		aabbs[i].updateCallback(aabbs[i]);
 	}
-	for(size_t i = 0; i < stage.numPlatforms; ++i){
-		sorted_insert(aabb(stage.platforms[i]), aabbs, numAABBs, aabbSortPredicate);
-	}
-	//	sorted_insert(aabb(stage.ship), aabbs, numAABBs, aabbSortPredicate);
+	// then resort the list (insertion sort is a "slow" sorting method
+	// but is very fast in an almost sorted list, which due to spatial coherence 
+	// this list should be)
+	insertion_sort(aabbs, numAABBs, aabbSortPredicate);
 	if (numAABBs == 0) return;
 	
 	std::vector<Collision> collisions;
@@ -36,14 +36,14 @@ void resolveCollisions(Stage& stage) {
 		collisions.push_back({aabbs[i], seaAAABB}); // just check everyone for collision with sea
 		for (size_t j = i-1; j > 0; --j) {
 			if (aabbs[j].upper.x > aabbs[i].lower.x) {
-				// OPTMZ: maybe push to a y array in sorted order and then run the sweep on that array again? (optimization)
+				// OPTMZ: sweep y-axis too
 				collisions.push_back({aabbs[i], aabbs[j]});
 			}
 			// if the current collider is right of the right most point of our
-			// biggest-so-far box then we don't need to keep looking bac
+			// biggest-so-far box then we don't need to keep looking back
 			if (aabbs[i].lower.x > max) break;
 		}
-		// if this box's rect is the biggest we've seen so far then remember it
+		// if this box's AABB is the biggest we've seen so far then remember it
 		max = (aabbs[i].upper.x > max) ? aabbs[i].upper.x : max;
 	}
 	for (size_t i = 0; i < collisions.size(); ++i) {
@@ -52,10 +52,8 @@ void resolveCollisions(Stage& stage) {
 }
 
 void dispatchPotentialCollision(Stage& stage, const Collision& collision) {
-	// TODO: Switch on type and call appropriate collision routine
 	// NOTE: We only check a small subset of the type collisions, anything
 	// not included is just undefined and therefore does nothing
-
 	EntityType aType = collision.a.type;
 	EntityType bType = collision.b.type;
 	switch(aType | bType){

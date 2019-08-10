@@ -1,6 +1,8 @@
 #include <iostream>
+#include <climits>
 #include "clock.hpp"
 #include "constants.hpp"
+#include "entity.hpp"
 #include "game.hpp"
 #include "graphics.hpp"
 #include "printing.hpp"
@@ -10,6 +12,14 @@
 
 int main(){
 	Stage stage(13.3f);
+	std::cout << "Stage: " << sizeof(stage) << std::endl;
+	std::cout << "Ship : " << sizeof(stage.ship) << std::endl;
+	std::cout << "Sea: " << sizeof(stage.sea) << std::endl;
+	std::cout << "Rock: " << sizeof(stage.rocks[0]) << std::endl;
+	std::cout << "Wave: " << sizeof(stage.sea.waves[0]) << std::endl;
+	std::cout << "Platform: " << sizeof(stage.platforms[0]) << std::endl;
+	std::cout << "AABB: " << sizeof(aabb(stage.platforms[0])) << std::endl;
+	std::cout << "EntityType: " << sizeof((EntityType)1) << std::endl;
 	runStage(stage);
  	// int blah [10] =  {};
 	// size_t blah_size = 0;

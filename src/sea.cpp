@@ -2,11 +2,12 @@
 #include "stage.hpp"
 #include "wave.hpp"
 
+uint8_t Sea::id_src = 0;
 
 float heightAtX(const Sea& sea, float x) {
-	auto height = sea.level;
-	for (auto &&wave : sea.waves) {
-		height += heightAtX(wave, x);
+	float height = sea.level;
+	for (short i = 0; i < sea.numWaves; ++i) {
+		height += heightAtX(sea.waves[i], x);
 	}
 	return height;
 }

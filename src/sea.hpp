@@ -1,7 +1,10 @@
 #pragma once
+#include <algorithm>
+#include <cstdint>
 
 #include "aabb.hpp"
 #include "constants.hpp"
+#include "maths.hpp"
 #include "wave.hpp"
 
 
@@ -9,17 +12,16 @@ struct Sea{
 	inline Sea() { }
 	inline Sea(float l) : level(l) { }
 	Wave waves[MAX_WAVES];
-	Wave inactiveWaves[MAX_WAVES];
-	size_t numWaves = 0;
+	short numWaves = 0;
 	float level = 0;
-	unsigned int id = 0;
-	unsigned id_src;
+	uint8_t id = 0;
+	static uint8_t id_src;
 };
 
 inline AABB aabb(const Sea& sea) {
 	float maxHeight = sea.level;
-	for(size_t i = 0; i < sea.numWaves; ++i) {
-		maxHeight = std::fmax(maxHeight, heightAtX(sea.waves[i], sea.waves[i].position.x));
+	for(short i = 0; i < sea.numWaves; ++i) {
+		maxHeight = std::max(maxHeight, heightAtX(sea.waves[i], sea.waves[i].position.x));
 	}
 	Vector2 lower = {0.f, 0.f};
 	Vector2 upper = {STAGE_WIDTH, maxHeight};

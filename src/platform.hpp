@@ -1,5 +1,4 @@
 #pragma once
-
 #include "aabb.hpp"
 #include "util.hpp"
 #include "vector2.hpp"
@@ -8,8 +7,10 @@ struct Platform {
 	Vector2 position = {0.f, 0.f};
 	float width = 0.f;
 	float height = 0.f;
-	int id = -1;
+	unsigned char id = 0;
+	static unsigned char id_src;
 };
+
 
 
 inline AABB aabb(const Platform& platform) {

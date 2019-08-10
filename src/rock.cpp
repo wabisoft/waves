@@ -6,13 +6,28 @@
 #include "rock.hpp"
 #include "stage.hpp"
 
+void updateRockAABB(AABB& a) {
+	assert(a.type & ROCK); // XXX: Assert the type of the aabb
+	a = aabb(*(Rock*)a.entity);
+}
 
 void fixedUpdateRocks(Stage& stage) {
 	Rock* rocks = stage.rocks;
-	for (size_t i = 0; i < stage.numRocks; ++i) {
+	for (short i = 0; i < stage.numRocks; ++i) {
 		if (rocks[i].position.x < 0 || rocks[i].position.x > STAGE_WIDTH || rocks[i].position.y < 0 || rocks[i].position.y > STAGE_HEIGHT || rocks[i].active == false) {
-			rocks[i].active = false;
-			for (size_t j = i; j < stage.numRocks-1; j++){
+			// remove our aabb from the stage aabb array
+			for(short k = 0; k < stage.numAABBS; ++k) { // look for the aabb
+				if(stage.aabbs[k].id == rocks[i].id) { // find the aabb
+					stage.aabbs[k] = AABB(); // "reset" the aabb;
+					for(short l = k; l < stage.numAABBS; ++l) { // 
+						stage.aabbs[l] = stage.aabbs[l+1]; // defrag the array
+					}
+					--stage.numAABBS;
+				}
+			}
+			// now "reset this rock" 
+			rocks[i] = Rock();
+			for (short j = i; j < stage.numRocks-1; j++){
 				rocks[j] = rocks[j+1];
 			}
 			--stage.numRocks;
@@ -29,23 +44,22 @@ int createRock(Stage& stage, Vector2 position, float radius){
 		// but just incase
 		return -1;
 	}
-	size_t new_rock_idx = stage.numRocks;
+	short new_rock_idx = stage.numRocks;
 	Rock& new_rock = *(stage.rocks + new_rock_idx);
 	new_rock = Rock();
 	new_rock.active = true;
 	new_rock.id = ++stage.id_src;
 	new_rock.position = position;
-	// new_rock.velocity = { 0.f, 0.f };
 	new_rock.radius = radius;
 	stage.numRocks++;
-	// insertion_sort(stage.rocks, stage.numRocks, [](Rock a, Rock b) { return aabb(a).lower.x < aabb(b).lower.x; });
+	sorted_insert(aabb(new_rock), stage.aabbs, stage.numAABBS, [](AABB& a, AABB&b) { return a.lower.x < b.lower.x; });
 	return new_rock.id;
 }
 
-int deleteRock(Stage& stage, int rock_id){
-	int rock_idx = -1;
+int deleteRock(Stage& stage, unsigned char rock_id){
+	short rock_idx = -1;
 	Rock * rocks = stage.rocks;
-	for(size_t i = 0; i < stage.numRocks; i++){
+	for(short i = 0; i < stage.numRocks; i++){
 		if (rocks[i].id == rock_id){
 			rock_idx = i;
 		} else if(rock_idx > 0){

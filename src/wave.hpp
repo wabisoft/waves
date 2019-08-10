@@ -1,7 +1,6 @@
 #pragma once
 
-#include <cmath>
-
+#include <cstdint>
 #include "aabb.hpp"
 #include "constants.hpp"
 #include "prelude.hpp"
@@ -12,26 +11,16 @@
 
 struct Wave {
 	inline Wave() {}
-	// inline Wave(const Vector2& position) : position(position) {}
-	// inline Wave(const Vector2& position, float amplitude) : position(position), amplitude(amplitude) {}
-	// explicit inline Wave(const Wave& wave) :
-	// 	position(wave.position),
-	// 	velocity(wave.velocity),
-	// 	amplitude(wave.amplitude),
-	// 	decay(wave.decay),
-	// 	time(wave.time),
-	// 	width(wave.width) {
-	// }
-
 	Vector2 position = {0.f, 0.f};
 	Vector2 velocity = {0.f, 0.f};
 	float amplitude = 0.f;
 	float decay = 0.f;
-	float sign = 5.f;
+	// float sign = 5.f;
 	float time = 0.f;
-	float width = 0.1f;
+	// float width = 0.1f;
 	bool active = false;
-	unsigned id;
+	bool grow = true;
+	uint8_t id = 0;
 };
 
 float heightAtX(const Wave& wave, float x);
