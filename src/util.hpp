@@ -40,7 +40,7 @@ inline void sorted_insert(T t_item, T* t, size_t& count, Pred predicate) {
 			T swap;
 			swap = t[i];
 			t[i] = t_item;
-			for (size_t j = i+1; j<count+1; ++j){	
+			for (size_t j = i+1; j<count+1; ++j){
 				T swap_swap = swap;
 				swap = t[j];
 				t[j] = swap_swap;
@@ -59,7 +59,7 @@ inline void sorted_insert(T t_item, T* t, size_t& count) {
 template <typename T, typename BinaryPred>
 inline size_t find_where(const T t_item, const T* const t, const size_t count, BinaryPred predicate) {
 	for (size_t i = 0; i<count; ++i) {
-		if(predicate(t[i], t_item)) { 
+		if(predicate(t[i], t_item)) {
 			return i;
 		}
 	}
@@ -75,7 +75,7 @@ inline size_t find_where(const T t_item, const T* const t, const size_t count) {
 template <typename T, typename UnaryPred>
 inline size_t find_where(const T* const t, const size_t count, UnaryPred predicate) {
 	for (size_t i = 0; i<count; ++i) {
-		if(predicate(t[i])) { 
+		if(predicate(t[i])) {
 			return i;
 		}
 	}
@@ -83,7 +83,7 @@ inline size_t find_where(const T* const t, const size_t count, UnaryPred predica
 }
 
 template <typename T, typename U, typename Prop>
-inline size_t binary_find_where(U search, const T* const t, const size_t count, Prop prop) {	
+inline size_t binary_find_where(U search, const T* const t, const size_t count, Prop prop) {
 	size_t left = 0;
 	size_t right = count-1;
 	while (left <= right) {

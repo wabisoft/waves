@@ -53,16 +53,16 @@ int main(){
 	// std::cout << "Insert 4" << std::endl;
 	// print_array(blah, blah_size);
 	// std::cout << "4 is at index: ";
-	// std::cout << binary_find_where(4, blah, blah_size, [] (int a) { return a; }); 
+	// std::cout << binary_find_where(4, blah, blah_size, [] (int a) { return a; });
 	// std::cout << std::endl;
 	// std::cout << "10 is at index: ";
-	// std::cout << binary_find_where(10, blah, blah_size, [] (int a) { return a; }); 
+	// std::cout << binary_find_where(10, blah, blah_size, [] (int a) { return a; });
 	// std::cout << std::endl;
 	// std::cout << "1 is at index: ";
-	// std::cout << binary_find_where(1, blah, blah_size, [] (int a) { return a; }); 
+	// std::cout << binary_find_where(1, blah, blah_size, [] (int a) { return a; });
 	// std::cout << std::endl;
 	// std::cout << "6 is at index: ";
-	// std::cout << binary_find_where(6, blah, blah_size, [] (int a) { return a; }); 
+	// std::cout << binary_find_where(6, blah, blah_size, [] (int a) { return a; });
 	// std::cout << std::endl;
 	return 0;
 }

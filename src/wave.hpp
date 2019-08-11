@@ -15,9 +15,7 @@ struct Wave {
 	Vector2 velocity = {0.f, 0.f};
 	float amplitude = 0.f;
 	float decay = 0.f;
-	// float sign = 5.f;
 	float time = 0.f;
-	// float width = 0.1f;
 	bool active = false;
 	bool grow = true;
 	uint8_t id = 0;

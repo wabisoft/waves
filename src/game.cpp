@@ -16,11 +16,9 @@ void runStage(Stage& stage){
 			if (event.type == sf::Event::Closed) {
 				graphics.window.close();
 			} else if (event.type == sf::Event::MouseButtonPressed && !mousePressed) {
-			
 				mousePosition = screen2GamePos(graphics, sf::Mouse::getPosition());
 				mousePressed = true;
 			} else if (event.type == sf::Event::MouseButtonReleased) {
-		
 				// Ideally there are a fixed number of rocks and we shouldn't need any error handling here
 				createRock(stage, mousePosition, 3.f);
 				mousePressed = false;

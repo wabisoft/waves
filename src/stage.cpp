@@ -19,11 +19,7 @@ void fixedUpdate(Stage& stage, float deltaTime){
 	if (stage.numAABBS > MAX_AABBS)
 		std::cout << "what the actual fuck" << std::endl;
 	resolveCollisions(stage);
-	// TODO: check for collisions of all AABBs
 	fixedUpdateRocks(stage);
-	// for (int i = 0; i < stage.numRocks; i++){
-	// 	fixedUpdate(stage.rocks[i]);
-	// }
 	fixedUpdateWaves(stage.sea);
 	fixedUpdate(stage.ship);
 }

@@ -16,7 +16,7 @@ find_library (SFML REQUIRED sfml-window sfml-system sfml-graphics sfml-audio)
 include_directories(${SFML_INCLUDE_DIR})
 
 
-file(GLOB wavesSource 
+file(GLOB wavesSource
     "*.hpp"
     "*.cpp"
 )

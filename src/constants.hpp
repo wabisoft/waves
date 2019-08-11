@@ -12,7 +12,7 @@ const float FRAME_RATE = 		1.f/120.f; // seconds (60 Hz)
 const int MAX_ROCKS = 		10;
 const int MAX_WAVES = 		MAX_ROCKS;
 const int MAX_PLATFORMS = 	10;
-const int MAX_AABBS =		MAX_ROCKS + MAX_PLATFORMS + 1; // +1 for ship and 
+const int MAX_AABBS =		MAX_ROCKS + MAX_PLATFORMS + 1; // +1 for ship and
 
 // Physics constants
 const float GRAVITATIONAL_CONSTANT = 9.8f;

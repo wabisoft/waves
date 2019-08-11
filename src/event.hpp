@@ -3,7 +3,7 @@
 
 
 enum EventType{
-	CLOSE=0,	
+	CLOSE=0,
 };
 
 struct Event{

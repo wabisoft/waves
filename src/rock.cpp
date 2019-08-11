@@ -16,14 +16,13 @@ void fixedUpdateRocks(Stage& stage) {
 			// remove our aabb from the stage aabb array
 			deleteRockByIdx(stage, i);
 		}
-				
 		rocks[i].velocity += GRAVITY * FIXED_TIMESTEP;
 		rocks[i].position += rocks[i].velocity;
 	}
 }
 
 int createRock(Stage& stage, Vector2 position, float radius){
-	// NOTE (!!!): The implementation of the routine must keep rocks in order of id so that the array can be 
+	// NOTE (!!!): The implementation of the routine must keep rocks in order of id so that the array can be
 	// binary searched in findRock
 	if (stage.numRocks >= MAX_ROCKS){
 		// Ideally there are a fixed number of rocks and we shouldn't need any error handling here

@@ -103,6 +103,3 @@ inline Vector2 normalized(const Vector2& v) {
 inline Vector2& normalize(Vector2& v) {
 	return v /= magnitude(v);
 }
-
-
-

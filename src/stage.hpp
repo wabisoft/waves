@@ -8,7 +8,7 @@
 #include "sea.hpp"
 #include "ship.hpp"
 
-struct Stage{	
+struct Stage{
 	inline Stage(float sea_level): sea(sea_level) { }
 	Sea sea;
 	Ship ship;
@@ -27,4 +27,4 @@ struct Stage{
 // }
 //
 
-void fixedUpdate(Stage& stage, float deltaTime);	
+void fixedUpdate(Stage& stage, float deltaTime);
