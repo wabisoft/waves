@@ -1,3 +1,4 @@
+#include <iostream>
 #include "collision.hpp"
 #include "constants.hpp"
 #include "platform.hpp"
@@ -15,6 +16,8 @@ void fixedUpdate(Stage& stage, float deltaTime){
 	if (stage.paused) {
 		return;
 	}
+	if (stage.numAABBS > MAX_AABBS)
+		std::cout << "what the actual fuck" << std::endl;
 	resolveCollisions(stage);
 	// TODO: check for collisions of all AABBs
 	fixedUpdateRocks(stage);

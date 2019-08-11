@@ -27,7 +27,7 @@ void initGraphics(Graphics & graphics, const char * title);
 void draw(Graphics& graphics, const Stage& stage);
 void drawInfoText(Graphics& graphics, const Stage& stage);
 inline void draw(Graphics& graphics, const Sea& sea);
-inline void draw(Graphics& graphics, const Rock* rocks, int numRocks);
+inline void draw(Graphics& graphics, const Rock* rocks, size_t numRocks);
 
 
 inline sf::Vector2f game2ScreenPos(const Graphics& graphics, const Vector2 &v)

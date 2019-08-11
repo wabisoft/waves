@@ -5,29 +5,50 @@
 
 #include "entity.hpp"
 #include "collision.hpp"
+#include "constants.hpp"
+#include "rock.hpp"
 #include "util.hpp"
 
 void resolveCollisions(Stage& stage) {
 	// NOTE (owen): if it starts to get slow this is definately a place we can optimize
 	// OPTMZ : keep aabbs attached to stage struct and manage it with the lifetime of other objects?
-	
+
 	size_t& numAABBs = stage.numAABBS;
+	if (numAABBs == 0) return;
 	AABB* aabbs = stage.aabbs;
 	auto aabbSortPredicate = [](AABB a, AABB b) { return a.lower.x < b.lower.x; };
 	for(size_t i = 0; i < numAABBs; ++i) {
 		// TODO: update aabbs with their callback;
-		aabbs[i].updateCallback(aabbs[i]);
+		// FIXME: the pointers of aabb.entity are all missaligned. and this is wreaking havoc here, only happens
+		// after first aabb deletion(so copy/move semantics are messy? Look into it)
+		switch (aabbs[i].type) {
+		case ROCK:
+			{
+				size_t rock_idx = binary_find_where(aabbs[i].id, stage.rocks, stage.numRocks, [](const Rock& rock){ return rock.id;});
+				assert(rock_idx < stage.numRocks);
+				aabbs[i] = AABB(stage.rocks[rock_idx]);
+			}
+		break;
+		case SHIP:
+			aabbs[i] = AABB(stage.ship);
+		break;
+		case PLATFORM:
+			// NOTE: since platforms are static, their AABBS should need updating, I'll leave here in case
+		break;
+		default:
+		break;
+		}
+		// aabbs[i].updateCallback(aabbs[i]);
 	}
 	// then resort the list (insertion sort is a "slow" sorting method
-	// but is very fast in an almost sorted list, which due to spatial coherence 
+	// but is very fast in an almost sorted list, which due to spatial coherence
 	// this list should be)
 	insertion_sort(aabbs, numAABBs, aabbSortPredicate);
-	if (numAABBs == 0) return;
-	
+
 	std::vector<Collision> collisions;
 	collisions.reserve(2*MAX_AABBS); // In a worst case scenario we could really have like MAX_ABBS^2 collisions but let's be optimistic
 
-	AABB seaAAABB = aabb(stage.sea);
+	AABB seaAAABB = AABB(stage.sea);
 	// start with the first aabb upper as the max
 	float max = aabbs[0].upper.x;
 	// Loop the aabbs and look for collisions
@@ -54,27 +75,25 @@ void resolveCollisions(Stage& stage) {
 void dispatchPotentialCollision(Stage& stage, const Collision& collision) {
 	// NOTE: We only check a small subset of the type collisions, anything
 	// not included is just undefined and therefore does nothing
-	EntityType aType = collision.a.type;
-	EntityType bType = collision.b.type;
-	switch(aType | bType){
+	// Get the a entity (if we need to);
+	Rock* aRock = nullptr;
+	// Platform* aPlatform = nullptr;
+	switch(collision.a.type) {
+		case ROCK:	aRock = &findRock(stage, collision.a.id); break;
+		default: break;
+	}
+	Rock* bRock = nullptr;
+	switch(collision.b.type) {
+		case ROCK:	bRock = &findRock(stage, collision.b.id); break;
+		default: break;
+	}
+	switch(collision.a.type| collision.b.type){
 		case ROCK|SEA:
-			switch(aType) {
-				case ROCK: collide(*(Rock*)collision.a.entity, stage.sea); break;
-				case SEA: collide(*(Rock*)collision.b.entity, stage.sea); break;
-				default: break;
-			}; break;
-		case ROCK|PLATFORM: 
-			switch(aType) {
-				case ROCK: collide(*(Rock*)collision.a.entity, *(Platform*)collision.b.entity); break;
-				case PLATFORM: collide(*(Rock*)collision.b.entity, *(Platform*)collision.a.entity); break;
-				default: break;
-			} break;
-		case ROCK|SHIP:
-			switch(aType) {
-				case ROCK: collide(*(Rock*)collision.a.entity, *(Ship*)collision.b.entity); break;
-				case SHIP: collide(*(Rock*)collision.b.entity, *(Ship*)collision.a.entity); break;
-				default: break;
-			} break;
+			if (aRock) collide(*aRock, stage.sea);
+			else collide(*bRock, stage.sea);
+			break;
+		case ROCK|PLATFORM: break;
+		case ROCK|SHIP: break;
 		case ROCK|ROCK: break;
 		case SHIP|SEA: break;
 		case SHIP|PLATFORM: break;
@@ -89,7 +108,7 @@ void collide(Rock& rock, Sea& sea) {
 	}
 	Vector2 rockPosition = rock.position;
 	Vector2 rockNextFramePosition = rock.position + rock.velocity * FIXED_TIMESTEP;
-	if(rockPosition.y < sea.level) { 
+	if(rockPosition.y < sea.level) {
 		// collision detection with sea is very easy on a per rock basis, and only complicates the collision detection broad phase if done there.
 		// so instead we do it here.
 		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.radius * rock.radius * PI);

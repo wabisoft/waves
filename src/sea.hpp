@@ -18,18 +18,6 @@ struct Sea{
 	static uint8_t id_src;
 };
 
-inline AABB aabb(const Sea& sea) {
-	float maxHeight = sea.level;
-	for(short i = 0; i < sea.numWaves; ++i) {
-		maxHeight = std::max(maxHeight, heightAtX(sea.waves[i], sea.waves[i].position.x));
-	}
-	Vector2 lower = {0.f, 0.f};
-	Vector2 upper = {STAGE_WIDTH, maxHeight};
-	AABB aabb(lower, upper, SEA, sea.id); 
-	aabb.entity = (void*)&sea;
-	return aabb;
-}
-
 float heightAtX(const Sea& sea, float x); // return the y height of a sea at x
 float slopeAtX(const Sea& sea, float x); // return the slope of the sea at x
 void fixedUpdate(Sea& sea); // Update the sea for this frame of the simulation

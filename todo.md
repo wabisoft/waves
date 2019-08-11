@@ -4,8 +4,6 @@
 
 
 # Bug
-[ ] AABB life time is not right yet, Probably a mistake in the clearing
-	in `fixedUpdateRocks`. If you create rocks in rapid succession you can
-	the rock to not collide(maybe there's no aabb?) and then you can get a 
-	bad read on a rockid in graphics. Needs looking at 
+[x] aabb update callback uses entity pointer, the pointers are bad after aabb deletion (needs immediate fixing)
+	FIX: Did away with the entity pointer and the call back because moving elements in the array invalidated the pointer. Switched to searching by ids (which are incidentally always inorder)
 

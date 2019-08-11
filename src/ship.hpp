@@ -13,4 +13,3 @@ struct Ship {
 };
 
 void fixedUpdate(Ship& ship);
-AABB aabb(const Ship& ship);

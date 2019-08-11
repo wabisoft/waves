@@ -55,6 +55,7 @@ void drawInfoText(Graphics& graphics, const Stage& stage) {
 	infostream << std::endl;
 	infostream << "numRocks: 					" << stage.numRocks << std::endl;
 	infostream << "numWaves: 					" << stage.sea.numWaves << std::endl;
+	infostream << "numAABBs: 					" << stage.numAABBS << std::endl;
 	text.setString(infostream.str());
 	text.setPosition(3, 3);
 	text.setPosition(3, 3);
@@ -70,7 +71,7 @@ void drawInfoText(Graphics& graphics, const Stage& stage) {
 	}
 }
 
-inline void draw(Graphics& graphics, const Rock* rocks, int numRocks) {
+inline void draw(Graphics& graphics, const Rock* rocks, size_t numRocks) {
 	sf::Text idText;
 	idText.setFont(graphics.gameFont);
 	idText.setFillColor(sf::Color::White);

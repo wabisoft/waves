@@ -7,5 +7,6 @@ std::ostream& operator<<(std::ostream& os, const Vector2& v) {
 }
 
 std::ostream& operator<<(std::ostream& os, const AABB& aabb) {
-	return os << "{ " << aabb.lower << ", " << aabb.upper << ", " << aabb.type << " }";
+	return os << (int)aabb.id;
+	// return os << "{ " << aabb.lower << ", " << aabb.upper << ", " << (int)aabb.type << " }";
 }

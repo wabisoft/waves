@@ -18,8 +18,9 @@ int main(){
 	std::cout << "Rock: " << sizeof(stage.rocks[0]) << std::endl;
 	std::cout << "Wave: " << sizeof(stage.sea.waves[0]) << std::endl;
 	std::cout << "Platform: " << sizeof(stage.platforms[0]) << std::endl;
-	std::cout << "AABB: " << sizeof(aabb(stage.platforms[0])) << std::endl;
+	std::cout << "AABB: " << sizeof(AABB(stage.platforms[0])) << std::endl;
 	std::cout << "EntityType: " << sizeof((EntityType)1) << std::endl;
+	std::cout << "Vector2: " << sizeof(Vector2{0,0}) << std::endl;
 	runStage(stage);
  	// int blah [10] =  {};
 	// size_t blah_size = 0;
@@ -52,13 +53,16 @@ int main(){
 	// std::cout << "Insert 4" << std::endl;
 	// print_array(blah, blah_size);
 	// std::cout << "4 is at index: ";
-	// std::cout << find_where(4, blah, blah_size, [](int a, int b) { return a==b; }) << std::endl;
+	// std::cout << binary_find_where(4, blah, blah_size, [] (int a) { return a; }); 
+	// std::cout << std::endl;
 	// std::cout << "10 is at index: ";
-	// std::cout << find_where(10, blah, blah_size, [](int a, int b) { return a==b; }) << std::endl;
+	// std::cout << binary_find_where(10, blah, blah_size, [] (int a) { return a; }); 
+	// std::cout << std::endl;
 	// std::cout << "1 is at index: ";
-	// std::cout << find_where(1, blah, blah_size, [](int a, int b) { return a==b; }) << std::endl;
+	// std::cout << binary_find_where(1, blah, blah_size, [] (int a) { return a; }); 
+	// std::cout << std::endl;
 	// std::cout << "6 is at index: ";
-	// std::cout << find_where(6, blah, blah_size, [](int a, int b) { return a==b; }) << std::endl;
-	// std::cout << SIZE_MAX << std::endl;
+	// std::cout << binary_find_where(6, blah, blah_size, [] (int a) { return a; }); 
+	// std::cout << std::endl;
 	return 0;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
-// #include <algorithm>
+#include <cmath>
+#include <algorithm>
 #include "constants.hpp"
 
 
@@ -76,6 +77,24 @@ inline size_t find_where(const T* const t, const size_t count, UnaryPred predica
 	for (size_t i = 0; i<count; ++i) {
 		if(predicate(t[i])) { 
 			return i;
+		}
+	}
+	return SIZE_MAX;
+}
+
+template <typename T, typename U, typename Prop>
+inline size_t binary_find_where(U search, const T* const t, const size_t count, Prop prop) {	
+	size_t left = 0;
+	size_t right = count-1;
+	while (left <= right) {
+		size_t middle = (size_t)std::floor((left + right) / 2);
+		U propRes = prop(t[middle]);
+		if (propRes < search) {
+			left = middle + 1;
+		} else if (propRes > search) {
+			right = middle - 1;
+		} else {
+			return middle;
 		}
 	}
 	return SIZE_MAX;

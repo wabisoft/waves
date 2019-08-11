@@ -15,7 +15,7 @@ struct Stage{
 	Rock rocks[MAX_ROCKS];
 	Platform platforms[MAX_PLATFORMS];
 	AABB aabbs[MAX_AABBS];
-	int id_src = 0;
+	uint8_t id_src = 0;
 	size_t numRocks = 0;
 	size_t numPlatforms = 0;
 	size_t numAABBS = 0;
