@@ -31,7 +31,6 @@ void initGraphics(Graphics & graphics, const char * title) {
 	graphics.ppu = (float)graphics.videoMode.width / STAGE_WIDTH;
 	if (!graphics.gameFont.loadFromFile("assets/fonts/IBMPlexMono-Regular.ttf")){
 		std::cout << "Couldn't load font" << std::endl;
-		std::cout << workingDir() << std::endl;
 	}
 }
 

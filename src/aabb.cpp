@@ -44,7 +44,7 @@ AABB::AABB(const Sea& sea) {
 	id = sea.id;
 }
 
-uint8_t createAABB(Stage& stage, AABB& aabb) {
+uint8_t createAABB(Stage& stage, AABB aabb) {
 	sorted_insert(aabb, stage.aabbs, stage.numAABBS, [](AABB& a, AABB&b) { return a.lower.x < b.lower.x; });
 	return aabb.id;
 }

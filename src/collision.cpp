@@ -1,4 +1,7 @@
-#include <intrin.h>
+// #ifdef _WIN32 
+// #include <intrin.h>
+// Do we need this?
+// #endif
 #include <cassert>
 #include <iostream>
 #include <vector>
@@ -12,7 +15,6 @@
 void resolveCollisions(Stage& stage) {
 	// NOTE (owen): if it starts to get slow this is definately a place we can optimize
 	// OPTMZ : keep aabbs attached to stage struct and manage it with the lifetime of other objects?
-
 	size_t& numAABBs = stage.numAABBS;
 	if (numAABBs == 0) return;
 	AABB* aabbs = stage.aabbs;

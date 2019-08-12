@@ -1,3 +1,5 @@
 build/
 *.swp
 tags
+waves
+compile_commands.json

@@ -6,7 +6,7 @@ if /i [%1] == [clean] (
 ) else if /i [%1] == [debug] (
 	mkdir build
 	pushd build\
-	cmake ../src -DSFML_DIR=C:\Users\Public\Libraries\SFML-2.5.1
+	cmake ../src -DSFML_DIR=C:\Users\Public\Libraries\SFML-2.5.1 -DCMAKE_BUILD_TYPE=Debug
 	call msbuild waves.sln 	
 	popd
 	cp -r assets build\Debug\
@@ -14,7 +14,8 @@ if /i [%1] == [clean] (
 ) else if /i [%1] == [release] (
 	mkdir build
 	pushd build\
-	cmake ../src -DSFML_DIR=C:\Users\Public\Libraries\SFML-2.5.1
+	cmake ../src -DSFML_DIR=C:\Users\Public\Libraries\SFML-2.5.1 -DCMAKE_BUILD_TYPE=Release
+
 	msbuild waves.sln /p:Configuration=Release
 	popd
 	cp -r assets build\Release\

@@ -18,7 +18,7 @@ struct AABB{
 	uint8_t id = 0;
 };
 
-uint8_t createAABB(Stage& stage, AABB& aabb);
+uint8_t createAABB(Stage& stage, AABB aabb);
 size_t deleteAABBByIdx(Stage& stage, int aabb_idx);
 size_t deleteAABBById(Stage& stage, uint8_t aabb_id);
 
