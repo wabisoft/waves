@@ -12,7 +12,7 @@ struct Vector2{
 	inline float& operator[](int i) { return (&x)[i]; } // read
 	inline const float& operator[](int i) const { return (&x)[i]; }; // write
 
-	float x, y = 0;
+	float x = 0.f, y = 0.f;
 };
 
 // Vector negation

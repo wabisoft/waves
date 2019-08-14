@@ -1,3 +1,4 @@
+#include <bitset>
 #include <iostream>
 #include <climits>
 #include "clock.hpp"
@@ -21,6 +22,7 @@ int main(){
 	std::cout << "AABB: " << sizeof(AABB(stage.platforms[0])) << std::endl;
 	std::cout << "EntityType: " << sizeof((EntityType)1) << std::endl;
 	std::cout << "Vector2: " << sizeof(Vector2{0,0}) << std::endl;
+	std::cout << "RockState: " << sizeof(RockState{}) << std::endl;
 	runStage(stage);
  	// int blah [10] =  {};
 	// size_t blah_size = 0;

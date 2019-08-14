@@ -11,15 +11,25 @@
 #include "vector2.hpp"
 
 
+enum RockState : uint8_t {
+	STANDING = 1 << 0, // to launch and stuff
+	FALLING = 1 << 1, // to fall and bounce and things
+};
+
 struct Rock {
 	Vector2 position, velocity = {0.f, 0.f};
 	float radius = 0.f;
 	bool active = false;
 	uint8_t id = -1;
+	RockState state = FALLING;
 };
 
 void fixedUpdateRocks(Stage& stage);
-int createRock(Stage& stage, Vector2 position, float radius);
-int deleteRockByIdx(Stage& stage, int rock_idx);
-int deleteRockById(Stage& stage, uint8_t rock_id);
+uint8_t createRock(Stage& stage, Vector2 position, float radius);
+size_t deleteRockByIdx(Stage& stage, int rock_idx);
+size_t deleteRockById(Stage& stage, uint8_t rock_id);
 Rock& findRock(Stage& stage, uint8_t rock_id);
+
+inline float area(const Rock& rock) {
+	return rock.radius * rock.radius * PI;
+}

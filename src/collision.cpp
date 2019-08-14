@@ -1,7 +1,3 @@
-// #ifdef _WIN32 
-// #include <intrin.h>
-// Do we need this?
-// #endif
 #include <cassert>
 #include <iostream>
 #include <vector>
@@ -35,7 +31,7 @@ void resolveCollisions(Stage& stage) {
 			aabbs[i] = AABB(stage.ship);
 		break;
 		case PLATFORM:
-			// NOTE: since platforms are static, their AABBS should need updating, I'll leave here in case
+			// NOTE: since platforms are static, their AABBS shouldn't need updating, I'll leave the case here in case
 		break;
 		default:
 		break;
@@ -50,7 +46,7 @@ void resolveCollisions(Stage& stage) {
 	std::vector<Collision> collisions;
 	collisions.reserve(2*MAX_AABBS); // In a worst case scenario we could really have like MAX_ABBS^2 collisions but let's be optimistic
 
-	AABB seaAAABB = AABB(stage.sea);
+	AABB seaAAABB = AABB(stage.sea); // because the sea AABB spans the entire stage, we don't want to include it in the sweep list as it will slow down the algorithm
 	// start with the first aabb upper as the max
 	float max = aabbs[0].upper.x;
 	// Loop the aabbs and look for collisions
@@ -89,10 +85,11 @@ void dispatchPotentialCollision(Stage& stage, const Collision& collision) {
 		case ROCK:	bRock = &findRock(stage, collision.b.id); break;
 		default: break;
 	}
-	switch(collision.a.type| collision.b.type){
+	switch(collision.a.type | collision.b.type){
 		case ROCK|SEA:
 			if (aRock) collide(*aRock, stage.sea);
-			else collide(*bRock, stage.sea);
+			else if (bRock) collide(*bRock, stage.sea);
+			else assert(false);
 			break;
 		case ROCK|PLATFORM: break;
 		case ROCK|SHIP: break;

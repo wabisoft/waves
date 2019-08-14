@@ -4,6 +4,7 @@
 #include "collision.hpp"
 #include "constants.hpp"
 #include "gravity.hpp"
+#include "physics.hpp"
 #include "rock.hpp"
 #include "stage.hpp"
 #include "util.hpp"
@@ -12,16 +13,25 @@
 void fixedUpdateRocks(Stage& stage) {
 	Rock* rocks = stage.rocks;
 	for (short i = 0; i < stage.numRocks; ++i) {
-		if (rocks[i].position.x < 0 || rocks[i].position.x > STAGE_WIDTH || rocks[i].position.y < 0 || rocks[i].position.y > STAGE_HEIGHT || rocks[i].active == false) {
-			// remove our aabb from the stage aabb array
-			deleteRockByIdx(stage, i);
+		switch (rocks[i].state) {
+			case FALLING:
+				if (rocks[i].position.x < 0 || rocks[i].position.x > STAGE_WIDTH || rocks[i].position.y < 0 || rocks[i].position.y > STAGE_HEIGHT || rocks[i].active == false) {
+					// remove our aabb from the stage aabb array
+					deleteRockByIdx(stage, i);
+				}
+				rocks[i].velocity+= GRAVITY * FIXED_TIMESTEP;
+				if(squaredMagnitude(rocks[i].velocity) > SQUARED_TERMINAL_VELOCITY) {
+					rocks[i].velocity = normalized(rocks[i].velocity) * TERMINAL_VELOCITY;
+				}
+				rocks[i].position += rocks[i].velocity;
+				break;
+			case STANDING:
+				break;
 		}
-		rocks[i].velocity += GRAVITY * FIXED_TIMESTEP;
-		rocks[i].position += rocks[i].velocity;
 	}
 }
 
-int createRock(Stage& stage, Vector2 position, float radius){
+uint8_t createRock(Stage& stage, Vector2 position, float radius){
 	// NOTE (!!!): The implementation of the routine must keep rocks in order of id so that the array can be
 	// binary searched in findRock
 	if (stage.numRocks >= MAX_ROCKS){
@@ -29,7 +39,7 @@ int createRock(Stage& stage, Vector2 position, float radius){
 		// but just incase
 		return -1;
 	}
-	short new_rock_idx = stage.numRocks;
+	size_t new_rock_idx = stage.numRocks;
 	Rock& new_rock = *(stage.rocks + new_rock_idx);
 	new_rock = Rock();
 	new_rock.active = true;
@@ -41,19 +51,19 @@ int createRock(Stage& stage, Vector2 position, float radius){
 	return new_rock.id;
 }
 
-inline int deleteRockByIdx(Stage& stage, int rock_idx){
+inline size_t deleteRockByIdx(Stage& stage, int rock_idx){
 	deleteAABBById(stage, stage.rocks[rock_idx].id);
 	stage.rocks[rock_idx] = Rock();
-	for (short j = rock_idx; j < stage.numRocks-1; j++){
+	for (size_t j = rock_idx; j < stage.numRocks-1; j++){
 			stage.rocks[j] = stage.rocks[j+1];
 			stage.rocks[j+1] = Rock();
 	}
 	return --stage.numRocks;
 }
 
-inline int deleteRockById(Stage& stage, uint8_t rock_id){
+inline size_t deleteRockById(Stage& stage, uint8_t rock_id){
 	Rock * rocks = stage.rocks;
-	for(short i = 0; i < stage.numRocks; i++){
+	for(size_t i = 0; i < stage.numRocks; i++){
 		if (rocks[i].id == rock_id){
 			return deleteRockByIdx(stage, i);
 		}

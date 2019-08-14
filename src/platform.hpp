@@ -10,4 +10,5 @@ struct Platform {
 	uint8_t id = 0;
 };
 
+uint8_t createPlatform(Stage& stage, Vector2 position, float width, float height);
 Platform& findPlatform(Stage& stage, uint8_t platform_id);

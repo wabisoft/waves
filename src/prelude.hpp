@@ -2,6 +2,7 @@
 
 struct AABB;
 struct Game;
+struct Graphics;
 struct Platform;
 struct Rock;
 struct Sea;
