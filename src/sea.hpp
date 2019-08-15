@@ -9,8 +9,6 @@
 
 
 struct Sea{
-	inline Sea() { }
-	inline Sea(float l) : level(l) { }
 	Wave waves[MAX_WAVES];
 	short numWaves = 0;
 	float level = 0;

@@ -9,7 +9,6 @@
 #include "ship.hpp"
 
 struct Stage{
-	inline Stage(float sea_level): sea(sea_level) { }
 	Sea sea;
 	Ship ship;
 	Rock rocks[MAX_ROCKS];

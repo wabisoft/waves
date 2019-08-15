@@ -5,7 +5,7 @@ uint8_t createPlatform(Stage& stage, Vector2 position, float width, float height
 	if (stage.numPlatforms >= MAX_PLATFORMS) {
 		return -1;
 	}
-	size_t new_platform_idx = stage.numPlatforms;	
+	size_t new_platform_idx = stage.numPlatforms;
 	Platform& platform = *(stage.platforms + new_platform_idx);
 	platform = Platform();
 	platform.id = ++stage.id_src;

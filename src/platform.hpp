@@ -1,5 +1,6 @@
 #pragma once
 #include "aabb.hpp"
+#include "maths.hpp"
 #include "util.hpp"
 #include "vector2.hpp"
 

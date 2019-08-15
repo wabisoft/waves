@@ -7,10 +7,9 @@ if /i [%1] == [clean] (
 	mkdir build
 	pushd build\
 	cmake ../src -DSFML_DIR=C:\Users\Public\Libraries\SFML-2.5.1 -DCMAKE_BUILD_TYPE=Debug
-	call msbuild waves.sln 	
+	call msbuild waves.sln
 	popd
 	cp -r assets build\Debug\
-	call "build/Debug/waves.exe"
 ) else if /i [%1] == [release] (
 	mkdir build
 	pushd build\
@@ -24,4 +23,6 @@ if /i [%1] == [clean] (
 ) else if /i [%1] == [tags] (
 	echo "updating tags"
 	ctags -R src
+) else if /i [%1] == [run] (
+	call "build/Debug/waves.exe"
 )

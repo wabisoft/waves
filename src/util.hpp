@@ -99,3 +99,5 @@ inline size_t binary_find_where(U search, const T* const t, const size_t count, 
 	}
 	return SIZE_MAX;
 }
+
+void test_utils();

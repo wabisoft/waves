@@ -43,20 +43,20 @@ void resolveCollisions(Stage& stage) {
 	// this list should be)
 	insertion_sort(aabbs, numAABBs, aabbSortPredicate);
 
-	std::vector<Collision> collisions;
-	collisions.reserve(2*MAX_AABBS); // In a worst case scenario we could really have like MAX_ABBS^2 collisions but let's be optimistic
+	std::vector<AABBPair> pairs;
+	pairs.reserve(2*MAX_AABBS); // In a worst case scenario we could really have like MAX_ABBS^2 collisions but let's be optimistic
 
-	AABB seaAAABB = AABB(stage.sea); // because the sea AABB spans the entire stage, we don't want to include it in the sweep list as it will slow down the algorithm
+	// AABB seaAAABB = AABB(stage.sea); // because the sea AABB spans the entire stage, we don't want to include it in the sweep list as it will slow down the algorithm
 	// start with the first aabb upper as the max
 	float max = aabbs[0].upper.x;
 	// Loop the aabbs and look for collisions
-	collisions.push_back({aabbs[0], seaAAABB}); // just check everyone for collision with sea
-	for (size_t i = 1; i < numAABBs; ++i){
-		collisions.push_back({aabbs[i], seaAAABB}); // just check everyone for collision with sea
-		for (size_t j = i-1; j > 0; --j) {
+	// collisions.push_back({aabbs[0], seaAAABB}); // just check everyone for collision with sea
+	for (int i = 1; i < numAABBs; ++i){
+		// collisions.push_back({aabbs[i], seaAAABB}); // just check everyone for collision with sea
+		for (int j = i-1; j >= 0; --j) {
 			if (aabbs[j].upper.x > aabbs[i].lower.x) {
 				// OPTMZ: sweep y-axis too
-				collisions.push_back({aabbs[i], aabbs[j]});
+				pairs.push_back({aabbs[i], aabbs[j]});
 			}
 			// if the current collider is right of the right most point of our
 			// biggest-so-far box then we don't need to keep looking back
@@ -65,33 +65,41 @@ void resolveCollisions(Stage& stage) {
 		// if this box's AABB is the biggest we've seen so far then remember it
 		max = (aabbs[i].upper.x > max) ? aabbs[i].upper.x : max;
 	}
-	for (size_t i = 0; i < collisions.size(); ++i) {
-		dispatchPotentialCollision(stage, collisions[i]);
+	for (int i = 0; i < pairs.size(); ++i) {
+		dispatchPotentialCollision(stage, pairs[i]);
 	}
 }
 
-void dispatchPotentialCollision(Stage& stage, const Collision& collision) {
+void dispatchPotentialCollision(Stage& stage, const AABBPair& pair) {
 	// NOTE: We only check a small subset of the type collisions, anything
 	// not included is just undefined and therefore does nothing
 	// Get the a entity (if we need to);
 	Rock* aRock = nullptr;
+	Platform* aPlatform = nullptr;
 	// Platform* aPlatform = nullptr;
-	switch(collision.a.type) {
-		case ROCK:	aRock = &findRock(stage, collision.a.id); break;
+	switch(pair.a.type) {
+		case ROCK:	aRock = &findRock(stage, pair.a.id); break;
+		case PLATFORM:	aPlatform = &findPlatform(stage, pair.a.id); break;
 		default: break;
 	}
 	Rock* bRock = nullptr;
-	switch(collision.b.type) {
-		case ROCK:	bRock = &findRock(stage, collision.b.id); break;
+	Platform* bPlatform= nullptr;
+	switch(pair.b.type) {
+		case ROCK:	bRock = &findRock(stage, pair.b.id); break;
+		case PLATFORM:	bPlatform = &findPlatform(stage, pair.b.id); break;
 		default: break;
 	}
-	switch(collision.a.type | collision.b.type){
+	switch(pair.a.type | pair.b.type){
 		case ROCK|SEA:
 			if (aRock) collide(*aRock, stage.sea);
 			else if (bRock) collide(*bRock, stage.sea);
 			else assert(false);
 			break;
-		case ROCK|PLATFORM: break;
+		case ROCK|PLATFORM:
+			if (aRock && bPlatform) collide(*aRock, *bPlatform);
+			else if (bRock && aPlatform) collide(*bRock, *aPlatform);
+			else assert(false);
+			break;
 		case ROCK|SHIP: break;
 		case ROCK|ROCK: break;
 		case SHIP|SEA: break;
@@ -121,6 +129,7 @@ void collide(Rock& rock, Sea& sea) {
 }
 
 void collide(Rock& rock, const Platform& platform) {
+	std::cout << "RockxPlatform" << std::endl;
 }
 
 void collide(Rock& rock, Ship& ship) {

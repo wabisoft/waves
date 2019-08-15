@@ -1,5 +1,12 @@
 # TODO
 
+## General
+[x] Get platforms
+[ ] Get Rocks bouncing off platforms
+[ ] Get Rocks sitting calmly on plarforms
+[ ] Get rocks launching off platforms
+[ ] Get a ships riding waves
+
 ## Bug
 [x] aabb update callback uses entity pointer, the pointers are bad after aabb deletion (needs immediate fixing)
 	FIX: Did away with the entity pointer and the call back because moving elements in the array invalidated the pointer. Switched to searching by ids (which are incidentally always inorder)
