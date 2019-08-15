@@ -2,7 +2,6 @@
 #include "aabb.hpp"
 #include "maths.hpp"
 #include "util.hpp"
-#include "vector2.hpp"
 
 struct Platform {
 	Vector2 position = {0.f, 0.f};

@@ -3,7 +3,6 @@
 #include "aabb.hpp"
 #include "collision.hpp"
 #include "constants.hpp"
-#include "gravity.hpp"
 #include "physics.hpp"
 #include "rock.hpp"
 #include "stage.hpp"

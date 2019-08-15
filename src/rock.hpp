@@ -8,7 +8,6 @@
 #include "maths.hpp"
 #include "prelude.hpp"
 #include "util.hpp"
-#include "vector2.hpp"
 
 
 enum RockState : uint8_t {

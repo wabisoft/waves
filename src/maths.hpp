@@ -4,12 +4,51 @@
 #include <cmath>
 #include <vector>
 
-#include "vector2.hpp"
+/***********
+ * Vectors *
+ ***********/
 
-template <typename T>
-T sign(T t) {
-	return t / abs(t);
-}
+struct Vector2{
+	// inline Vector2() {}
+	// inline Vector2(float x, float y): x(x), y(y) { }
+	// inline Vector2(const Vector2& v): x(v[0]), y(v[1]) { }
+	float& operator[](int i) { return (&x)[i]; } // read
+	const float& operator[](int i) const { return (&x)[i]; }; // write
+	float x = 0.f, y = 0.f;
+};
+
+// Vector negation
+inline Vector2 operator-(const Vector2& v);
+// Vector/Vector addition and subtraction
+inline Vector2 operator+(const Vector2& b, const Vector2& a);
+inline Vector2 operator-(const Vector2& a, const Vector2& b);
+inline Vector2& operator+=(Vector2& a, const Vector2& b);
+inline Vector2& operator-=(Vector2& a, const Vector2& b);
+// Vector equality an inequality
+inline bool operator==(const Vector2& a, const Vector2& b);
+inline bool operator!=(const Vector2& a, const Vector2& b);
+// Vector/Scalar multiplication and addition
+inline Vector2 operator*(const Vector2& v, float s);
+inline Vector2 operator*(float s, const Vector2& v);
+inline Vector2 operator/(const Vector2& v, float s);
+inline Vector2 operator/(float s, const Vector2& v);
+inline Vector2& operator*=(Vector2& v, float s);
+inline Vector2& operator/=(Vector2& v, float s);
+// Vector math operations
+inline float dot(const Vector2& a, const Vector2& b);
+inline float cross(const Vector2& a, const Vector2& b);
+inline float squaredMagnitude(const Vector2& v);
+inline float magnitude(const Vector2& v);
+// normalize copy
+inline Vector2 normalized(const Vector2& v);
+// normalize in place
+inline Vector2& normalize(Vector2& v);
+
+#include "vector2.inl"
+
+/**********
+ * Shapes *
+ **********/
 
 struct Circle {
 	Vector2 position;
@@ -30,44 +69,22 @@ struct Rectangle : Polygon<4>{
 	float height = 0.f;
 };
 
+Rectangle makeRectangle(Vector2 p, float w, float h);
 
-inline Rectangle makeRectangle(Vector2 p, float w, float h) {
-	Rectangle r;
-	r.width = w;
-	r.height = h;
-	r.position = p;
-	float halfWidth = w/2.f;
-	float halfHeight = h/2.f;
-	r.model[0] = {-halfWidth, halfHeight}; // top left
-	r.model[1] = {halfWidth, halfHeight}; // top right
-	r.model[2] = {halfWidth, -halfHeight}; // bottom right
-	r.model[3] = {-halfWidth, -halfHeight}; // bottom left
-	r.vertices[0] = r.position + r.model[0];
-	r.vertices[1] = r.position + r.model[1];
-	r.vertices[2] = r.position + r.model[2];
-	r.vertices[3] = r.position + r.model[3];
-	return r;
+/************
+ * Geometry *
+ ************/
+
+bool lineSegmentIntersection(Vector2 a, Vector2 b, Vector2 c, Vector2 d, Vector2& intersection);
+Vector2 findNormal(Vector2 a, Vector2 b, Vector2 c);
+
+
+/********
+ * Misc *
+ ********/
+
+template <typename T>
+T sign(T t) {
+	return t / abs(t);
 }
-
-
-// Return the point of intersection of 2 lineSegments
-// if return 0.f then no intersection
-// otherwise return depth of intersection and update intersection param
-// See line segment intersection in owen's notebook or online at http://www.cs.swan.ac.uk/~cssimon/line_intersection.html
-inline bool lineSegmentIntersection(Vector2 a, Vector2 b, Vector2 c, Vector2 d, Vector2& intersection) {
-	float h = (d.x - c.x) * (a.y - b.y) - (a.x - b.x) * (d.y - c.y);
-	if (h == 0){
-		return false; // h is zero when the lines are colinear
-	}
-	float t = ((a.x - c.x) * (a.y - b.y) + (a.y - c.y) * (b.x - a.x)) / h;
-	float s = ((a.x - c.x) * (c.y - d.y) + (a.y - c.y) * (d.x - c.x)) / h;
-	if (s >= 0.f && s < 1.f && t >=0.f && t < 1.f) {
-		assert(a + s * (b-a) == c + t * (d-c));
-		intersection = a + s * (b-a);
-		return true;
-	} else {
-		return false;
-	}
-}
-
 

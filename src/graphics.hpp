@@ -7,7 +7,6 @@
 #include "maths.hpp"
 #include "rock.hpp"
 #include "sea.hpp"
-#include "vector2.hpp"
 
 #define SEA_COLOR sf::Color::Cyan
 
@@ -38,7 +37,7 @@ inline sf::Vector2f game2ScreenPos(const Graphics& graphics, const Vector2 &v) {
 }
 
 inline Vector2 screen2GamePos(const Graphics& graphics, const sf::Vector2i &v) {
-	return Vector2((float)v.x, std::fabs((float)graphics.videoMode.height - (float)v.y)) / (graphics.ppu);
+	return Vector2{(float)v.x, std::fabs((float)graphics.videoMode.height - (float)v.y)} / (graphics.ppu);
 }
 
 inline void drawCircle(Graphics& graphics, const Circle& circle, sf::Color c) {

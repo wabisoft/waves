@@ -1,5 +1,11 @@
 #include <iostream>
+#include "clock.hpp"
+#include "constants.hpp"
+#include "graphics.hpp"
+#include "stage.hpp"
 #include "game.hpp"
+#include "util.hpp"
+#include "maths.hpp"
 
 void runStage(Stage& stage){
 	Graphics graphics;

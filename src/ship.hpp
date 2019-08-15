@@ -1,7 +1,7 @@
 #pragma once
 
 #include "prelude.hpp"
-#include "vector2.hpp"
+#include "maths.hpp"
 
 struct Ship {
 	Vector2 position = {0.f, 0.f};

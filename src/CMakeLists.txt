@@ -20,8 +20,9 @@ include_directories(${SFML_INCLUDE_DIR})
 
 
 file(GLOB wavesSource
-    "*.hpp"
-    "*.cpp"
+	"*.hpp"
+	"*.inl"
+	"*.cpp"
 )
 
 add_executable(waves main.cpp ${wavesSource})

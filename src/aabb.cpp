@@ -5,7 +5,7 @@
 #include "stage.hpp"
 
 AABB::AABB(const Platform& platform) {
-	Vector2 diag = Vector2(platform.width/2, platform.height/2);
+	Vector2 diag = {platform.width/2, platform.height/2};
 	lower = platform.position - diag;
 	upper = platform.position + diag;
 	type = PLATFORM;
@@ -13,7 +13,7 @@ AABB::AABB(const Platform& platform) {
 }
 
 AABB::AABB(const Rock& rock) {
-	Vector2 diag = Vector2(rock.radius, rock.radius);
+	Vector2 diag = {rock.radius, rock.radius};
 	Vector2 lower0 = rock.position - diag;
 	Vector2 upper0 = rock.position + diag;
 	Vector2 futurePos = rock.position + rock.velocity * FIXED_TIMESTEP;

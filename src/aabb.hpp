@@ -3,7 +3,7 @@
 
 #include "entity.hpp"
 #include "prelude.hpp"
-#include "vector2.hpp"
+#include "maths.hpp"
 
 
 struct AABB{

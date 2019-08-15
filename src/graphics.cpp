@@ -50,8 +50,8 @@ inline void draw(Graphics& graphics, const Sea& sea) {
 	float step = 1 / graphics.ppu;
 	for (float i = 0; i < STAGE_WIDTH; i += step)
 	{
-		vertices.push_back(sf::Vertex(game2ScreenPos(graphics, Vector2(i, heightAtX(sea, i))), SEA_COLOR));
-		vertices.push_back(sf::Vertex(game2ScreenPos(graphics, Vector2(i, 0)), SEA_COLOR));
+		vertices.push_back(sf::Vertex(game2ScreenPos(graphics, {i, heightAtX(sea, i)}), SEA_COLOR));
+		vertices.push_back(sf::Vertex(game2ScreenPos(graphics, {i, 0}), SEA_COLOR));
 	}
 	graphics.window.draw(&vertices[0], vertices.size(), sf::TriangleStrip);
 	vertices.clear();

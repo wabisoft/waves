@@ -68,7 +68,7 @@ int createWave(Sea& sea, Vector2 position, float amplitude){
 	new_wave.position = position;
 	new_wave.amplitude = amplitude;
 	new_wave.active = true;
-	new_wave.id = ++sea.id_src;	
+	new_wave.id = ++sea.id_src;
 	return sea.numWaves++;
 }
 

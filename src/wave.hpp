@@ -4,9 +4,8 @@
 #include "aabb.hpp"
 #include "constants.hpp"
 #include "prelude.hpp"
+#include "maths.hpp"
 #include "util.hpp"
-#include "vector2.hpp"
-
 
 
 struct Wave {
