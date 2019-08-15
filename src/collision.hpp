@@ -93,6 +93,7 @@ Collision collision(Circle& circle, Polygon<N>& polygon) {//, Vector2& intersect
 		if(lineSegmentIntersection(a, b, c, d, col.intersection)) {
 			col.collides = true;
 			col.penetration = magnitude(b-col.intersection);
+			// How to get normals?
 			collisions.push_back(col);
 		}
 	}

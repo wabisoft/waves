@@ -2,6 +2,7 @@
 
 ## General
 [x] Get platforms
+[ ] Figure out how to get collision normals
 [ ] Get Rocks bouncing off platforms
 [ ] Get Rocks sitting calmly on plarforms
 [ ] Get rocks launching off platforms
