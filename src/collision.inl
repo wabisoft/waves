@@ -44,29 +44,73 @@ Collision collision(const Polygon<N>& poly1, const Polygon<M>& poly2) {// Vector
 template <int N>
 Collision collision(const Circle& circle, const Polygon<N>& polygon) {//, Vector2& intersection, float& depth) {
 	std::vector<Collision> collisions;
-	// Check radius projected on the relative position vector...
-	Vector2 a = circle.position;
-	// Vector2 b = a + normalized(polygon.position - circle.position) * circle.radius;
-	// ...against the edges of the polygon
+	// Start with the circle position
+	Vector2 c = circle.position;
+	float circleRadiusSquared = circle.radius * circle.radius;
 	for (int i = 0; i < polygon.size; ++i) {
-		Vector2 c = polygon.vertices[i];
-		Vector2 d = polygon.vertices[(i+1)%polygon.size];
-		Vector2 normal = normalized(findNormal(c, d, a));
-		Vector2 b = a - normal * circle.radius; // furthest extend of circle anti the polygon normal
+		Vector2 a = polygon.vertices[i];
+		Vector2 b = polygon.vertices[(i+1)%polygon.size];
+		Vector2 normal = normalized(findNormal(a, b, c)); // normal of a b in direction of c
+		// Find the rel pos between circle and line segment start...
+		Vector2 ca = c - a;
+		// ... and the rel pos between line segment end and start
+		Vector2 ba = b - a;
+		// Find the point of circle line relpos(ca) projected onto line relpos (ba)
+		Vector2 ba_hat = normalized(ba);
+		Vector2 d = a + dot(ca,ba_hat) * normalized(ba_hat);
 		Collision col;
-		if(lineSegmentIntersection(a, b, c, d, col.intersection)) {
-			col.collides = true;
-			col.penetration = magnitude(b-col.intersection);
-			// special case close to polygon vertex;
-			if (squaredMagnitude(c - col.intersection) < 0.01) {
-				col.normal = normalized(c - polygon.position); // set normal to normalized vertex diagonal
-			} else if (squaredMagnitude(d - col.intersection) < 0.01) {
-				col.normal = normalized(d - polygon.position); // set normal to normalized vertex diagonal
-			} else {
-				col.normal = normal;
+		// determine the distance between point on line and circle
+		Vector2 dc = d-c;
+		// if the point is closer than the radius then we collide with that line
+		if (squaredMagnitude(dc) < circleRadiusSquared) {
+			// Now we know that we collide with a point on the infinite line between a and b
+			// We still need to check if our collision is bounded on the line segment
+			// then there is a collision
+			if (std::abs(ba.x) > std::abs(ba.y)) { // line more horizontally oriented
+				// we check that we are bounded on x
+				if (ba.x > 0) { // positive dx means b.x > a.x
+					col.collides = d.x >= a.x && d.x <=b.x;
+				} else { // negative dx means that b.x < a.x
+					col.collides = d.x >= b.x && d.x <=a.x;
+				}
+			} else { // line is more vertically oriented
+				// we check that we are bounded on y
+				if (ba.y > 0) { // positive dy means b.y > a.y
+					col.collides = d.y >= a.y && d.y <= b.y;
+				} else { // negative dy means that a.y > b.y
+					col.collides = d.y >= b.y && d.y <= a.y;
+				}
 			}
-			std::cout << col.normal << std::endl;
-			collisions.push_back(col);
+			if (col.collides) {
+				col.intersection = d; // the poin projection onto ba is our collision point
+				col.penetration = std::abs(magnitude(dc) - circle.radius);
+				col.normal = normal;
+				collisions.push_back(col);
+			} else {
+				// if the circle is on the very edge of our line the vertex can be within the circle and
+				// we wont detect it as a collision, a literal edge case
+				// The reason we wait till the last minute to check this edge case is
+				// that we don't want to prematurely take this action, only do this if we are not colliding
+				// in the ordinary way
+				Vector2 vertex = a; // start by looking at a
+				Vector2 relpos = ca; // since we already calulated c-a above let's not waste any cycles
+				for (int i = 0; i < 2; ++i) {
+					if (i = 1) {
+						vertex = b; // look at b second time round
+						Vector2 relpos = c - vertex; // this time we must to the math
+					}
+					// if the vertex is closer than our radius is long
+					if (squaredMagnitude(relpos) < circleRadiusSquared) {
+						// collision!
+						col.collides = true;
+						col.intersection = vertex;
+						float relpos_mag = magnitude(relpos);
+						col.penetration = std::abs(relpos_mag - circle.radius);
+						col.normal = relpos / relpos_mag; // since we are on a corner we just push out away from vertex;
+						collisions.push_back(col);
+					}
+				}
+			}
 		}
 	}
 	if (!collisions.empty()) {
