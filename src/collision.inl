@@ -2,7 +2,7 @@
 // NOTE: this only determines if poly1 is specifically overlaping poly2
 // Also NOTE: poly1 and poly2 must be CONVEX
 template <int N, int M>
-Collision collision(Polygon<N>& poly1, Polygon<M>& poly2) {// Vector2& intersection, float& depth) {
+Collision collision(const Polygon<N>& poly1, const Polygon<M>& poly2) {// Vector2& intersection, float& depth) {
 	// check the diagonals of one polygon ...
 	std::vector<Collision> collisions;
 	for (int i = 0; i < poly1.size; ++i) {
@@ -40,7 +40,7 @@ Collision collision(Polygon<N>& poly1, Polygon<M>& poly2) {// Vector2& intersect
 }
 
 template <int N>
-Collision collision(Circle& circle, Polygon<N>& polygon) {//, Vector2& intersection, float& depth) {
+Collision collision(const Circle& circle, const Polygon<N>& polygon) {//, Vector2& intersection, float& depth) {
 	std::vector<Collision> collisions;
 	// Check radius projected on the relative position vector...
 	Vector2 a = circle.position;
@@ -53,7 +53,6 @@ Collision collision(Circle& circle, Polygon<N>& polygon) {//, Vector2& intersect
 		if(lineSegmentIntersection(a, b, c, d, col.intersection)) {
 			col.collides = true;
 			col.penetration = magnitude(b-col.intersection);
-			// How to get normals?
 			col.normal = normalized(findNormal(c, d, a));
 			collisions.push_back(col);
 		}

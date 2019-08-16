@@ -1,12 +1,17 @@
-# TODO
+## TODO
 
-## General
-[x] Get platforms
-[ ] Figure out how to get collision normals
-[ ] Get Rocks bouncing off platforms
 [ ] Get Rocks sitting calmly on plarforms
+	[ ] Lock rocks to a platform if they are in a continuous collision with it
+	[ ] roll rocks moving on platforms
 [ ] Get rocks launching off platforms
-[ ] Get a ships riding waves
+[ ] Get a ships riding waves (most of the hard work was done in v1 (should mostly just need porting ...knock on wood...)
+
+## DONE
+[x] Get platforms
+[x] Figure out how to get collision normals
+[x] Get Rocks bouncing off platforms
+
+
 
 ## Bug
 [x] aabb update callback uses entity pointer, the pointers are bad after aabb deletion (needs immediate fixing)
@@ -23,3 +28,6 @@
 
 * Slow time as a mechanic of the game
 * Bouncy platforms
+
+
+

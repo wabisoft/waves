@@ -8,10 +8,11 @@ uint8_t createPlatform(Stage& stage, Vector2 position, float width, float height
 	size_t new_platform_idx = stage.numPlatforms;
 	Platform& platform = *(stage.platforms + new_platform_idx);
 	platform = Platform();
+	platform.shape = makeRectangle(position, width, height);
 	platform.id = ++stage.id_src;
-	platform.position = position;
-	platform.width = width;
-	platform.height = height;
+	// platform.position = position;
+	// platform.width = width;
+	// platform.height = height;
 	stage.numPlatforms++;
 	createAABB(stage, AABB(platform));
 	return platform.id;

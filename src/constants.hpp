@@ -24,3 +24,6 @@ const float SQUARED_TERMINAL_VELOCITY = 2.f * GRAVITATIONAL_CONSTANT * STAGE_HEI
 const float WAVE_WIDTH_MULTIPLIER = 0.085f;
 const float WAVE_POSITIVE_DECAY_MULTIPLIER = 5.f;
 const float WAVE_NEGATIVE_DECAY_MULTIPLIER = -0.75f;
+
+// We're gonna make some magic numbers for our world
+const float ROCK_RADIUS_MASS_RATIO = 2.f/3.f; // i.e if rock radius is 3 then mass should be 2;

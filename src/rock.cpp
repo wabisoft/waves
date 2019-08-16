@@ -13,17 +13,20 @@ void fixedUpdateRocks(Stage& stage) {
 	Rock* rocks = stage.rocks;
 	for (short i = 0; i < stage.numRocks; ++i) {
 		switch (rocks[i].state) {
-			case FALLING:
-				if (rocks[i].position.x < 0 || rocks[i].position.x > STAGE_WIDTH || rocks[i].position.y < 0 || rocks[i].position.y > STAGE_HEIGHT || rocks[i].active == false) {
+			case FALLING: {
+				if (rocks[i].shape.position.x < 0 || rocks[i].shape.position.x > STAGE_WIDTH || rocks[i].shape.position.y < 0 || rocks[i].shape.position.y > STAGE_HEIGHT || rocks[i].active == false) {
 					// remove our aabb from the stage aabb array
 					deleteRockByIdx(stage, i);
 				}
 				rocks[i].velocity+= GRAVITY * FIXED_TIMESTEP;
+				auto drag = dragForce(rocks[i].velocity, 1.225, rocks[i].shape.radius * ROCK_RADIUS_MASS_RATIO);
+				rocks[i].velocity += drag * FIXED_TIMESTEP;
 				if(squaredMagnitude(rocks[i].velocity) > SQUARED_TERMINAL_VELOCITY) {
 					rocks[i].velocity = normalized(rocks[i].velocity) * TERMINAL_VELOCITY;
 				}
-				rocks[i].position += rocks[i].velocity;
-				break;
+				rocks[i].shape.position += rocks[i].velocity;
+			}
+			break;
 			case STANDING:
 				break;
 		}
@@ -43,8 +46,8 @@ uint8_t createRock(Stage& stage, Vector2 position, float radius){
 	new_rock = Rock();
 	new_rock.active = true;
 	new_rock.id = ++stage.id_src;
-	new_rock.position = position;
-	new_rock.radius = radius;
+	new_rock.shape.position = position;
+	new_rock.shape.radius = radius;
 	stage.numRocks++;
 	createAABB(stage, AABB(new_rock));
 	return new_rock.id;

@@ -60,7 +60,7 @@ struct Polygon {
 	Vector2 position;
 	Vector2 vertices[N];
 	Vector2 model[N];
-	const int size = N;
+	int size = N;
 	float rotation = 0.f;
 };
 
@@ -85,6 +85,6 @@ Vector2 findNormal(Vector2 a, Vector2 b, Vector2 c);
 
 template <typename T>
 T sign(T t) {
-	return t / abs(t);
+	return (t == (T)0) ? (T)0 : t / abs(t);
 }
 

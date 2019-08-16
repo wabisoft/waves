@@ -40,8 +40,9 @@ struct Collision {
 };
 
 template <int N, int M>
-Collision collision(Polygon<N>& poly1, Polygon<M>& poly2);
+Collision collision(const Polygon<N>& poly1, const Polygon<M>& poly2);
 template <int N>
-Collision collision(Circle& circle, Polygon<N>& polygon);
+Collision collision(const Circle& circle, const Polygon<N>& polygon);
+Collision collision(const Circle& c1, const Circle& c2);
 
 #include "collision.inl"

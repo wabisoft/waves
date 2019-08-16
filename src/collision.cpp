@@ -5,6 +5,7 @@
 #include "entity.hpp"
 #include "collision.hpp"
 #include "constants.hpp"
+#include "physics.hpp"
 #include "rock.hpp"
 #include "util.hpp"
 
@@ -46,13 +47,13 @@ void resolveCollisions(Stage& stage) {
 	std::vector<AABBPair> pairs;
 	pairs.reserve(2*MAX_AABBS); // In a worst case scenario we could really have like MAX_ABBS^2 collisions but let's be optimistic
 
-	// AABB seaAAABB = AABB(stage.sea); // because the sea AABB spans the entire stage, we don't want to include it in the sweep list as it will slow down the algorithm
+	AABB seaAAABB = AABB(stage.sea); // because the sea AABB spans the entire stage, we don't want to include it in the sweep list as it will slow down the algorithm
 	// start with the first aabb upper as the max
 	float max = aabbs[0].upper.x;
 	// Loop the aabbs and look for collisions
-	// collisions.push_back({aabbs[0], seaAAABB}); // just check everyone for collision with sea
+	pairs.push_back({aabbs[0], seaAAABB}); // just check everyone for collision with sea
 	for (int i = 1; i < numAABBs; ++i){
-		// collisions.push_back({aabbs[i], seaAAABB}); // just check everyone for collision with sea
+		pairs.push_back({aabbs[i], seaAAABB}); // just check everyone for collision with sea
 		for (int j = i-1; j >= 0; --j) {
 			if (aabbs[j].upper.x > aabbs[i].lower.x) {
 				// OPTMZ: sweep y-axis too
@@ -101,7 +102,10 @@ void dispatchPotentialCollision(Stage& stage, const AABBPair& pair) {
 			else assert(false);
 			break;
 		case ROCK|SHIP: break;
-		case ROCK|ROCK: break;
+		case ROCK|ROCK:
+			if (aRock && bRock){ collide(*aRock, *bRock); }
+			else { assert(false); }
+			break;
 		case SHIP|SEA: break;
 		case SHIP|PLATFORM: break;
 		default: break;
@@ -113,29 +117,40 @@ void collide(Rock& rock, Sea& sea) {
 	if (!rock.active){
 		return;
 	}
-	Vector2 rockPosition = rock.position;
-	Vector2 rockNextFramePosition = rock.position + rock.velocity * FIXED_TIMESTEP;
+	Vector2 rockPosition = rock.shape.position;
+	Vector2 rockNextFramePosition = rock.shape.position + rock.velocity * FIXED_TIMESTEP;
 	if(rockPosition.y < sea.level) {
 		// collision detection with sea is very easy on a per rock basis, and only complicates the collision detection broad phase if done there.
 		// so instead we do it here.
-		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.radius * rock.radius * PI);
+		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI);
 		rock.active = 0;
 	} else if (rockPosition.y < heightAtX(sea, rockPosition.x)) {
 		// TODO: Find nearest wave and maybe distructively interfere with it?
 	} else if (rockNextFramePosition.y < sea.level) {
-		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.radius * rock.radius * PI);
+		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI);
 		rock.active = 0;
 	}
 }
 
 void collide(Rock& rock, const Platform& platform) {
-	std::cout << "RockxPlatform" << std::endl;
-}
-
-void collide(Rock& rock, Ship& ship) {
+	Collision col = collision(rock.shape, platform.shape);
+	if (col.collides) {
+		rock.shape.position += col.normal * col.penetration;
+		rock.velocity += impulse(rock.velocity, rock.shape.radius * ROCK_RADIUS_MASS_RATIO, 5.f, 0.05f) * col.normal;
+	}
 }
 
 void collide(Rock& rock, Rock& other_rock) {
+	Collision col = collision(rock.shape, other_rock.shape);
+	if (col.collides) {
+		rock.shape.position += col.normal * 0.5f * col.penetration;
+		other_rock.shape.position += -col.normal * 0.5f * col.penetration;
+		rock.velocity += impulse(rock.velocity, rock.shape.radius * ROCK_RADIUS_MASS_RATIO, other_rock.shape.radius * ROCK_RADIUS_MASS_RATIO, 0.05f) * col.normal;
+		other_rock.velocity += impulse(other_rock.velocity, other_rock.shape.radius * ROCK_RADIUS_MASS_RATIO, rock.shape.radius * ROCK_RADIUS_MASS_RATIO, 0.05f) * -1 * col.normal;
+	}
+}
+
+void collide(Rock& rock, Ship& ship) {
 }
 
 void collide(Ship& ship, const Sea& sea) {
@@ -147,3 +162,20 @@ void collide(Ship& ship, const Platform& platform) {
 void collide(Ship& ship, Rock& rock) {
 }
 
+
+Collision collision(const Circle& c1, const Circle& c2) {
+	Vector2 relativePosition = c1.position - c2.position;
+	float sumOfRadii = (c1.radius + c2.radius);
+	float sumOfRadiiSquared =  sumOfRadii * (c1.radius + c2.radius);
+	if (squaredMagnitude(relativePosition) < sumOfRadiiSquared) {
+		Vector2 normalizedRelPos = normalized(relativePosition); // normalize in place;
+		Collision col;
+		col.collides = true;
+		col.intersection = c1.position + c1.radius * normalizedRelPos;
+		col.normal = normalized(col.intersection - c2.position);
+		col.penetration = std::abs(magnitude(relativePosition) - sumOfRadii);
+		return col;
+	} else {
+		return Collision();
+	}
+}

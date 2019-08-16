@@ -39,7 +39,7 @@ bool lineSegmentIntersection(Vector2 a, Vector2 b, Vector2 c, Vector2 d, Vector2
 	float t = ((a.x - c.x) * (a.y - b.y) + (a.y - c.y) * (b.x - a.x)) / h;
 	float s = ((a.x - c.x) * (c.y - d.y) + (a.y - c.y) * (d.x - c.x)) / h;
 	if (s >= 0.f && s < 1.f && t >=0.f && t < 1.f) {
-		assert(a + s * (b-a) == c + t * (d-c));
+		// assert(a + s * (b-a) == c + t * (d-c)); // assertion not safe because rounding error
 		intersection = a + s * (b-a);
 		return true;
 	} else {

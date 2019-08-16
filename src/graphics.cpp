@@ -13,14 +13,14 @@
 
 
 #ifdef _WIN32
-#include <windows.h>
-std::string workingDir() {
-	char buffer[MAX_PATH];
-	GetModuleFileName( NULL, buffer, MAX_PATH );
-	std::string str = std::string(buffer);
-	std::string::size_type pos = std::string( buffer ).find_last_of( "\\/" );
-	return std::string( buffer ).substr( 0, pos);
-}
+// #include <windows.h>
+// std::string workingDir() {
+// 	char buffer[MAX_PATH];
+// 	GetModuleFileName( NULL, buffer, MAX_PATH );
+// 	std::string str = std::string(buffer);
+// 	std::string::size_type pos = std::string( buffer ).find_last_of( "\\/" );
+// 	return std::string( buffer ).substr( 0, pos);
+// }
 #endif
 
 void initGraphics(Graphics & graphics, const char * title) {
@@ -66,8 +66,8 @@ inline void draw(Graphics& graphics, const Rock* rocks, size_t numRocks) {
 	circle.setFillColor(sf::Color::Red);
 	sf::FloatRect bounds;
 	for (int i = 0; i < numRocks; ++i){
-		float adjustedRadius = rocks[i].radius * graphics.ppu;
-		auto RockPosition = game2ScreenPos(graphics, rocks[i].position);
+		float adjustedRadius = rocks[i].shape.radius * graphics.ppu;
+		auto RockPosition = game2ScreenPos(graphics, rocks[i].shape.position);
 		circle.setPosition(RockPosition);
 		circle.setRadius(adjustedRadius);
 		circle.setOrigin(adjustedRadius, adjustedRadius);
@@ -85,18 +85,19 @@ inline void draw(Graphics& graphics, const Platform* platforms, size_t numPlatfo
 	idText.setFont(graphics.gameFont);
 	idText.setFillColor(sf::Color::White);
 	idText.setCharacterSize(15);
-	sf::RectangleShape rectangle;
-	rectangle.setFillColor(sf::Color::Magenta);
+	// sf::RectangleShape rectangle;
+	// rectangle.setFillColor(sf::Color::Magenta);
 	sf::FloatRect bounds;
 	for (int i = 0; i < numPlatforms; ++i){
-		float adjustedWidth = platforms[i].width * graphics.ppu;
-		float adjustedHeight = platforms[i].height * graphics.ppu;
-		auto platformPosition = game2ScreenPos(graphics, platforms[i].position);
-		rectangle.setPosition(platformPosition);
-		rectangle.setSize({adjustedWidth, adjustedHeight});
-		rectangle.setOrigin(adjustedWidth/2.f, adjustedHeight/2.f);
-		graphics.window.draw(rectangle);
-		idText.setPosition(platformPosition);
+		drawPolygon(graphics, platforms[i].shape, sf::Color::Magenta);
+		// float adjustedWidth = platforms[i].width * graphics.ppu;
+		// float adjustedHeight = platforms[i].height * graphics.ppu;
+		// auto platformPosition = game2ScreenPos(graphics, platforms[i].position);
+		// rectangle.setPosition(platformPosition);
+		// rectangle.setSize({adjustedWidth, adjustedHeight});
+		// rectangle.setOrigin(adjustedWidth/2.f, adjustedHeight/2.f);
+		// graphics.window.draw(rectangle);
+		idText.setPosition(game2ScreenPos(graphics, platforms[i].shape.position));
 		idText.setString((sf::String)std::to_string(platforms[i].id));
 		bounds = idText.getGlobalBounds();
 		idText.setOrigin(bounds.width/2, bounds.height/2);

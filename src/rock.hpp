@@ -16,8 +16,8 @@ enum RockState : uint8_t {
 };
 
 struct Rock {
-	Vector2 position, velocity = {0.f, 0.f};
-	float radius = 0.f;
+	Circle shape = {{0.f, 0.f}, 0.f};
+	Vector2 velocity = {0.f, 0.f};
 	bool active = false;
 	uint8_t id = -1;
 	RockState state = FALLING;
@@ -30,5 +30,5 @@ size_t deleteRockById(Stage& stage, uint8_t rock_id);
 Rock& findRock(Stage& stage, uint8_t rock_id);
 
 inline float area(const Rock& rock) {
-	return rock.radius * rock.radius * PI;
+	return rock.shape.radius * rock.shape.radius * PI;
 }

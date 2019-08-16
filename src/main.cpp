@@ -18,7 +18,7 @@
 int main(){
 	Stage stage;
 	stage.sea.level = 13.3f;
-	createPlatform(stage, {STAGE_WIDTH/2.f, STAGE_HEIGHT/2}, 5, 5);
+	createPlatform(stage, {STAGE_WIDTH/2.f, STAGE_HEIGHT/2}, 30, 5);
 	std::cout << "Stage: " << sizeof(stage) << std::endl;
 	std::cout << "Ship : " << sizeof(stage.ship) << std::endl;
 	std::cout << "Sea: " << sizeof(stage.sea) << std::endl;
