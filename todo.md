@@ -1,25 +1,25 @@
 ## TODO
-
-[ ] Get Rocks sitting calmly on plarforms
-	[ ] Lock rocks to a platform if they are in a continuous collision with it
-	[ ] roll rocks moving on platforms
-[ ] Get rocks launching off platforms
-[ ] Get a ships riding waves (most of the hard work was done in v1 (should mostly just need porting ...knock on wood...)
+- [ ] Update polygon's vertices every frame with position and rotation;
+- [ ] Get Rocks sitting calmly on plarforms
+	- [ ] Lock rocks to a platform if they are in a continuous collision with it
+	- [ ] roll rocks moving on platforms
+- [ ] Get rocks launching off platforms
+- [ ] Get a ships riding waves (most of the hard work was done in v1 (should mostly just need porting ...knock on wood...)
 
 ## DONE
-[x] Get platforms
-[x] Figure out how to get collision normals
-[x] Get Rocks bouncing off platforms
+- [x] Get platforms
+- [x] Figure out how to get collision normals
+- [x] Get Rocks bouncing off platforms
 
 
 
 ## Bug
-[x] aabb update callback uses entity pointer, the pointers are bad after aabb deletion (needs immediate fixing)
+- [x] aabb update callback uses entity pointer, the pointers are bad after aabb deletion (needs immediate fixing)
 	FIX: Did away with the entity pointer and the call back because moving elements in the array invalidated the pointer. Switched to searching by ids (which are incidentally always inorder)
 
 
 ## Extra Curricular
-[ ] Start playing with getting an android build. We'll probably need to get an iOS device
+- [ ] Start playing with getting an android build. We'll probably need to get an iOS device
 	and get enrolled in the dev program (or jailbreak it) so we can run some builds for that
 
 ## Nice to haves
