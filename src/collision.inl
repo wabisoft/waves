@@ -1,3 +1,5 @@
+#include "printing.hpp"
+
 // Thanks javidx9!
 // NOTE: this only determines if poly1 is specifically overlaping poly2
 // Also NOTE: poly1 and poly2 must be CONVEX
@@ -44,16 +46,26 @@ Collision collision(const Circle& circle, const Polygon<N>& polygon) {//, Vector
 	std::vector<Collision> collisions;
 	// Check radius projected on the relative position vector...
 	Vector2 a = circle.position;
-	Vector2 b = a + normalized(polygon.position - circle.position) * circle.radius;
+	// Vector2 b = a + normalized(polygon.position - circle.position) * circle.radius;
 	// ...against the edges of the polygon
 	for (int i = 0; i < polygon.size; ++i) {
 		Vector2 c = polygon.vertices[i];
 		Vector2 d = polygon.vertices[(i+1)%polygon.size];
+		Vector2 normal = normalized(findNormal(c, d, a));
+		Vector2 b = a - normal * circle.radius; // furthest extend of circle anti the polygon normal
 		Collision col;
 		if(lineSegmentIntersection(a, b, c, d, col.intersection)) {
 			col.collides = true;
 			col.penetration = magnitude(b-col.intersection);
-			col.normal = normalized(findNormal(c, d, a));
+			// special case close to polygon vertex;
+			if (squaredMagnitude(c - col.intersection) < 0.01) {
+				col.normal = normalized(c - polygon.position); // set normal to normalized vertex diagonal
+			} else if (squaredMagnitude(d - col.intersection) < 0.01) {
+				col.normal = normalized(d - polygon.position); // set normal to normalized vertex diagonal
+			} else {
+				col.normal = normal;
+			}
+			std::cout << col.normal << std::endl;
 			collisions.push_back(col);
 		}
 	}

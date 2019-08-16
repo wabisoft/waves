@@ -35,6 +35,8 @@ void runStage(Stage& stage){
 	   						timeScale = 3.f; break;
        					case sf::Keyboard::Key::Num4:
 	   						timeScale = 4.f; break;
+       					case sf::Keyboard::Key::Num5:
+	   						timeScale = 100.f; break;
 						default: break;
 					}
 					break;

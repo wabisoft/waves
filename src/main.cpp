@@ -32,8 +32,8 @@ int main(){
 	runStage(stage);
 
 	// Testing shapes and shit
-	// Rectangle rectangle = makeRectangle({STAGE_WIDTH/2, STAGE_HEIGHT/2 -1.5}, 5, 2);
-	// Circle circle = {{STAGE_WIDTH/2, STAGE_HEIGHT/2 + 4}, 5.f};
+	// Rectangle rectangle = makeRectangle({STAGE_WIDTH/2, STAGE_HEIGHT/2}, 30, 5);
+	// Circle circle = {{STAGE_WIDTH/2-7, STAGE_HEIGHT/2 + 5}, 3.f};
 	// Graphics graphics;
 	// initGraphics(graphics, "Waves!!!");
 	// while(graphics.window.isOpen()) {
@@ -61,7 +61,7 @@ int main(){
 	// 		c.setPosition(game2ScreenPos(graphics, col.intersection));
 	// 		graphics.window.draw(c);
 	// 		// draw the normal
-	// 		Vector2 normalOffset = col.intersection + 2 * col.normal;
+	// 		Vector2 normalOffset = col.intersection + 1 * col.normal;
 	// 		sf::VertexArray arr(sf::Lines, 2);
 	// 		arr[0] = sf::Vertex(game2ScreenPos(graphics, col.intersection), sf::Color::Magenta);
 	// 		arr[1] = sf::Vertex(game2ScreenPos(graphics, normalOffset), sf::Color::Magenta);
