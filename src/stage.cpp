@@ -13,6 +13,9 @@
 
 
 void fixedUpdate(Stage& stage, float deltaTime){
+	// if (stage.numRocks < 1) {
+	// 	createRock(stage, stage.rockSpawn, 3.f);
+	// }
 	if (stage.paused) {
 		return;
 	}
