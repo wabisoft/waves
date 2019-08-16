@@ -20,6 +20,7 @@ void fixedUpdateWaves(Sea& sea){
 			wave = Wave();
 			for(short j = i; j < sea.numWaves-1; ++j) {
 				waves[j] = waves[j+1];
+				waves[j+1] = Wave();
 			}
 			--sea.numWaves;
 		}
@@ -38,7 +39,7 @@ void fixedUpdateWaves(Sea& sea){
 }
 
 
-inline float heightAtX(const Wave& wave, float x){
+float heightAtX(const Wave& wave, float x){
 	// get the height of the wave at x
 	// Cool gaussian
 	return wave.amplitude * wave.decay * pow(E, -pow(WAVE_WIDTH_MULTIPLIER * (x - wave.position.x), 2));
@@ -72,3 +73,7 @@ int createWave(Sea& sea, Vector2 position, float amplitude){
 	return sea.numWaves++;
 }
 
+
+// Wave& findWave(Sea& sea, Vector2 position) {
+	// TODO: return closest wave
+// }

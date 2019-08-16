@@ -63,7 +63,9 @@ inline void draw(Graphics& graphics, const Rock* rocks, size_t numRocks) {
 	idText.setFillColor(sf::Color::White);
 	idText.setCharacterSize(15);
 	sf::CircleShape circle;
-	circle.setFillColor(sf::Color::Red);
+	circle.setFillColor(sf::Color(0,0,0,0));
+	circle.setOutlineColor(sf::Color::Red);
+	circle.setOutlineThickness(2);
 	sf::FloatRect bounds;
 	for (int i = 0; i < numRocks; ++i){
 		float adjustedRadius = rocks[i].shape.radius * graphics.ppu;

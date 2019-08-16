@@ -27,3 +27,5 @@ float maximumX(const Wave& wave);
 
 void fixedUpdateWaves(Sea& sea);
 int createWave(Sea& sea, Vector2 position, float amplitude);
+
+// Wave& findClosestWave(Sea& sea, Vector2 position); // return the closest wave

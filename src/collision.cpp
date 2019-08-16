@@ -136,7 +136,10 @@ void collide(Rock& rock, const Platform& platform) {
 	Collision col = collision(rock.shape, platform.shape);
 	if (col.collides) {
 		rock.shape.position += col.normal * col.penetration;
+		// FIXME: the restitudion and platform mass have some kind of weird ass
+		// non-intuitive probably incorrect relationship (play with this and do math to fix plz)
 		rock.velocity += impulse(rock.velocity, rock.shape.radius * ROCK_RADIUS_MASS_RATIO, 5.f, 0.05f) * col.normal;
+		// FIXME: there is no rolling resistance or friction of any kind which feels yucky, plz fix
 	}
 }
 
