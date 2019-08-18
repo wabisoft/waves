@@ -10,4 +10,11 @@ enum EntityType : uint8_t {
 };// Good thing there aren't many entity types in the game :)
 
 
+struct Entity {
+	// Specifically not a base class, more of a proxy or indirect reference
+	// to things with ids and a type
+	uint8_t id = 0;
+	EntityType TYPE = NONE;
+};
+
 // NOTE(owen): should we have a base entity class? revisit or don't. I can't decide.

@@ -1,8 +1,9 @@
 ## TODO
 - [ ] Update polygon's vertices every frame with position and rotation;
-- [ ] Get Rocks sitting calmly on plarforms
+- [x] Get Rocks sitting calmly on plarforms
 	- [ ] Lock rocks to a platform if they are in a continuous collision with it
 	- [ ] roll rocks moving on platforms
+- [ ] Resize rocks with clicks and touches and shit
 - [ ] Get rocks launching off platforms
 - [ ] Get a ships riding waves (most of the hard work was done in v1 (should mostly just need porting ...knock on wood...)
 

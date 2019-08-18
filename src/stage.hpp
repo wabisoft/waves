@@ -28,3 +28,6 @@ struct Stage{
 //
 
 void fixedUpdate(Stage& stage, float deltaTime);
+void resizeRock(Stage& stage, int rockId, Vector2 position);
+
+Rock& findEntityAtPosition(Stage& stage, Vector2 position);

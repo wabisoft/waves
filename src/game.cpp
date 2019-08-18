@@ -16,6 +16,9 @@ void runStage(Stage& stage){
 	Vector2 mousePosition;
 	int loopsPerFixedUpdate = 0;
 	float timeScale = 1.f;
+	// this should probably be a handle to variatic type if we need to select other thing too
+	Rock& selection;
+	// TODO: implement rock resizing
 	while(graphics.window.isOpen()){
 		sf::Event event;
 		while (graphics.window.pollEvent(event))
@@ -40,12 +43,16 @@ void runStage(Stage& stage){
 						default: break;
 					}
 					break;
+				case sf::Event::MouseMoved:
+					if(mousePressed) {
+					}
+					break;
 		        case sf::Event::MouseButtonPressed:
 					mousePosition = screen2GamePos(graphics, sf::Mouse::getPosition());
 	 				mousePressed = true;
 					break;
 		        case sf::Event::MouseButtonReleased:
-					createRock(stage, mousePosition, 3.f);
+					// createRock(stage, mousePosition, 3.f);
 	 				mousePressed = false;
 					break;
 		        case sf::Event::TouchBegan: break; // bummer city man, we can mess with touches till we're on our target devices

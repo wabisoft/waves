@@ -27,3 +27,6 @@ const float WAVE_NEGATIVE_DECAY_MULTIPLIER = -0.75f;
 
 // We're gonna make some magic numbers for our world
 const float ROCK_RADIUS_MASS_RATIO = 2.f/3.f; // i.e if rock radius is 3 then mass should be 2;
+const float ROCK_MIN_RADIUS = 1.f;
+const float ROCK_MAX_RADIUS = 10.f;
+const float ROCK_START_RADIUS = ROCK_MIN_RADIUS;

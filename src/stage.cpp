@@ -13,9 +13,9 @@
 
 
 void fixedUpdate(Stage& stage, float deltaTime){
-	// if (stage.numRocks < 1) {
-	// 	createRock(stage, stage.rockSpawn, 3.f);
-	// }
+	if (stage.numRocks < 1) {
+		createRock(stage, stage.rockSpawn, ROCK_START_RADIUS);
+	}
 	if (stage.paused) {
 		return;
 	}
@@ -27,3 +27,21 @@ void fixedUpdate(Stage& stage, float deltaTime){
 	fixedUpdate(stage.ship);
 }
 
+
+void resizeRock(Stage& stage, int rock_id, Vector2 position){
+	Rock& rock = findRock(stage, rock_id);
+	Vector2 relPos = position - rock.shape.position;
+	float size = magnitude(relPos);
+	if(size > ROCK_MIN_RADIUS && size < ROCK_MAX_RADIUS) {
+		rock.shape.radius = size;
+	}
+}
+
+Rock& findRockAtPosition(Stage& stage, Vector2 position) {
+	for (int i = 0; i < stage.numRocks; ++i) {
+		if (magnitude(position - stage.rocks[i].shape.position) <= stage.rocks[i].shape.radius) {
+			return stage.rocks[i];
+		}
+	}
+	// TODO: Maybe we need to look for other things
+}
