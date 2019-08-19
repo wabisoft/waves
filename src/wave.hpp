@@ -25,7 +25,7 @@ float slopeAtX(const Wave & wave, float x); // derivative of height
 float minimumX(const Wave& wave);
 float maximumX(const Wave& wave);
 
-void fixedUpdateWaves(Sea& sea);
+void updateWaves(Sea& sea);
 int createWave(Sea& sea, Vector2 position, float amplitude);
 
 // Wave& findClosestWave(Sea& sea, Vector2 position); // return the closest wave

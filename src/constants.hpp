@@ -28,5 +28,16 @@ const float WAVE_NEGATIVE_DECAY_MULTIPLIER = -0.75f;
 // We're gonna make some magic numbers for our world
 const float ROCK_RADIUS_MASS_RATIO = 2.f/3.f; // i.e if rock radius is 3 then mass should be 2;
 const float ROCK_MIN_RADIUS = 1.f;
-const float ROCK_MAX_RADIUS = 10.f;
+const float ROCK_MAX_RADIUS = 4.f;
+const float ROCK_MIN_RADIUS_SQUARED = ROCK_MIN_RADIUS * ROCK_MIN_RADIUS;
+const float ROCK_MAX_RADIUS_SQUARED = ROCK_MAX_RADIUS * ROCK_MAX_RADIUS;
 const float ROCK_START_RADIUS = ROCK_MIN_RADIUS;
+const float ROCK_MAX_SPEED = 48.f; // 48 meters/second (remember to multiply by timestep)
+
+
+// Magic numbers for STAGE
+const float STAGE_MAX_PULL_LENGTH = 8.f;
+const float STAGE_MAX_PULL_LENGTH_SQUARED = STAGE_MAX_PULL_LENGTH * STAGE_MAX_PULL_LENGTH;
+
+
+const char * const GAME_TITLE = "Waves!!!!";

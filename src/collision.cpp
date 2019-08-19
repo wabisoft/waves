@@ -11,20 +11,16 @@
 
 void resolveCollisions(Stage& stage) {
 	// NOTE (owen): if it starts to get slow this is definately a place we can optimize
-	// OPTMZ : keep aabbs attached to stage struct and manage it with the lifetime of other objects?
-	size_t& numAABBs = stage.numAABBS;
+	int& numAABBs = stage.numAABBS;
 	if (numAABBs == 0) return;
 	AABB* aabbs = stage.aabbs;
 	auto aabbSortPredicate = [](AABB a, AABB b) { return a.lower.x < b.lower.x; };
-	for(size_t i = 0; i < numAABBs; ++i) {
-		// TODO: update aabbs with their callback;
-		// FIXME: the pointers of aabb.entity are all missaligned. and this is wreaking havoc here, only happens
-		// after first aabb deletion(so copy/move semantics are messy? Look into it)
+	for(int i = 0; i < numAABBs; ++i) {
 		switch (aabbs[i].type) {
 		case ROCK:
 			{
-				size_t rock_idx = binary_find_where(aabbs[i].id, stage.rocks, stage.numRocks, [](const Rock& rock){ return rock.id;});
-				assert(rock_idx < stage.numRocks);
+				int rock_idx = binary_find_where(aabbs[i].id, stage.rocks, stage.numRocks, [](const Rock& rock){ return rock.id;});
+				assert(rock_idx > -1);
 				aabbs[i] = AABB(stage.rocks[rock_idx]);
 			}
 		break;
@@ -37,7 +33,6 @@ void resolveCollisions(Stage& stage) {
 		default:
 		break;
 		}
-		// aabbs[i].updateCallback(aabbs[i]);
 	}
 	// then resort the list (insertion sort is a "slow" sorting method
 	// but is very fast in an almost sorted list, which due to spatial coherence
@@ -139,6 +134,10 @@ void collide(Rock& rock, const Platform& platform) {
 		// FIXME: the restitudion and platform mass have some kind of weird ass
 		// non-intuitive probably incorrect relationship (play with this and do math to fix plz)
 		rock.velocity += impulse(rock.velocity, rock.shape.radius * ROCK_RADIUS_MASS_RATIO, 5.f, 0.05f) * col.normal;
+		if (col.normal == VECTOR2_UP) { // we are colliding the top
+			rock.state = STANDING;
+			rock.anchor = col.intersection;
+		}
 		// FIXME: there is no rolling resistance or friction of any kind which feels yucky, plz fix
 	}
 }

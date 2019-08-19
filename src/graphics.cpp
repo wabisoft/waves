@@ -8,6 +8,7 @@
 #include "graphics.hpp"
 #include "maths.hpp"
 #include "printing.hpp"
+#include "rock.hpp"
 #include "sea.hpp"
 #include "stage.hpp"
 
@@ -36,12 +37,17 @@ void initGraphics(Graphics & graphics, const char * title) {
 }
 
 
-void draw(Graphics& graphics, const Stage& stage) {
+void draw(Graphics& graphics, Stage& stage) {
 	graphics.window.clear(sf::Color::Black);
 	draw(graphics, stage.platforms, stage.numPlatforms);
 	draw(graphics, stage.rocks, stage.numRocks);
 	draw(graphics, stage.sea);
+	if(stage.selection.active && stage.pullPosition != VECTOR2_ZERO) {
+		Rock& rock = findRock(stage, stage.selection.entity.id);
+		drawLine(graphics, rock.shape.position, stage.pullPosition, sf::Color::Blue);
+	}
 	drawInfoText(graphics, stage);
+	graphics.window.display();
 }
 
 
@@ -57,7 +63,7 @@ inline void draw(Graphics& graphics, const Sea& sea) {
 	vertices.clear();
 }
 
-inline void draw(Graphics& graphics, const Rock* rocks, size_t numRocks) {
+inline void draw(Graphics& graphics, const Rock* rocks, int numRocks) {
 	sf::Text idText;
 	idText.setFont(graphics.gameFont);
 	idText.setFillColor(sf::Color::White);
@@ -82,7 +88,7 @@ inline void draw(Graphics& graphics, const Rock* rocks, size_t numRocks) {
 	}
 }
 
-inline void draw(Graphics& graphics, const Platform* platforms, size_t numPlatforms) {
+inline void draw(Graphics& graphics, const Platform* platforms, int numPlatforms) {
 	sf::Text idText;
 	idText.setFont(graphics.gameFont);
 	idText.setFillColor(sf::Color::White);
@@ -113,13 +119,13 @@ inline void drawInfoText(Graphics& graphics, const Stage& stage) {
 	text.setFillColor(sf::Color::White);
 	text.setCharacterSize(15);
 	std::stringstream infostream;
-	infostream << "FrameRate(Hz): 				" << 1/graphics.deltaTime <<std::endl;
-	infostream << "Simulation Frequency(Hz): 	" << 1/graphics.fixedDeltaTime <<std::endl;
-	infostream << "Loops/SimulationStep: 		" << graphics.loopsPerFixedUpdate <<std::endl;
+	infostream << "Draw (Hz): 				" << 1/graphics.drawDelta << std::endl;
+	infostream << "Update (Hz): 			" << 1/graphics.updateDelta << std::endl;
+	infostream << "Loops/Update: 			" << graphics.loopsPerUpdate <<std::endl;
 	infostream << std::endl;
-	infostream << "numRocks: 					" << stage.numRocks << std::endl;
-	infostream << "numWaves: 					" << stage.sea.numWaves << std::endl;
-	infostream << "numAABBs: 					" << stage.numAABBS << std::endl;
+	infostream << "#Rocks: 					" << stage.numRocks << std::endl;
+	infostream << "#Waves: 					" << stage.sea.numWaves << std::endl;
+	infostream << "#AABBs: 					" << stage.numAABBS << std::endl;
 	text.setString(infostream.str());
 	text.setPosition(3, 3);
 	text.setPosition(3, 3);
@@ -130,7 +136,7 @@ inline void drawInfoText(Graphics& graphics, const Stage& stage) {
 		text.setString("Paused");
 		auto bounds = text.getGlobalBounds();
 		text.setOrigin(bounds.width/2, bounds.height/2);
-		text.setPosition(graphics.videoMode.width/2, graphics.videoMode.height/2);
+		text.setPosition((float)graphics.videoMode.width/2, (float)graphics.videoMode.height/2);
 		graphics.window.draw(text);
 	}
 }

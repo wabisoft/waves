@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include "prelude.hpp"
 
 enum EntityType : uint8_t {
 	NONE		= 1 << 1,
@@ -13,8 +14,8 @@ enum EntityType : uint8_t {
 struct Entity {
 	// Specifically not a base class, more of a proxy or indirect reference
 	// to things with ids and a type
-	uint8_t id = 0;
-	EntityType TYPE = NONE;
+	uint8_t id = 0;  // non-zero if refers to valid entity
+	EntityType type = NONE;
 };
 
 // NOTE(owen): should we have a base entity class? revisit or don't. I can't decide.

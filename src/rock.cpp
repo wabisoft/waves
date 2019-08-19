@@ -3,23 +3,25 @@
 #include "aabb.hpp"
 #include "collision.hpp"
 #include "constants.hpp"
+#include "entity.hpp"
 #include "physics.hpp"
 #include "rock.hpp"
 #include "stage.hpp"
 #include "util.hpp"
 
 
-void fixedUpdateRocks(Stage& stage) {
+void updateRocks(Stage& stage) {
 	Rock* rocks = stage.rocks;
-	for (short i = 0; i < stage.numRocks; ++i) {
+	for (int i = 0; i < stage.numRocks; ++i) {
+		clamp(rocks[i].velocity, ROCK_MAX_SPEED); // clamp the rock speed
 		switch (rocks[i].state) {
 			case FALLING: {
-				if (rocks[i].shape.position.x < 0 || rocks[i].shape.position.x > STAGE_WIDTH || rocks[i].shape.position.y < 0 || rocks[i].shape.position.y > STAGE_HEIGHT || rocks[i].active == false) {
+				if (rocks[i].shape.position.x < 0 || rocks[i].shape.position.x > STAGE_WIDTH || rocks[i].shape.position.y < 0 || rocks[i].active == false) {
 					// remove our aabb from the stage aabb array
 					deleteRockByIdx(stage, i);
 				}
 				rocks[i].velocity+= GRAVITY * FIXED_TIMESTEP;
-				auto drag = dragForce(rocks[i].velocity, 1.225, rocks[i].shape.radius * ROCK_RADIUS_MASS_RATIO);
+				auto drag = dragForce(rocks[i].velocity, 1.225f, rocks[i].shape.radius * ROCK_RADIUS_MASS_RATIO);
 				rocks[i].velocity += drag * FIXED_TIMESTEP;
 				if(squaredMagnitude(rocks[i].velocity) > SQUARED_TERMINAL_VELOCITY) {
 					rocks[i].velocity = normalized(rocks[i].velocity) * TERMINAL_VELOCITY;
@@ -28,6 +30,8 @@ void fixedUpdateRocks(Stage& stage) {
 			}
 			break;
 			case STANDING:
+				rocks[i].velocity = VECTOR2_ZERO;
+				rocks[i].shape.position.y = rocks[i].anchor.y + rocks[i].shape.radius;
 				break;
 		}
 	}
@@ -41,7 +45,7 @@ uint8_t createRock(Stage& stage, Vector2 position, float radius){
 		// but just incase
 		return -1;
 	}
-	size_t new_rock_idx = stage.numRocks;
+	int new_rock_idx = stage.numRocks;
 	Rock& new_rock = *(stage.rocks + new_rock_idx);
 	new_rock = Rock();
 	new_rock.active = true;
@@ -53,19 +57,19 @@ uint8_t createRock(Stage& stage, Vector2 position, float radius){
 	return new_rock.id;
 }
 
-inline size_t deleteRockByIdx(Stage& stage, int rock_idx){
+inline int deleteRockByIdx(Stage& stage, int rock_idx){
 	deleteAABBById(stage, stage.rocks[rock_idx].id);
 	stage.rocks[rock_idx] = Rock();
-	for (size_t j = rock_idx; j < stage.numRocks-1; j++){
+	for (int j = rock_idx; j < stage.numRocks-1; j++){
 			stage.rocks[j] = stage.rocks[j+1];
 			stage.rocks[j+1] = Rock();
 	}
 	return --stage.numRocks;
 }
 
-inline size_t deleteRockById(Stage& stage, uint8_t rock_id){
+inline int deleteRockById(Stage& stage, uint8_t rock_id){
 	Rock * rocks = stage.rocks;
-	for(size_t i = 0; i < stage.numRocks; i++){
+	for(int i = 0; i < stage.numRocks; i++){
 		if (rocks[i].id == rock_id){
 			return deleteRockByIdx(stage, i);
 		}
@@ -74,7 +78,29 @@ inline size_t deleteRockById(Stage& stage, uint8_t rock_id){
 }
 
 Rock& findRock(Stage& stage, uint8_t rock_id) {
-	size_t rock_idx = binary_find_where(rock_id, stage.rocks, stage.numRocks, [](const Rock& rock){return rock.id;});
-	assert(rock_idx < stage.numRocks);
+	int rock_idx = binary_find_where(rock_id, stage.rocks, stage.numRocks, [](const Rock& rock){return rock.id;});
+	assert(rock_idx > -1); // see binary find where
 	return stage.rocks[rock_idx];
 }
+
+Entity findRockAtPosition(Stage& stage, Vector2 position) {
+	for (int i = 0; i < stage.numRocks; ++i) {
+		float dist = magnitude(position - stage.rocks[i].shape.position);
+		if (dist <= stage.rocks[i].shape.radius) {
+			return {stage.rocks[i].id, ROCK};
+		}
+	}
+	return {};
+}
+
+void resizeRock(Stage& stage, int rock_id, Vector2 position){
+	Rock& rock = findRock(stage, rock_id);
+	if (rock.state != STANDING) { return; }
+	Vector2 relPos = position - rock.shape.position;
+	float squaredSize = squaredMagnitude(relPos);
+	if(squaredSize > ROCK_MIN_RADIUS_SQUARED && squaredSize < ROCK_MAX_RADIUS_SQUARED) {
+		rock.shape.radius = std::sqrt(squaredSize);
+	}
+}
+
+

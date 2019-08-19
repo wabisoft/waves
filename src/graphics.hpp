@@ -16,18 +16,18 @@ struct Graphics {
 	sf::RenderWindow window;
 	sf::Font gameFont;
 	float ppu = 0; // pixelsPerUnit;
-	float deltaTime = 0;
-	float fixedDeltaTime = 0;
-	int loopsPerFixedUpdate = 0;
+	float drawDelta = 0;
+	float updateDelta = 0;
+	int loopsPerUpdate = 0;
 };
 
 
 void initGraphics(Graphics & graphics, const char * title);
 
-void draw(Graphics& graphics, const Stage& stage);
+void draw(Graphics& graphics, Stage& stage);
 inline void draw(Graphics& graphics, const Sea& sea);
-inline void draw(Graphics& graphics, const Rock* rocks, size_t numRocks);
-inline void draw(Graphics& graphics, const Platform* platforms, size_t numPlatforms);
+inline void draw(Graphics& graphics, const Rock* rocks, int numRocks);
+inline void draw(Graphics& graphics, const Platform* platforms, int numPlatforms);
 
 inline void drawInfoText(Graphics& graphics, const Stage& stage);
 
@@ -38,6 +38,13 @@ inline sf::Vector2f game2ScreenPos(const Graphics& graphics, const Vector2 &v) {
 
 inline Vector2 screen2GamePos(const Graphics& graphics, const sf::Vector2i &v) {
 	return Vector2{(float)v.x, std::fabs((float)graphics.videoMode.height - (float)v.y)} / (graphics.ppu);
+}
+
+inline void drawLine(Graphics& graphics, Vector2 a, Vector2 b, sf::Color c) {
+	sf::VertexArray sfVertices(sf::LineStrip, 2);
+	sfVertices[0] = sf::Vertex(game2ScreenPos(graphics, a), c);
+	sfVertices[1] = sf::Vertex(game2ScreenPos(graphics, b), c);
+	graphics.window.draw(sfVertices);
 }
 
 inline void drawCircle(Graphics& graphics, const Circle& circle, sf::Color c) {

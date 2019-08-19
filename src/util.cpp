@@ -4,7 +4,7 @@
 
 void test_utils() {
  	int blah [10] =  {};
-	size_t blah_size = 0;
+	int blah_size = 0;
 	std::cout << "Empty" << std::endl;
 	print_array(blah, blah_size);
 

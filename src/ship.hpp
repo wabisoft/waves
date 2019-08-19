@@ -12,4 +12,4 @@ struct Ship {
 	int id = -1;
 };
 
-void fixedUpdate(Ship& ship);
+void updateShip(Ship& ship);

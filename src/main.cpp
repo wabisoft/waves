@@ -16,6 +16,7 @@
 #include "util.hpp"
 
 
+
 void test_shapes_and_shit() {
 	// Testing shapes and shit
 	Rectangle rectangle = makeRectangle({STAGE_WIDTH/2, STAGE_HEIGHT/2}, 30, 5);
@@ -58,11 +59,9 @@ void test_shapes_and_shit() {
 }
 
 void do_normal_shit() {
-	Stage stage;
-	stage.sea.level = 13.3f;
-	createPlatform(stage, {STAGE_WIDTH-15, STAGE_HEIGHT/2 -15}, 30, 30);
-	createPlatform(stage, {4.f, STAGE_HEIGHT/3}, 6, 2*STAGE_HEIGHT/3); // launching platform
-	stage.rockSpawn = {4.f, 2*STAGE_HEIGHT/3 + 6};
+	Game game;
+	Stage& stage = *game.stage;
+	std::cout << "Game: " << sizeof(game) << std::endl;
 	std::cout << "Stage: " << sizeof(stage) << std::endl;
 	std::cout << "Ship : " << sizeof(stage.ship) << std::endl;
 	std::cout << "Sea: " << sizeof(stage.sea) << std::endl;
@@ -73,10 +72,35 @@ void do_normal_shit() {
 	std::cout << "EntityType: " << sizeof((EntityType)1) << std::endl;
 	std::cout << "Vector2: " << sizeof(Vector2{0,0}) << std::endl;
 	std::cout << "RockState: " << sizeof(RockState{}) << std::endl;
-	runStage(stage);
+	start(game);
+	run(game);
+	stop(game);
 }
 
-int main(){
+#if NDEBUG
+#if _WIN32
+#include <float.h>
+#pragma fenv_access (on)
+#endif
+#endif
+int main() {
+#if NDEBUG
+#if _WIN32
+
+    unsigned int fp_control_word;
+    unsigned int new_fp_control_word;
+
+    _controlfp_s(&fp_control_word, 0, 0);
+
+    // Make the new fp env same as the old one,
+    // except for the changes we're going to make
+    new_fp_control_word = fp_control_word | _EM_INVALID | _EM_DENORMAL | _EM_ZERODIVIDE | _EM_OVERFLOW | _EM_UNDERFLOW | _EM_INEXACT;
+    //Update the control word with our changes
+    _controlfp_s(&fp_control_word, new_fp_control_word, _MCW_EM)
+
+#endif
+#endif
+
 	do_normal_shit();
 	// test_shapes_and_shit();
 	return 0;

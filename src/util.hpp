@@ -6,9 +6,9 @@
 
 
 template<typename T, typename Pred>
-inline void insertion_sort(T* t, const size_t count, Pred predicate) {
-	for(size_t i = 1; i<count; ++i) {
-		for(size_t j = i; predicate(t[j], t[j-1]) && j>0; --j) {
+inline void insertion_sort(T* t, const int count, Pred predicate) {
+	for(int i = 1; i<count; ++i) {
+		for(int j = i; predicate(t[j], t[j-1]) && j>0; --j) {
 			T swap = t[j];
 			t[j] = t[j-1];
 			t[j-1] = swap;
@@ -17,18 +17,18 @@ inline void insertion_sort(T* t, const size_t count, Pred predicate) {
 }
 
 template<typename T>
-inline void insertion_sort(T* t, const size_t count) {
+inline void insertion_sort(T* t, const int count) {
 	return insertion_sort(t, count, [](T a, T b) { return a<b; });
 }
 
 template <typename T, typename Pred>
-inline void sorted_insert(T t_item, T* t, size_t& count, Pred predicate) {
+inline void sorted_insert(T t_item, T* t, int & count, Pred predicate) {
 	if (count == 0) {
 		t[0] = t_item;
 		++count;
 		return;
 	}
-	for(size_t i = 0; i<count; ++i){
+	for(int i = 0; i<count; ++i){
 		if(predicate(t[i],t_item)) {
 			if (i == count - 1) { // at the end of array
 				t[i+1] = t_item;
@@ -40,7 +40,7 @@ inline void sorted_insert(T t_item, T* t, size_t& count, Pred predicate) {
 			T swap;
 			swap = t[i];
 			t[i] = t_item;
-			for (size_t j = i+1; j<count+1; ++j){
+			for (int j = i+1; j<count+1; ++j){
 				T swap_swap = swap;
 				swap = t[j];
 				t[j] = swap_swap;
@@ -52,42 +52,42 @@ inline void sorted_insert(T t_item, T* t, size_t& count, Pred predicate) {
 }
 
 template <typename T>
-inline void sorted_insert(T t_item, T* t, size_t& count) {
+inline void sorted_insert(T t_item, T* t, int & count) {
 	return sorted_insert(t_item, t, count, [](T a, T b) { return a<b; });
 }
 
 template <typename T, typename BinaryPred>
-inline size_t find_where(const T t_item, const T* const t, const size_t count, BinaryPred predicate) {
-	for (size_t i = 0; i<count; ++i) {
+inline int find_where(const T t_item, const T* const t, const int count, BinaryPred predicate) {
+	for (int i = 0; i<count; ++i) {
 		if(predicate(t[i], t_item)) {
 			return i;
 		}
 	}
-	return SIZE_MAX;
+	return -1;
 }
 
 
 template <typename T>
-inline size_t find_where(const T t_item, const T* const t, const size_t count) {
+inline int find_where(const T t_item, const T* const t, const int count) {
 	return find_where(t_item, t, count, [](T a, T b) { return a==b; });
 }
 
 template <typename T, typename UnaryPred>
-inline size_t find_where(const T* const t, const size_t count, UnaryPred predicate) {
-	for (size_t i = 0; i<count; ++i) {
+inline int find_where(const T* const t, const int count, UnaryPred predicate) {
+	for (int i = 0; i<count; ++i) {
 		if(predicate(t[i])) {
 			return i;
 		}
 	}
-	return SIZE_MAX;
+	return -1;
 }
 
 template <typename T, typename U, typename Prop>
-inline size_t binary_find_where(U search, const T* const t, const size_t count, Prop prop) {
-	size_t left = 0;
-	size_t right = count-1;
+inline int binary_find_where(U search, const T* const t, const int count, Prop prop) {
+	int left = 0;
+	int right = count-1;
 	while (left <= right) {
-		size_t middle = (size_t)std::floor((left + right) / 2);
+		int middle = (int)std::floor((left + right) / 2);
 		U propRes = prop(t[middle]);
 		if (propRes < search) {
 			left = middle + 1;
@@ -97,7 +97,7 @@ inline size_t binary_find_where(U search, const T* const t, const size_t count, 
 			return middle;
 		}
 	}
-	return SIZE_MAX;
+	return -1;
 }
 
 void test_utils();

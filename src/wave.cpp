@@ -4,7 +4,7 @@
 #include "sea.hpp"
 #include "wave.hpp"
 
-void fixedUpdateWaves(Sea& sea){
+void updateWaves(Sea& sea){
 	//Update the wave for this time step
 	Wave* waves = sea.waves;
 	for(short i = 0; i < sea.numWaves; i++){

@@ -9,13 +9,16 @@
  ***********/
 
 struct Vector2{
-	// inline Vector2() {}
-	// inline Vector2(float x, float y): x(x), y(y) { }
-	// inline Vector2(const Vector2& v): x(v[0]), y(v[1]) { }
 	float& operator[](int i) { return (&x)[i]; } // read
 	const float& operator[](int i) const { return (&x)[i]; }; // write
 	float x = 0.f, y = 0.f;
 };
+
+const Vector2 VECTOR2_UP {0.f, 1.f};
+const Vector2 VECTOR2_DOWN {0.f, -1.f};
+const Vector2 VECTOR2_LEFT {-1.f, 0.f};
+const Vector2 VECTOR2_RIGHT {1.f, 0.f};
+const Vector2 VECTOR2_ZERO {0.f, 0.f};
 
 // Vector negation
 inline Vector2 operator-(const Vector2& v);
@@ -43,6 +46,7 @@ inline float magnitude(const Vector2& v);
 inline Vector2 normalized(const Vector2& v);
 // normalize in place
 inline Vector2& normalize(Vector2& v);
+inline Vector2& clamp(Vector2& v, float s); // clamp this vector to a scalar magnitude
 
 #include "vector2.inl"
 

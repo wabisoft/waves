@@ -3,5 +3,5 @@
 #include "ship.hpp"
 
 
-void fixedUpdate(Ship& ship){ }
+void updateShip(Ship& ship){ }
 

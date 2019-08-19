@@ -49,7 +49,7 @@ uint8_t createAABB(Stage& stage, AABB aabb) {
 	return aabb.id;
 }
 
-size_t deleteAABBByIdx(Stage& stage, int aabb_idx) {
+int deleteAABBByIdx(Stage& stage, int aabb_idx) {
 	stage.aabbs[aabb_idx] = AABB();
 	for(short j = aabb_idx; j < stage.numAABBS-1; ++j) {
 		stage.aabbs[j] = stage.aabbs[j+1];
@@ -58,7 +58,7 @@ size_t deleteAABBByIdx(Stage& stage, int aabb_idx) {
 	return --stage.numAABBS;
 }
 
-size_t deleteAABBById(Stage& stage, uint8_t aabb_id) {
+int deleteAABBById(Stage& stage, uint8_t aabb_id) {
 	for(short i = 0; i < stage.numAABBS; ++i) {
 		if(stage.aabbs[i].id == aabb_id) {
 			return deleteAABBByIdx(stage, i);
