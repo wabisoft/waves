@@ -11,7 +11,7 @@ Collision collision(const Vector2 a, const Vector2 b, const Polygon<N> & polygon
 		if (lineSegmentIntersection(a, b, c, d, col.intersection)) {
 			col.collides = true;
 			col.penetration = magnitude(b - col.intersection);
-			col.normal = normalize(findNormal(c, d, a));
+			col.normal = normalized(findNormal(c, d, a));
 			collisions.push_back(col);
 		}
 	}
@@ -49,7 +49,7 @@ Collision collision(const Polygon<N>& poly1, const Polygon<M>& poly2) {// Vector
 			if(lineSegmentIntersection(a,b,c,d,col.intersection)) {
 				col.collides = true;
 				col.penetration = magnitude(b-col.intersection);
-				col.normal = normalize(findNormal(c, d, a));
+				col.normal = normalized(findNormal(c, d, a));
 				collisions.push_back(col);
 			}
 		}
@@ -125,7 +125,7 @@ Collision collision(const Circle& circle, const Polygon<N>& polygon) {//, Vector
 				Vector2 vertex = a; // start by looking at a
 				Vector2 relpos = ca; // since we already calulated c-a above let's not waste any cycles
 				for (int i = 0; i < 2; ++i) {
-					if (i = 1) {
+					if (i == 1) {
 						vertex = b; // look at b second time round
 						Vector2 relpos = c - vertex; // this time we must to the math
 					}

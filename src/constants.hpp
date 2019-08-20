@@ -12,9 +12,9 @@ const float STAGE_HEIGHT = 	72.f; // meters
 const float FIXED_TIMESTEP = 	1.f/480.f; // seconds (120 Hz)
 const float FRAME_RATE = 		1.f/120.f; // seconds (60 Hz)
 
-const int MAX_ROCKS = 		10;
+const int MAX_ROCKS = 		5;
 const int MAX_WAVES = 		MAX_ROCKS;
-const int MAX_PLATFORMS = 	10;
+const int MAX_PLATFORMS = 	5;
 const int MAX_AABBS =		MAX_ROCKS + MAX_PLATFORMS + 1; // +1 for ship and
 
 // Physics constants

@@ -4,6 +4,15 @@
 #include <cmath>
 #include <vector>
 
+/********
+ * Misc *
+ ********/
+
+template <typename T>
+T sign(T t) {
+	return (t == (T)0) ? (T)0 : t / abs(t);
+}
+
 /***********
  * Vectors *
  ***********/
@@ -47,6 +56,8 @@ inline Vector2 normalized(const Vector2& v);
 // normalize in place
 inline Vector2& normalize(Vector2& v);
 inline Vector2& clamp(Vector2& v, float s); // clamp this vector to a scalar magnitude
+// returns + if point on left - if point on right 0 if point on line from b to a
+inline float sideSign(Vector2 a, Vector2 b, Vector2 point);
 
 #include "vector2.inl" // definitions for template functions and inlines
 
@@ -95,23 +106,4 @@ Rectangle makeRectangle(Vector2 p, float w, float h);
 
 bool lineSegmentIntersection(Vector2 a, Vector2 b, Vector2 c, Vector2 d, Vector2& intersection);
 Vector2 findNormal(Vector2 a, Vector2 b, Vector2 c);
-
-
-/********
- * Misc *
- ********/
-
-template <typename T>
-T sign(T t) {
-	return (t == (T)0) ? (T)0 : t / abs(t);
-}
-
-// returns + if point on left - if point on right 0 if point on line from b to a
-inline float sideSign(Vector2 a, Vector2 b, Vector2 point) {
-	Vector2 u = b - a;
-	Vector2 v = point - a;
-	float product = cross(u, v);
-	return sign(product);
-}
-
 

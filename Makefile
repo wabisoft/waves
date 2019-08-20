@@ -1,15 +1,23 @@
+.PHONY: cmake clean debug release tags commands
+
+cmake-debug:
+	mkdir -p build
+	cd build && cmake ../src -DCMAKE_BUILD_TYPE=Debug
+
+cmake-release:
+	mkdir -p build
+	cd build && cmake ../src -DCMAKE_BUILD_TYPE=Release
+
 clean:
 	rm -rf build
 
-debug:
-	mkdir -p build
-	cd build && cmake ../src -DCMAKE_BUILD_TYPE=Debug && make
+debug: cmake-debug
+	cd build && make
 	cp build/waves ./
 	./waves
 
-release:
-	mkdir -p build
-	cd build && cmake ../src -DCMAKE_BUILD_TYPE=Debug && make
+release: cmake-release
+	cd build && make
 	cp build/waves ./
 	./waves
 

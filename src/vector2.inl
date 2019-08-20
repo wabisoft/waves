@@ -121,3 +121,12 @@ inline Vector2& clamp(Vector2& v, float s) {
 	}
 	return v;
 }
+
+// returns + if point on left - if point on right 0 if point on line from b to a
+inline float sideSign(Vector2 a, Vector2 b, Vector2 point) {
+	Vector2 u = b - a;
+	Vector2 v = point - a;
+	float product = cross(u, v);
+	return sign(product);
+}
+
