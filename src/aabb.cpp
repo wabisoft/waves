@@ -26,9 +26,9 @@ AABB::AABB(const Rock& rock) {
 }
 
 AABB::AABB(const Ship& ship) {
-	Vector2 diag = {ship.width/2, ship.height/2};
-	lower = ship.position - diag;
-	upper = ship.position + diag;
+	Vector2 diag = {ship.shape.width/2, ship.shape.height/2};
+	lower = ship.shape.position - diag;
+	upper = ship.shape.position + diag;
 	type = SHIP;
 	id = ship.id;
 }

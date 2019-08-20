@@ -14,6 +14,7 @@ void start(Game& game) {
 	game.stage = new Stage();
 	game.stage->sea.level = 13.3f;
 	createPlatform(*game.stage, {STAGE_WIDTH-15, STAGE_HEIGHT/2 -15}, 30, 30);
+	createPlatform(*game.stage, {STAGE_WIDTH-50, STAGE_HEIGHT/2 -15}, 30, 30);
 	createPlatform(*game.stage, {10.f, STAGE_HEIGHT/3}, 6, 2*STAGE_HEIGHT/3); // launching platform
 	game.stage->rockSpawn = {10.f, 2*STAGE_HEIGHT/3 + 6};
 	// TODO: Menu stuff
@@ -35,7 +36,8 @@ void run(Game& game) {
 			loopsPerUpdate = 0;
 		} else { ++loopsPerUpdate; }
 		float drawDelta = game.drawClock.getElapsedTime().asSeconds();
-		if (drawDelta >= FRAME_RATE* game.timeScale) {
+		// if (drawDelta >= FRAME_RATE* game.timeScale) {
+		if (drawDelta >= FRAME_RATE) {
 			game.graphics.drawDelta = drawDelta;
 			draw(game.graphics, stage);
 			game.drawClock.restart();
@@ -84,6 +86,7 @@ void keyEvent(Game& game, sf::Event& event) {
 		case sf::Keyboard::Key::Num3: game.timeScale = 3.f; break;
 		case sf::Keyboard::Key::Num4: game.timeScale = 4.f; break;
 		case sf::Keyboard::Key::Num5: game.timeScale = 100.f; break;
+		case sf::Keyboard::Key::Num6: game.timeScale = 1000.f; break;
 		default: break;
 	}
 }

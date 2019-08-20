@@ -1,5 +1,6 @@
 #pragma once
 #include "aabb.hpp"
+#include "constants.hpp"
 #include "maths.hpp"
 #include "util.hpp"
 
@@ -10,3 +11,6 @@ struct Platform {
 
 uint8_t createPlatform(Stage& stage, Vector2 position, float width, float height);
 Platform& findPlatform(Stage& stage, uint8_t platform_id);
+inline float mass(const Platform& platform) {
+	return area(platform.shape) * PLATFORM_AREA_MASS_RATIO;
+}

@@ -6,6 +6,7 @@
 #include "collision.hpp"
 #include "constants.hpp"
 #include "physics.hpp"
+#include "platform.hpp"
 #include "rock.hpp"
 #include "util.hpp"
 
@@ -128,18 +129,31 @@ void collide(Rock& rock, Sea& sea) {
 }
 
 void collide(Rock& rock, const Platform& platform) {
+	// Vector2 futurePos = rock.shape.position + rock.velocity;
+	// FIXME: still need to figure out tunneling for really fast shit
+	// First Check if colliding already
 	Collision col = collision(rock.shape, platform.shape);
 	if (col.collides) {
-		rock.shape.position += col.normal * col.penetration;
-		// FIXME: the restitudion and platform mass have some kind of weird ass
-		// non-intuitive probably incorrect relationship (play with this and do math to fix plz)
-		rock.velocity += impulse(rock.velocity, rock.shape.radius * ROCK_RADIUS_MASS_RATIO, 5.f, 0.05f) * col.normal;
-		if (col.normal == VECTOR2_UP) { // we are colliding the top
-			rock.state = STANDING;
-			rock.anchor = col.intersection;
-		}
+		rock.shape.position += col.normal * (col.penetration + 0.01 * col.penetration);
+		float j = linearImpulse(rock.velocity, VECTOR2_ZERO, mass(rock) , mass(platform), ROCK_RESTITUTION);
+		rock.velocity += (j/mass(rock)) * col.normal;
+		rock.velocity += mass(rock) * col.normal * ROLLING_RESISTANCE_COEFFICIENT;
 		// FIXME: there is no rolling resistance or friction of any kind which feels yucky, plz fix
+		// I really want rocks to roll!
+		return;
 	}
+	// Then check if colliding at the end of my tragectory
+	Circle nextFrameShape = rock.shape;
+ 	nextFrameShape.position += rock.velocity;
+ 	col = collision(nextFrameShape, platform.shape);
+ 	if( col.collides) {
+ 		nextFrameShape.position += col.normal * col.penetration;
+ 		rock.shape = nextFrameShape;
+ 		float j = linearImpulse(rock.velocity, VECTOR2_ZERO, mass(rock) , mass(platform), ROCK_RESTITUTION);
+ 		rock.velocity += (j/mass(rock)) * col.normal;
+ 		rock.velocity += mass(rock) * col.normal * ROLLING_RESISTANCE_COEFFICIENT;
+ 		return;
+ 	}
 }
 
 void collide(Rock& rock, Rock& other_rock) {
@@ -147,8 +161,8 @@ void collide(Rock& rock, Rock& other_rock) {
 	if (col.collides) {
 		rock.shape.position += col.normal * 0.5f * col.penetration;
 		other_rock.shape.position += -col.normal * 0.5f * col.penetration;
-		rock.velocity += impulse(rock.velocity, rock.shape.radius * ROCK_RADIUS_MASS_RATIO, other_rock.shape.radius * ROCK_RADIUS_MASS_RATIO, 0.05f) * col.normal;
-		other_rock.velocity += impulse(other_rock.velocity, other_rock.shape.radius * ROCK_RADIUS_MASS_RATIO, rock.shape.radius * ROCK_RADIUS_MASS_RATIO, 0.05f) * -1 * col.normal;
+		rock.velocity += linearImpulse(rock.velocity, other_rock.velocity, rock.shape.radius * ROCK_RADIUS_MASS_RATIO, other_rock.shape.radius * ROCK_RADIUS_MASS_RATIO, ROCK_RESTITUTION) * col.normal;
+		other_rock.velocity += linearImpulse(other_rock.velocity, other_rock.velocity, other_rock.shape.radius * ROCK_RADIUS_MASS_RATIO, rock.shape.radius * ROCK_RADIUS_MASS_RATIO, ROCK_RESTITUTION) * -1 * col.normal;
 	}
 }
 

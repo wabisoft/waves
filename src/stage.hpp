@@ -15,9 +15,10 @@ struct Selection {
 };
 
 enum Phase : uint8_t {
-	RESIZE 		= 1 << 0,
-	PREPULL 	= 1 << 1,
-	PULL 		= 1 << 2,
+	SELECT		= 1 << 0, // XXX: I think we can get away with just SELECT, RESIZE and PULL if we hold a sized flag in Rock
+	RESIZE 		= 1 << 1,
+	PREPULL 	= 1 << 2,
+	PULL 		= 1 << 3,
 };
 
 struct Stage{

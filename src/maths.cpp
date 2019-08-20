@@ -47,6 +47,7 @@ bool lineSegmentIntersection(Vector2 a, Vector2 b, Vector2 c, Vector2 d, Vector2
 	}
 }
 
+
 // Returns the normal of the vector from a to b (b-a) in the direction of c
 Vector2 findNormal(Vector2 a, Vector2 b, Vector2 c) {
 	Vector2 u = b - a;
@@ -56,11 +57,11 @@ Vector2 findNormal(Vector2 a, Vector2 b, Vector2 c) {
 		// c is colinear/parallel to ba
 		return {0.f, 0.f};
 	} else if (product > 0) {
-		// c is on the right of ba
-		return {-u.y, u.x};  // {-dy, dx} is the right normal
+		// c is on the left of ba
+		return {-u.y, u.x};  // {-dy, dx} is the left normal
 	} else {
-		// c is on the left
-		return {u.y, -u.x};  // {dy, -dx} is the left normal
+		// c is on the right
+		return {u.y, -u.x};  // {dy, -dx} is the right normal
 	}
 }
 

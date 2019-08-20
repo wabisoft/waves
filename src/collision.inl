@@ -1,4 +1,35 @@
-#include "printing.hpp"
+// XXX: there is some duplicate code between polygonXpolygon and linesegmentXpolygon
+// this is because I wrote polygonXpolygon first and I don't feel like refactoring it to use
+// linesegmentXpolygon, if it becomes a maintainence issue I'll worry about it then
+template <int N>
+Collision collision(const Vector2 a, const Vector2 b, const Polygon<N> & polygon){ // this is actually not that usefull
+	std::vector<Collision> collisions;
+	for (int i=0; i < polygon.size; ++i) {
+		Vector2 c = polygon.vertices[i];
+		Vector2 d = polygon.vertices[(i+1) % polygon.size];
+		Collision col;
+		if (lineSegmentIntersection(a, b, c, d, col.intersection)) {
+			col.collides = true;
+			col.penetration = magnitude(b - col.intersection);
+			col.normal = normalize(findNormal(c, d, a));
+			collisions.push_back(col);
+		}
+	}
+	if (!collisions.empty()) {
+		Collision col = collisions[0];
+		float min = squaredMagnitude(a - col.intersection);
+		for(int i = 1; i < collisions.size(); ++i) {
+			float sqrDst = squaredMagnitude(a - collisions[i].intersection); // get the intersection closest to a
+			if (sqrDst < min) {
+				col = collisions[i];
+				min = sqrDst;
+			}
+		}
+		return col;
+	} else {
+		return Collision();
+	}
+}
 
 // Thanks javidx9!
 // NOTE: this only determines if poly1 is specifically overlaping poly2
@@ -18,8 +49,6 @@ Collision collision(const Polygon<N>& poly1, const Polygon<M>& poly2) {// Vector
 			if(lineSegmentIntersection(a,b,c,d,col.intersection)) {
 				col.collides = true;
 				col.penetration = magnitude(b-col.intersection);
-				// get normal (how?) it's always either (-dy, dx) or (dy,-dx) but which
-				// we want the one that is opposite polygon1's velocity (probably can also use relpos)
 				col.normal = normalize(findNormal(c, d, a));
 				collisions.push_back(col);
 			}
@@ -57,7 +86,8 @@ Collision collision(const Circle& circle, const Polygon<N>& polygon) {//, Vector
 		Vector2 ba = b - a;
 		// Find the point of circle line relpos(ca) projected onto line relpos (ba)
 		Vector2 ba_hat = normalized(ba);
-		Vector2 d = a + dot(ca,ba_hat) * normalized(ba_hat);
+		// Vector2 d = a + dot(ca,ba_hat) * normalized(ba_hat);
+		Vector2 d = a + dot(ca,ba_hat) * ba_hat;
 		Collision col;
 		// determine the distance between point on line and circle
 		Vector2 dc = d-c;

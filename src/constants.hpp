@@ -24,16 +24,26 @@ const float SQUARED_TERMINAL_VELOCITY = 2.f * GRAVITATIONAL_CONSTANT * STAGE_HEI
 const float WAVE_WIDTH_MULTIPLIER = 0.085f;
 const float WAVE_POSITIVE_DECAY_MULTIPLIER = 5.f;
 const float WAVE_NEGATIVE_DECAY_MULTIPLIER = -0.75f;
+const float ROLLING_RESISTANCE_COEFFICIENT = 0.03f; // from a table on this page https://www.school-for-champions.com/science/friction_rolling_coefficient.htm#.XVtDwHspCUk
 
-// We're gonna make some magic numbers for our world
+/******************
+ * MAGIC NUMBERS! *
+ ******************/
+
+// Magic Rocks
 const float ROCK_RADIUS_MASS_RATIO = 2.f/3.f; // i.e if rock radius is 3 then mass should be 2;
 const float ROCK_MIN_RADIUS = 1.f;
 const float ROCK_MAX_RADIUS = 4.f;
 const float ROCK_MIN_RADIUS_SQUARED = ROCK_MIN_RADIUS * ROCK_MIN_RADIUS;
 const float ROCK_MAX_RADIUS_SQUARED = ROCK_MAX_RADIUS * ROCK_MAX_RADIUS;
 const float ROCK_START_RADIUS = ROCK_MIN_RADIUS;
-const float ROCK_MAX_SPEED = 48.f; // 48 meters/second (remember to multiply by timestep)
+const float ROCK_MAX_SPEED = 70.f; // 48 meters/second (remember to multiply by timestep)
+const float ROCK_RESTITUTION = 0.00001f; // FIXME: these numbers don't make sense but they look/feel right, diagnse
 
+// Magic Platforms
+const float PLATFORM_AREA_MASS_RATIO = 2.f/3.f;
+
+// Magic Ships
 
 // Magic numbers for STAGE
 const float STAGE_MAX_PULL_LENGTH = 8.f;

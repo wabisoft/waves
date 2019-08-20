@@ -21,6 +21,25 @@ void test_shapes_and_shit() {
 	// Testing shapes and shit
 	Rectangle rectangle = makeRectangle({STAGE_WIDTH/2, STAGE_HEIGHT/2}, 30, 5);
 	Circle circle = {{STAGE_WIDTH/2-14, STAGE_HEIGHT/2 + 5}, 3.f};
+	Vector2 p1 = rectangle.position;
+	Vector2 p2 = rectangle.position - Vector2{rectangle.width, 0.f};
+	Vector2 p3 = rectangle.position - Vector2{rectangle.width/2.f, 0.f};
+	if (pointInsidePolygon(p1, rectangle)){
+		std::cout << "p1 inside rectangle" << std::endl;
+	} else {
+		std::cout << "p1 outside rectangle" << std::endl;
+	}
+	if (pointInsidePolygon(p2, rectangle)){
+		std::cout << "p2 inside rectangle" << std::endl;
+	} else {
+		std::cout << "p2 outside rectangle" << std::endl;
+	}
+	if (pointInsidePolygon(p3, rectangle)){
+		std::cout << "p3 inside rectangle" << std::endl;
+	} else {
+		std::cout << "p3 outside rectangle" << std::endl;
+	}
+
 	Graphics graphics;
 	initGraphics(graphics, "Waves!!!");
 	while(graphics.window.isOpen()) {
@@ -71,36 +90,13 @@ void do_normal_shit() {
 	std::cout << "AABB: " << sizeof(AABB(stage.platforms[0])) << std::endl;
 	std::cout << "EntityType: " << sizeof((EntityType)1) << std::endl;
 	std::cout << "Vector2: " << sizeof(Vector2{0,0}) << std::endl;
-	std::cout << "RockState: " << sizeof(RockState{}) << std::endl;
+	// std::cout << "RockState: " << sizeof(RockState{}) << std::endl;
 	start(game);
 	run(game);
 	stop(game);
 }
 
-#if NDEBUG
-#if _WIN32
-#include <float.h>
-#pragma fenv_access (on)
-#endif
-#endif
 int main() {
-#if NDEBUG
-#if _WIN32
-
-    unsigned int fp_control_word;
-    unsigned int new_fp_control_word;
-
-    _controlfp_s(&fp_control_word, 0, 0);
-
-    // Make the new fp env same as the old one,
-    // except for the changes we're going to make
-    new_fp_control_word = fp_control_word | _EM_INVALID | _EM_DENORMAL | _EM_ZERODIVIDE | _EM_OVERFLOW | _EM_UNDERFLOW | _EM_INEXACT;
-    //Update the control word with our changes
-    _controlfp_s(&fp_control_word, new_fp_control_word, _MCW_EM)
-
-#endif
-#endif
-
 	do_normal_shit();
 	// test_shapes_and_shit();
 	return 0;

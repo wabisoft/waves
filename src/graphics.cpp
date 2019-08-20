@@ -40,12 +40,12 @@ void initGraphics(Graphics & graphics, const char * title) {
 void draw(Graphics& graphics, Stage& stage) {
 	graphics.window.clear(sf::Color::Black);
 	draw(graphics, stage.platforms, stage.numPlatforms);
-	draw(graphics, stage.rocks, stage.numRocks);
 	draw(graphics, stage.sea);
 	if(stage.selection.active && stage.pullPosition != VECTOR2_ZERO) {
 		Rock& rock = findRock(stage, stage.selection.entity.id);
 		drawLine(graphics, rock.shape.position, stage.pullPosition, sf::Color::Blue);
 	}
+	draw(graphics, stage.rocks, stage.numRocks);
 	drawInfoText(graphics, stage);
 	graphics.window.display();
 }

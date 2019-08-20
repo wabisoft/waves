@@ -10,19 +10,17 @@
 #include "util.hpp"
 
 
-enum RockState: uint8_t {
-	STANDING = 1 << 0, // to launch and stuff
-	FALLING = 1 << 1, // to fall and bounce and things
-};
-
 struct Rock {
 	Circle shape = {{0.f, 0.f}, 0.f};
 	Vector2 velocity = {0.f, 0.f};
 	bool active = false;
+	// bool sized = false; // TODO: I think probably we should only allow rocks to be sized once, so if this flag were set you could only launch this rock.
 	uint8_t id = 0;
-	RockState state = FALLING;
-	Vector2 anchor = {0.f, 0.f};
 };
+
+inline float mass(Rock& rock) {
+	return rock.shape.radius * ROCK_RADIUS_MASS_RATIO;
+}
 
 void updateRocks(Stage& stage);
 uint8_t createRock(Stage& stage, Vector2 position, float radius);

@@ -14,26 +14,17 @@ void updateRocks(Stage& stage) {
 	Rock* rocks = stage.rocks;
 	for (int i = 0; i < stage.numRocks; ++i) {
 		clamp(rocks[i].velocity, ROCK_MAX_SPEED); // clamp the rock speed
-		switch (rocks[i].state) {
-			case FALLING: {
-				if (rocks[i].shape.position.x < 0 || rocks[i].shape.position.x > STAGE_WIDTH || rocks[i].shape.position.y < 0 || rocks[i].active == false) {
-					// remove our aabb from the stage aabb array
-					deleteRockByIdx(stage, i);
-				}
-				rocks[i].velocity+= GRAVITY * FIXED_TIMESTEP;
-				auto drag = dragForce(rocks[i].velocity, 1.225f, rocks[i].shape.radius * ROCK_RADIUS_MASS_RATIO);
-				rocks[i].velocity += drag * FIXED_TIMESTEP;
-				if(squaredMagnitude(rocks[i].velocity) > SQUARED_TERMINAL_VELOCITY) {
-					rocks[i].velocity = normalized(rocks[i].velocity) * TERMINAL_VELOCITY;
-				}
-				rocks[i].shape.position += rocks[i].velocity;
-			}
-			break;
-			case STANDING:
-				rocks[i].velocity = VECTOR2_ZERO;
-				rocks[i].shape.position.y = rocks[i].anchor.y + rocks[i].shape.radius;
-				break;
+		if (rocks[i].shape.position.x < 0 || rocks[i].shape.position.x > STAGE_WIDTH || rocks[i].shape.position.y < 0 || rocks[i].active == false) {
+			// remove our aabb from the stage aabb array
+			deleteRockByIdx(stage, i);
 		}
+		rocks[i].velocity+= GRAVITY * FIXED_TIMESTEP;
+		auto drag = dragForce(rocks[i].velocity, 1.225f, rocks[i].shape.radius * ROCK_RADIUS_MASS_RATIO);
+		rocks[i].velocity += drag * FIXED_TIMESTEP;
+		if(squaredMagnitude(rocks[i].velocity) > SQUARED_TERMINAL_VELOCITY) {
+			rocks[i].velocity = normalized(rocks[i].velocity) * TERMINAL_VELOCITY;
+		}
+		rocks[i].shape.position += rocks[i].velocity;
 	}
 }
 
@@ -95,7 +86,6 @@ Entity findRockAtPosition(Stage& stage, Vector2 position) {
 
 void resizeRock(Stage& stage, int rock_id, Vector2 position){
 	Rock& rock = findRock(stage, rock_id);
-	if (rock.state != STANDING) { return; }
 	Vector2 relPos = position - rock.shape.position;
 	float squaredSize = squaredMagnitude(relPos);
 	if(squaredSize > ROCK_MIN_RADIUS_SQUARED && squaredSize < ROCK_MAX_RADIUS_SQUARED) {

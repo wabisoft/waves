@@ -73,6 +73,24 @@ inline float dot(const Vector2& a, const Vector2& b) {
 	return a.x * b.x + a.y * b.y;
 }
 
+/************************************************************
+ * NOTE: remember that |a x b| = |a| |b| sin(theta)			*
+ * that means for a 2d cross we have:                    	*
+ * a x b = {												*
+ * 		a.y*b.z - a.z*b.y,									*
+ * 		a.z*b.x - a.x*b.z,									*
+ * 		a.x*b.y - a.y*b.x									*
+ * }														*
+ *															*
+ * in 2d the z is 0 so we get a new 3d vector				*
+ * the magnitude of that vector is just the z component		*
+ * That value is also |a||b|sin(theta)						*
+ * which means that the sign of theta (+/-) can tell us 	*
+ * if we have a counter-clockwise(-) or clockwise(+)		*
+ * rotation between the 2 vectors.							*
+ * this important to determine,	which side of a line a		*
+ * point is on among other things							*
+ ************************************************************/
 inline float cross(const Vector2& a, const Vector2&b) {
 	return a.x*b.y - a.y*b.x; // the z component of the 3 dimensional cross
 }
