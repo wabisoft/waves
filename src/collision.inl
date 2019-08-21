@@ -1,43 +1,10 @@
 // collision.hpp
 
-// XXX: there is some duplicate code between polygonXpolygon and linesegmentXpolygon
-// this is because I wrote polygonXpolygon first and I don't feel like refactoring it to use
-// linesegmentXpolygon, if it becomes a maintainence issue I'll worry about it then
-// template <int N>
-// Collision collision(const Vector2 a, const Vector2 b, const Polygon<N> & polygon){ // this is actually not that usefull
-// 	std::vector<Collision> collisions;
-// 	for (int i=0; i < polygon.size; ++i) {
-// 		Vector2 c = polygon.vertices[i];
-// 		Vector2 d = polygon.vertices[(i+1) % polygon.size];
-// 		Collision col;
-// 		if (lineSegmentIntersection(a, b, c, d, col.intersection)) {
-// 			col.collides = true;
-// 			col.penetration = magnitude(b - col.intersection);
-// 			col.normal = normalized(findNormal(c, d, a));
-// 			collisions.push_back(col);
-// 		}
-// 	}
-// 	if (!collisions.empty()) {
-// 		Collision col = collisions[0];
-// 		float min = squaredMagnitude(a - col.intersection);
-// 		for(int i = 1; i < collisions.size(); ++i) {
-// 			float sqrDst = squaredMagnitude(a - collisions[i].intersection); // get the intersection closest to a
-// 			if (sqrDst < min) {
-// 				col = collisions[i];
-// 				min = sqrDst;
-// 			}
-// 		}
-// 		return col;
-// 	} else {
-// 		return Collision();
-// 	}
-// }
-
 // Thanks javidx9!
 // NOTE: this only determines if poly1 is specifically overlaping poly2
 // Also NOTE: poly1 and poly2 must be CONVEX
 template <int N, int M>
-Collision collision(const Polygon<N>& poly1, const Polygon<M>& poly2) {// Vector2& intersection, float& depth) {
+Collision collision(const Polygon<N>& poly1, const Polygon<M>& poly2) {
 	// check the diagonals of one polygon ...
 	std::vector<Collision> collisions;
 	for (int i = 0; i < poly1.size; ++i) {
@@ -75,7 +42,7 @@ Collision collision(const Polygon<N>& poly1, const Polygon<M>& poly2) {// Vector
 }
 
 template <int N>
-Collision collision(const Circle& circle, const Polygon<N>& polygon) {//, Vector2& intersection, float& depth) {
+Collision collision(const Circle& circle, const Polygon<N>& polygon) {
 	std::vector<Collision> collisions;
 	// Start with the circle position
 	Vector2 c = circle.position;
@@ -84,7 +51,7 @@ Collision collision(const Circle& circle, const Polygon<N>& polygon) {//, Vector
 		Vector2 a = polygon.vertices[i];
 		Vector2 b = polygon.vertices[(i+1)%polygon.size];
 		Vector2 normal = normalized(findNormal(a, b, c)); // normal of a b in direction of c
-		// Find the rel pos between circle and line segment start...
+		// Find the rel pos between circle and line segment start ...
 		Vector2 ca = c - a;
 		// ... and the rel pos between line segment end and start
 		Vector2 ba = b - a;
@@ -131,7 +98,8 @@ Collision collision(const Circle& circle, const Polygon<N>& polygon) {//, Vector
 						col.penetration = std::abs(relpos_mag - circle.radius);
 						col.surfaceStart = vertex;
 						col.surfaceEnd = other_vertex;
-						col.normal = relpos / relpos_mag; // since we are on a corner we just push out away from vertex;
+						// col.normal = relpos / relpos_mag; // since we are on a corner we just push out away from vertex;
+						col.normal = normal;
 						collisions.push_back(col);
 					}
 				}

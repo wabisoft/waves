@@ -135,11 +135,15 @@ void collide(Rock& rock, const Platform& platform) {
 	// First Check if colliding already
 	Collision col = collision(rock.shape, platform.shape);
 	if (col.collides) {
+		if(rock.state.type == RockState::FALLING && col.normal == VECTOR2_UP) {
+			rock.state = {RockState::STANDING, {{col.surfaceStart, col.surfaceEnd}}};
+		}
 		rock.shape.position += col.normal * col.penetration;
 		float j = linearImpulse(rock.velocity, VECTOR2_ZERO, mass(rock) , mass(platform), ROCK_RESTITUTION);
 		rock.velocity += (j/mass(rock)) * col.normal;
 		// rock.velocity += mass(rock) * col.normal * ROLLING_RESISTANCE_COEFFICIENT;
-		Vector2 fric = friction(col.surfaceStart, col.surfaceEnd, mass(rock), rock.velocity, rock.shape.position) * FIXED_TIMESTEP;
+		// Vector2 fric = friction(col.surfaceStart, col.surfaceEnd, mass(rock), rock.velocity, rock.shape.position) * FIXED_TIMESTEP;
+		// rock.velocity += fric;
 		// Vector2 velPlusFric = rock.velocity + fric;
 		// if (rock.velocity.x == 0.f) { fric.x = 0.f; }
 		// if (rock.velocity.y == 0.f) { fric.y = 0.f; }
@@ -153,7 +157,6 @@ void collide(Rock& rock, const Platform& platform) {
 		// 	fric.y = 0.f;
 		// 	rock.velocity.y = 0.f;
 		// }
-		rock.velocity += fric;
 		// FIXME: there is no rolling resistance or friction of any kind which feels yucky, plz fix
 		// I really want rocks to roll!
 		return;

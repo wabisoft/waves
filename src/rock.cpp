@@ -27,13 +27,25 @@ inline void updateStandingRock(Stage& stage, Rock& rock, int rock_idx) {
 	Vector2& end = rock.state.standing.surfaceEnd;
 	Vector2 start2Rock = futurePos - start;
 	Vector2 start2End = end - start;
-	float proj = dot(start2Rock, start2End);
-	Vector2 anchor = start + normalized(start2End) * proj;
-	bool staysInContact = sideSign(start, end, anchor) == 0 && bounded(start, end, anchor);
+	Vector2 normalizedStart2End = normalized(start2End);
+	float proj = dot(start2Rock, normalizedStart2End);
+	Vector2 anchor = start +  normalizedStart2End * proj;
+	bool staysInContact = bounded(start, end, anchor);
 	if (!staysInContact) {
 		rock.state = {RockState::FALLING, {}};
 		return updateFallingRock(stage, rock, rock_idx);
 	} else {
+		rock.shape.position = anchor + (1.0f * rock.shape.radius) * VECTOR2_UP;
+		// Vector2 fric = friction(start, end, mass(rock), rock.velocity, rock.shape.position) * FIXED_TIMESTEP;
+		// rock.velocity += fric;
+		rock.velocity.y = 0.f;
+		rock.velocity *= 0.85;
+		Vector2 futurePos = rock.shape.position + rock.velocity;
+		if (magnitude(rock.shape.position - futurePos) < 0.01){
+			return;
+		} else {
+			rock.shape.position = futurePos;
+		}
 	}
 }
 

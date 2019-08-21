@@ -40,11 +40,11 @@ inline float linearImpulse(Vector2 velocity1, Vector2 velocity2, float mass1, fl
 inline Vector2 friction(Vector2 a, Vector2 b, float mass, Vector2 velocity, Vector2 position) {
 	Vector2 ABBA;
 	// easy for unlevel surface
-	// if (a.y > b.y) {
-	// 	ABBA = a - b;
-	// } else if (b.y > a.y){
-	// 	ABBA = b - a;
-	// } else {
+	if (a.y > b.y) {
+		ABBA = a - b;
+	} else if (b.y > a.y){
+		ABBA = b - a;
+	} else {
 		// need to specifically resist velocity
 		float sqDistA = squaredMagnitude(a - position);
 		float sqDistB = squaredMagnitude(b - position);
@@ -61,13 +61,13 @@ inline Vector2 friction(Vector2 a, Vector2 b, float mass, Vector2 velocity, Vect
 			// then we're not moving and friction should be zero
 			return {0.f, 0.f};
 		}
-	// }
+	}
 	// float cosTheta = dot(ABBA, VECTOR2_RIGHT) / magnitude(ABBA);
 	// float Fn = mass * GRAVITATIONAL_CONSTANT * cosTheta;  // because of our simulation technique *maybe* we don't need gravity here
 	// return COEFFICIENT_OF_FRICTION * Fn * -normalized(ABBA);
 	if(velocity.x < 1.f) {
-	 	return COEFFICIENT_OF_FRICTION * mass * GRAVITATIONAL_CONSTANT * normalized(ABBA) * velocity.x;
+	 	return COEFFICIENT_OF_FRICTION * mass * GRAVITATIONAL_CONSTANT * -normalized(ABBA) * velocity.x;
 	} else {
-		return COEFFICIENT_OF_FRICTION * mass * GRAVITATIONAL_CONSTANT * normalized(ABBA);
+		return COEFFICIENT_OF_FRICTION * mass * GRAVITATIONAL_CONSTANT * -normalized(ABBA);
 	}
 }

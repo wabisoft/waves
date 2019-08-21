@@ -119,6 +119,7 @@ inline void drawInfoText(Graphics& graphics, const Stage& stage) {
 	infostream << "#Waves: 					" << stage.sea.numWaves << std::endl;
 	infostream << "#AABBs: 					" << stage.numAABBS << std::endl;
 	if(stage.numRocks > 0 ) {
+		infostream << "P:						" << stage.rocks[0].shape.position<< std::endl;
 		infostream << "V:						" << stage.rocks[0].velocity << std::endl;
 	}
 	text.setString(infostream.str());

@@ -119,7 +119,7 @@ void processEndInput(Stage& stage, Vector2 position) {
 		rock.shape.position += 0.01f * pull; // If you dont so this then to collision get all weird and bad things happen
 		Vector2 force = (pull/pullLength) * throwMag;
 		rock.velocity += force;
-		// rock.state = FALLING;
+		rock.state = {RockState::FALLING, {}};
 		stage.selection = {};
 		stage.pullPosition = VECTOR2_ZERO;
 		stage.phase = SELECT;
