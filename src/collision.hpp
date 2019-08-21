@@ -1,14 +1,10 @@
 #pragma once
 
 #include "aabb.hpp"
-#include "stage.hpp"
+#include "prelude.hpp"
+// #include "stage.hpp"
 #include "util.hpp"
 
-
-struct AABBPair{
-	AABB a;
-	AABB b;
-};
 
 void resolveCollisions(Stage& stage);
 void dispatchPotentialCollision(Stage& stage, const AABBPair& pair);
@@ -37,6 +33,8 @@ struct Collision {
 	Vector2 intersection;
 	Vector2 normal;
 	float penetration;
+	Vector2 surfaceStart = VECTOR2_ZERO;
+	Vector2 surfaceEnd = VECTOR2_ZERO;
 };
 
 template <int N, int M>

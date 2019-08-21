@@ -12,18 +12,6 @@
 #include "sea.hpp"
 #include "stage.hpp"
 
-
-#ifdef _WIN32
-// #include <windows.h>
-// std::string workingDir() {
-// 	char buffer[MAX_PATH];
-// 	GetModuleFileName( NULL, buffer, MAX_PATH );
-// 	std::string str = std::string(buffer);
-// 	std::string::size_type pos = std::string( buffer ).find_last_of( "\\/" );
-// 	return std::string( buffer ).substr( 0, pos);
-// }
-#endif
-
 void initGraphics(Graphics & graphics, const char * title) {
 	graphics.settings.antialiasingLevel = 100;
 	graphics.videoMode = sf::VideoMode::getDesktopMode();
@@ -70,12 +58,16 @@ inline void draw(Graphics& graphics, const Rock* rocks, int numRocks) {
 	idText.setCharacterSize(15);
 	sf::CircleShape circle;
 	circle.setFillColor(sf::Color(0,0,0,0));
-	circle.setOutlineColor(sf::Color::Red);
 	circle.setOutlineThickness(2);
 	sf::FloatRect bounds;
 	for (int i = 0; i < numRocks; ++i){
 		float adjustedRadius = rocks[i].shape.radius * graphics.ppu;
 		auto RockPosition = game2ScreenPos(graphics, rocks[i].shape.position);
+		if (rocks[i].sized) {
+			circle.setOutlineColor(sf::Color::Red);
+		} else {
+			circle.setOutlineColor(sf::Color::Green);
+		}
 		circle.setPosition(RockPosition);
 		circle.setRadius(adjustedRadius);
 		circle.setOrigin(adjustedRadius, adjustedRadius);
@@ -126,6 +118,9 @@ inline void drawInfoText(Graphics& graphics, const Stage& stage) {
 	infostream << "#Rocks: 					" << stage.numRocks << std::endl;
 	infostream << "#Waves: 					" << stage.sea.numWaves << std::endl;
 	infostream << "#AABBs: 					" << stage.numAABBS << std::endl;
+	if(stage.numRocks > 0 ) {
+		infostream << "V:						" << stage.rocks[0].velocity << std::endl;
+	}
 	text.setString(infostream.str());
 	text.setPosition(3, 3);
 	text.setPosition(3, 3);

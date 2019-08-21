@@ -1,3 +1,6 @@
+// maths.hpp
+// Leave that comment up there, ycm uses it
+
 /*****************
  * 	Vector Stuff *
  *****************/
@@ -130,3 +133,23 @@ inline float sideSign(Vector2 a, Vector2 b, Vector2 point) {
 	return sign(product);
 }
 
+
+inline bool bounded(Vector2 a, Vector2 b, Vector2 point) {
+	Vector2 ba = b - a;
+	if (std::abs(ba.x) > std::abs(ba.y)) { // line more horizontally oriented
+		// we check that we are bounded on x
+		if (ba.x > 0) { // positive dx means b.x > a.x
+			return point.x >= a.x && point.x <=b.x;
+		} else { // negative dx means that b.x < a.x
+			return point.x >= b.x && point.x <=a.x;
+		}
+	} else { // line is more vertically oriented
+		// we check that we are bounded on y
+		if (ba.y > 0) { // positive dy means b.y > a.y
+			return point.y >= a.y && point.y <= b.y;
+		} else { // negative dy means that a.y > b.y
+			return point.y >= b.y && point.y <= a.y;
+		}
+	}
+	assert(false);
+}

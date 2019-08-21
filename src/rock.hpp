@@ -10,11 +10,32 @@
 #include "util.hpp"
 
 
+struct RockState {
+	struct FallingState { };
+
+	struct StandingState{
+		Vector2 surfaceStart;
+		Vector2 surfaceEnd;
+	};
+
+	enum StateType {
+		FALLING = 1 << 0,
+		STANDING = 1 << 1,
+	};
+	StateType type;
+
+	union {
+		StandingState standing;
+		FallingState falling;
+	};
+};
+
 struct Rock {
 	Circle shape = {{0.f, 0.f}, 0.f};
 	Vector2 velocity = {0.f, 0.f};
+	RockState state { RockState::FALLING, {} };
 	bool active = false;
-	// bool sized = false; // TODO: I think probably we should only allow rocks to be sized once, so if this flag were set you could only launch this rock.
+	bool sized = false; // TODO: I think probably we should only allow rocks to be sized once, so if this flag were set you could only launch this rock.
 	uint8_t id = 0;
 };
 

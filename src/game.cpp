@@ -13,10 +13,11 @@ void start(Game& game) {
 	// TODO: this should happen during stage loading which ideal is read from a file
 	game.stage = new Stage();
 	game.stage->sea.level = 13.3f;
-	createPlatform(*game.stage, {STAGE_WIDTH-15, STAGE_HEIGHT/2 -15}, 30, 30);
-	createPlatform(*game.stage, {STAGE_WIDTH-50, STAGE_HEIGHT/2 -15}, 30, 30);
+	createPlatform(*game.stage, {STAGE_WIDTH-35, STAGE_HEIGHT/2 -15}, 35, 30);
+	createPlatform(*game.stage, {STAGE_WIDTH-70, STAGE_HEIGHT/2 -15}, 35, 30);
 	createPlatform(*game.stage, {10.f, STAGE_HEIGHT/3}, 6, 2*STAGE_HEIGHT/3); // launching platform
-	game.stage->rockSpawn = {10.f, 2*STAGE_HEIGHT/3 + 6};
+	// game.stage->rockSpawn = {10.f, 2*STAGE_HEIGHT/3 + 6};
+	game.stage->rockSpawn = {STAGE_WIDTH-50, 2*STAGE_HEIGHT/3 + 6};
 	// TODO: Menu stuff
 	// TODO: Load first Stage, blah blah blah
 }

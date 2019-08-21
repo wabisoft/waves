@@ -18,7 +18,7 @@ void update(Stage& stage, float deltaTime){
 	}
 
 	if (stage.numRocks < 1) {
-		createRock(stage, stage.rockSpawn, ROCK_START_RADIUS);
+		createRock(stage, stage.rockSpawn, ROCK_MAX_RADIUS - 1);
 	}
 	if (stage.numAABBS > MAX_AABBS)
 		std::cout << "what the actual fuck" << std::endl;
@@ -29,7 +29,7 @@ void update(Stage& stage, float deltaTime){
 }
 
 
-Entity selectEntityAtPosition(Stage& stage, Vector2 position) {
+Entity makeSelectionAtPosition(Stage& stage, Vector2 position) {
 	// For now we only select rocks so let's find our rock
 	Entity entity = findRockAtPosition(stage, position);
 	if (entity.id && entity.type != NONE) { // id defaults 0 and is always > 0 if it refers to an entity
@@ -37,6 +37,11 @@ Entity selectEntityAtPosition(Stage& stage, Vector2 position) {
 		stage.selection.active = true;
 	}
 	return entity;
+}
+
+void clearSelection(Stage& stage) {
+	stage.selection = {};
+	stage.phase = SELECT;
 }
 
 inline bool validateAndSetPullPosition(Stage& stage,  Vector2 position) {
@@ -54,9 +59,22 @@ inline bool validateAndSetPullPosition(Stage& stage,  Vector2 position) {
 }
 
 void processStartInput(Stage& stage, Vector2 position) {
+	if (stage.phase == SELECT) {
+		makeSelectionAtPosition(stage, position);
+		if (! stage.selection.active) {
+			return;
+		} else if (stage.selection.entity.type == ROCK) {
+			Rock& rock = findRock(stage, stage.selection.entity.id);
+			if (!rock.sized){
+				stage.phase = RESIZE;
+			} else {
+				stage.phase = PULL;
+			}
+		}
+	}
 	if(stage.phase == RESIZE) {
-		selectEntityAtPosition(stage, position);
-	} else if (stage.phase == PREPULL) {
+		makeSelectionAtPosition(stage, position);
+	} else if (stage.phase == PULL) {
 		if(validateAndSetPullPosition(stage, position)){
 			stage.phase = PULL;
 		}
@@ -64,7 +82,9 @@ void processStartInput(Stage& stage, Vector2 position) {
 }
 
 void processContinuingInput(Stage& stage, Vector2 position) {
-	if (stage.phase == RESIZE) {
+	if(stage.phase == SELECT){
+		// Such empty...
+	} else if (stage.phase == RESIZE) {
 		if (stage.selection.active && stage.selection.entity.type == ROCK) {
 			resizeRock(stage, stage.selection.entity.id, position);
 		} else {
@@ -76,16 +96,18 @@ void processContinuingInput(Stage& stage, Vector2 position) {
 }
 
 void processEndInput(Stage& stage, Vector2 position) {
-	if (stage.phase == RESIZE) { // if we're resizing
+	if (stage.phase == SELECT) {
+		// such empty ...
+	} else if (stage.phase == RESIZE) { // if we're resizing
 		if (stage.selection.active) { // and we have a selection
-			stage.phase = PREPULL; // move on to throwing
+			resizeRock(stage, stage.selection.entity.id, position);
+			stage.phase = SELECT; // move on to throwing
 			return;
 		} else {
 			stage.selection = Selection(); // otherwise safety clear the selection and move on
 			return;
 		}
-	}
-	else if (stage.phase == PULL){ // if we're throwing
+	} else if (stage.phase == PULL){ // if we're throwing
 		assert(stage.selection.active); // I think we should always have a selection in this phase
 		validateAndSetPullPosition(stage, position);
 		// TODO: Throw the rock
@@ -100,6 +122,6 @@ void processEndInput(Stage& stage, Vector2 position) {
 		// rock.state = FALLING;
 		stage.selection = {};
 		stage.pullPosition = VECTOR2_ZERO;
-		stage.phase = RESIZE;
+		stage.phase = SELECT;
 	}
 }

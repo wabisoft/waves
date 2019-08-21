@@ -1,6 +1,7 @@
 #pragma once
 
 struct AABB;
+struct AABBPair;
 struct Game;
 struct Graphics;
 struct Platform;

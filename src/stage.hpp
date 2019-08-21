@@ -27,10 +27,11 @@ struct Stage{
 	Rock rocks[MAX_ROCKS];
 	Platform platforms[MAX_PLATFORMS];
 	AABB aabbs[MAX_AABBS];
+	// std::vector<AABBPair> aabbPairs;
 	Vector2 rockSpawn;
 	Vector2 pullPosition; // the position of the throw pull (just used for drawing)
 	Selection selection;
-	Phase phase = RESIZE;
+	Phase phase = SELECT;
 	uint8_t id_src = 0;
 	int numRocks = 0;
 	int numPlatforms = 0;
@@ -44,7 +45,8 @@ struct Stage{
 //
 
 void update(Stage& stage, float deltaTime);
-Entity selectEntityAtPosition(Stage& stage, Vector2 position);
+Entity makeSelectionAtPosition(Stage& stage, Vector2 position);
+void clearSelection(Stage& stage);
 void processStartInput(Stage& stage, Vector2 position);
 void processContinuingInput(Stage& stage, Vector2 position);
 void processEndInput(Stage& stage, Vector2 position);

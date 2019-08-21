@@ -58,6 +58,8 @@ inline Vector2& normalize(Vector2& v);
 inline Vector2& clamp(Vector2& v, float s); // clamp this vector to a scalar magnitude
 // returns + if point on left - if point on right 0 if point on line from b to a
 inline float sideSign(Vector2 a, Vector2 b, Vector2 point);
+// returns true if point is bounded on the line segment defined by a and b
+inline bool bounded(Vector2 a, Vector2 b, Vector2 point);
 
 #include "vector2.inl" // definitions for template functions and inlines
 

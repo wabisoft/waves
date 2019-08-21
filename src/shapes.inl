@@ -1,3 +1,5 @@
+// maths.hpp
+
 #include "constants.hpp"
 
 inline float area(const Circle& circle) {

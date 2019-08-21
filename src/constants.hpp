@@ -25,6 +25,7 @@ const float WAVE_WIDTH_MULTIPLIER = 0.085f;
 const float WAVE_POSITIVE_DECAY_MULTIPLIER = 5.f;
 const float WAVE_NEGATIVE_DECAY_MULTIPLIER = -0.75f;
 const float ROLLING_RESISTANCE_COEFFICIENT = 0.03f; // from a table on this page https://www.school-for-champions.com/science/friction_rolling_coefficient.htm#.XVtDwHspCUk
+const float COEFFICIENT_OF_FRICTION = 2.f;
 
 /******************
  * MAGIC NUMBERS! *

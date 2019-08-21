@@ -9,6 +9,33 @@
 #include "stage.hpp"
 #include "util.hpp"
 
+inline void updateFallingRock(Stage& stage, Rock& rock, int rock_idx) {
+	assert(rock.state.type == RockState::FALLING);
+	rock.velocity += GRAVITY * FIXED_TIMESTEP;
+	auto drag = dragForce(rock.velocity, 1.525f, rock.shape.radius * ROCK_RADIUS_MASS_RATIO);
+	rock.velocity += drag * FIXED_TIMESTEP;
+	if(squaredMagnitude(rock.velocity) > SQUARED_TERMINAL_VELOCITY) {
+		rock.velocity = normalized(rock.velocity) * TERMINAL_VELOCITY;
+	}
+	rock.shape.position += rock.velocity;
+}
+
+inline void updateStandingRock(Stage& stage, Rock& rock, int rock_idx) {
+	assert(rock.state.type == RockState::STANDING);
+	Vector2 futurePos = rock.shape.position + rock.velocity;
+	Vector2& start = rock.state.standing.surfaceStart;
+	Vector2& end = rock.state.standing.surfaceEnd;
+	Vector2 start2Rock = futurePos - start;
+	Vector2 start2End = end - start;
+	float proj = dot(start2Rock, start2End);
+	Vector2 anchor = start + normalized(start2End) * proj;
+	bool staysInContact = sideSign(start, end, anchor) == 0 && bounded(start, end, anchor);
+	if (!staysInContact) {
+		rock.state = {RockState::FALLING, {}};
+		return updateFallingRock(stage, rock, rock_idx);
+	} else {
+	}
+}
 
 void updateRocks(Stage& stage) {
 	Rock* rocks = stage.rocks;
@@ -16,15 +43,16 @@ void updateRocks(Stage& stage) {
 		clamp(rocks[i].velocity, ROCK_MAX_SPEED); // clamp the rock speed
 		if (rocks[i].shape.position.x < 0 || rocks[i].shape.position.x > STAGE_WIDTH || rocks[i].shape.position.y < 0 || rocks[i].active == false) {
 			// remove our aabb from the stage aabb array
+			if (stage.selection.entity.id == rocks[i].id) {
+				// if this rock is selected we need to clear it
+				clearSelection(stage);
+			}
 			deleteRockByIdx(stage, i);
 		}
-		rocks[i].velocity+= GRAVITY * FIXED_TIMESTEP;
-		auto drag = dragForce(rocks[i].velocity, 1.225f, rocks[i].shape.radius * ROCK_RADIUS_MASS_RATIO);
-		rocks[i].velocity += drag * FIXED_TIMESTEP;
-		if(squaredMagnitude(rocks[i].velocity) > SQUARED_TERMINAL_VELOCITY) {
-			rocks[i].velocity = normalized(rocks[i].velocity) * TERMINAL_VELOCITY;
+		switch (rocks[i].state.type) {
+			case RockState::FALLING: updateFallingRock(stage, rocks[i], i); break;
+			case RockState::STANDING: updateStandingRock(stage, rocks[i], i); break;
 		}
-		rocks[i].shape.position += rocks[i].velocity;
 	}
 }
 
@@ -91,6 +119,7 @@ void resizeRock(Stage& stage, int rock_id, Vector2 position){
 	if(squaredSize > ROCK_MIN_RADIUS_SQUARED && squaredSize < ROCK_MAX_RADIUS_SQUARED) {
 		rock.shape.radius = std::sqrt(squaredSize);
 	}
+	rock.sized = true;
 }
 
 
