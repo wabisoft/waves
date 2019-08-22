@@ -21,7 +21,15 @@ inline void updateFallingRock(Stage& stage, Rock& rock, int rock_idx) {
 }
 
 inline void updateStandingRock(Stage& stage, Rock& rock, int rock_idx) {
+	// TODO: this function does a lot of useless caching for debugging purposes,
+	// clean that up eventually
 	assert(rock.state.type == RockState::STANDING);
+	// Do the actual update
+	rock.velocity *= 0.75; // shitty friction
+	rock.velocity += GRAVITY * FIXED_TIMESTEP;
+	rock.shape.position += rock.velocity;
+
+	// Calculate if we should not be standing anymore
 	Vector2 futurePos = rock.shape.position + rock.velocity;
 	Vector2& start = rock.state.standing.surfaceStart;
 	Vector2& end = rock.state.standing.surfaceEnd;
@@ -31,30 +39,14 @@ inline void updateStandingRock(Stage& stage, Rock& rock, int rock_idx) {
 	float proj = dot(start2Rock, normalizedStart2End);
 	Vector2 anchor = start +  normalizedStart2End * proj;
 	Vector2 anchorRelPos = anchor - rock.shape.position;
-	bool staysInContact = bounded(start, end, anchor) && squaredMagnitude(anchorRelPos) <= rock.shape.radius * rock.shape.radius;
-	// TEST
-	rock.velocity += GRAVITY * FIXED_TIMESTEP;
-	rock.velocity *= 0.75;
-	futurePos = rock.shape.position + Vector2{rock.velocity.x, 0.f};
-	if (magnitude(rock.shape.position - futurePos) >= 0.01){
-		rock.shape.position = futurePos;
-	}
+	float sqMagAnchorRelPos = squaredMagnitude(anchorRelPos);
+	float sqrockRadius = rock.shape.radius * rock.shape.radius;
+	bool bound = bounded(start, end, anchor);
+	bool anchorOnSurface = sqMagAnchorRelPos <= sqrockRadius;
+	bool staysInContact = bound && anchorOnSurface;
 	if (!staysInContact) {
 		rock.state = {RockState::FALLING, {}};
-		return updateFallingRock(stage, rock, rock_idx);
 	}
-
-	// else {
-		// rock.shape.position = anchor + (rock.shape.radius + 0.05) * VECTOR2_UP;
-		// rock.velocity.y = 0.f;
-		// rock.velocity *= 0.85;
-		// Vector2 futurePos = rock.shape.position + rock.velocity;
-		// if (magnitude(rock.shape.position - futurePos) < 0.01){
-		// 	return;
-		// } else {
-		// 	rock.shape.position = futurePos;
-		// }
-	// }
 }
 
 void updateRocks(Stage& stage) {

@@ -33,7 +33,7 @@ void draw(Graphics& graphics, Stage& stage) {
 		Rock& rock = findRock(stage, stage.selection.entity.id);
 		drawLine(graphics, rock.shape.position, stage.pullPosition, sf::Color::Blue);
 	}
-	draw(graphics, stage.rocks, stage.numRocks);
+	drawRocks(graphics, stage);
 	drawInfoText(graphics, stage);
 	graphics.window.display();
 }
@@ -51,7 +51,7 @@ inline void draw(Graphics& graphics, const Sea& sea) {
 	vertices.clear();
 }
 
-inline void draw(Graphics& graphics, const Rock* rocks, int numRocks) {
+inline void drawRocks(Graphics& graphics, const Stage& stage) {
 	sf::Text idText;
 	idText.setFont(graphics.gameFont);
 	idText.setFillColor(sf::Color::White);
@@ -60,10 +60,13 @@ inline void draw(Graphics& graphics, const Rock* rocks, int numRocks) {
 	circle.setFillColor(sf::Color(0,0,0,0));
 	circle.setOutlineThickness(2);
 	sf::FloatRect bounds;
-	for (int i = 0; i < numRocks; ++i){
-		float adjustedRadius = rocks[i].shape.radius * graphics.ppu;
-		auto RockPosition = game2ScreenPos(graphics, rocks[i].shape.position);
-		if (rocks[i].sized) {
+	for (int i = 0; i < stage.numRocks; ++i){
+		float adjustedRadius = stage.rocks[i].shape.radius * graphics.ppu;
+		auto RockPosition = game2ScreenPos(graphics, stage.rocks[i].shape.position);
+		if (stage.selection.active && stage.rocks[i].id == stage.selection.entity.id) {
+			circle.setOutlineColor(sf::Color::Cyan);
+		}
+		else if (stage.rocks[i].sized) {
 			circle.setOutlineColor(sf::Color::Red);
 		} else {
 			circle.setOutlineColor(sf::Color::Green);
@@ -73,7 +76,7 @@ inline void draw(Graphics& graphics, const Rock* rocks, int numRocks) {
 		circle.setOrigin(adjustedRadius, adjustedRadius);
 		graphics.window.draw(circle);
 		idText.setPosition(RockPosition);
-		idText.setString((sf::String)std::to_string(rocks[i].id));
+		idText.setString((sf::String)std::to_string(stage.rocks[i].id));
 		bounds = idText.getGlobalBounds();
 		idText.setOrigin(bounds.width/2, bounds.height/2);
 		graphics.window.draw(idText);
@@ -122,6 +125,7 @@ inline void drawInfoText(Graphics& graphics, const Stage& stage) {
 		infostream << "P:						" << stage.rocks[0].shape.position<< std::endl;
 		infostream << "V:						" << stage.rocks[0].velocity << std::endl;
 	}
+	infostream << "RockState:				" << stage.rocks[0].state.type << std::endl;
 	text.setString(infostream.str());
 	text.setPosition(3, 3);
 	text.setPosition(3, 3);

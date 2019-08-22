@@ -26,7 +26,7 @@ void initGraphics(Graphics & graphics, const char * title);
 
 void draw(Graphics& graphics, Stage& stage);
 inline void draw(Graphics& graphics, const Sea& sea);
-inline void draw(Graphics& graphics, const Rock* rocks, int numRocks);
+inline void drawRocks(Graphics& graphics, const Stage& stage);
 inline void draw(Graphics& graphics, const Platform* platforms, int numPlatforms);
 
 inline void drawInfoText(Graphics& graphics, const Stage& stage);

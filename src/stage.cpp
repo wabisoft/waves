@@ -119,13 +119,10 @@ void processEndInput(Stage& stage, Vector2 position) {
 	} else if (stage.phase == PULL){ // if we're throwing
 		assert(stage.selection.active); // I think we should always have a selection in this phase
 		validateAndSetPullPosition(stage, position);
-		// TODO: Throw the rock
 		Rock& rock = findRock(stage, stage.selection.entity.id);
 		Vector2 pull = rock.shape.position - stage.pullPosition;
 		float pullLength = std::abs(magnitude(pull));
-		// float throwMag = (pullLength / STAGE_MAX_PULL_LENGTH) * ROCK_MAX_SPEED * 0.025f; // YAY magic!
-		float throwMag = (pullLength / STAGE_MAX_PULL_LENGTH) * ROCK_MAX_SPEED; // YAY magic!
-		// float throwMag = (pullLength / STAGE_MAX_PULL_LENGTH) * ROCK_MAX_SPEED;
+		float throwMag = (pullLength / STAGE_MAX_PULL_LENGTH) * ROCK_MAX_SPEED;
 		rock.shape.position += 0.01f * pull; // If you dont so this then to collision get all weird and bad things happen
 		Vector2 force = (pull/pullLength) * throwMag;
 		rock.velocity += force;
