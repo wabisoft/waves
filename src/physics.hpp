@@ -65,9 +65,9 @@ inline Vector2 friction(Vector2 a, Vector2 b, float mass, Vector2 velocity, Vect
 	// float cosTheta = dot(ABBA, VECTOR2_RIGHT) / magnitude(ABBA);
 	// float Fn = mass * GRAVITATIONAL_CONSTANT * cosTheta;  // because of our simulation technique *maybe* we don't need gravity here
 	// return COEFFICIENT_OF_FRICTION * Fn * -normalized(ABBA);
-	if(velocity.x < 1.f) {
-	 	return COEFFICIENT_OF_FRICTION * mass * GRAVITATIONAL_CONSTANT * -normalized(ABBA) * velocity.x;
-	} else {
-		return COEFFICIENT_OF_FRICTION * mass * GRAVITATIONAL_CONSTANT * -normalized(ABBA);
-	}
+	// if(velocity.x < 1.f) {
+	//  	return COEFFICIENT_OF_FRICTION * mass * GRAVITATIONAL_CONSTANT * -normalized(ABBA) * velocity.x;
+	// } else {
+	return COEFFICIENT_OF_FRICTION * mass * GRAVITATIONAL_CONSTANT * -normalized(ABBA);
+	// }
 }

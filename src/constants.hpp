@@ -18,7 +18,8 @@ const int MAX_PLATFORMS = 	5;
 const int MAX_AABBS =		MAX_ROCKS + MAX_PLATFORMS + 1; // +1 for ship and
 
 // Physics constants
-const float GRAVITATIONAL_CONSTANT = 9.8f;
+// const float GRAVITATIONAL_CONSTANT = 9.8f;
+const float GRAVITATIONAL_CONSTANT = 7.8f;
 const float SQUARED_TERMINAL_VELOCITY = 2.f * GRAVITATIONAL_CONSTANT * STAGE_HEIGHT;
 
 const float WAVE_WIDTH_MULTIPLIER = 0.085f;
@@ -38,7 +39,7 @@ const float ROCK_MAX_RADIUS = 4.f;
 const float ROCK_MIN_RADIUS_SQUARED = ROCK_MIN_RADIUS * ROCK_MIN_RADIUS;
 const float ROCK_MAX_RADIUS_SQUARED = ROCK_MAX_RADIUS * ROCK_MAX_RADIUS;
 const float ROCK_START_RADIUS = ROCK_MIN_RADIUS;
-const float ROCK_MAX_SPEED = 70.f; // 48 meters/second (remember to multiply by timestep)
+const float ROCK_MAX_SPEED = 1.75f; // meters/second (remember to multiply by timestep)
 const float ROCK_RESTITUTION = 0.00001f; // FIXME: these numbers don't make sense but they look/feel right, diagnse
 
 // Magic Platforms

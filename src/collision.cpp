@@ -130,9 +130,7 @@ void collide(Rock& rock, Sea& sea) {
 }
 
 void collide(Rock& rock, const Platform& platform) {
-	// Vector2 futurePos = rock.shape.position + rock.velocity;
-	// FIXME: still need to figure out tunneling for really fast shit
-	// First Check if colliding already
+	// FIXME: still need to figure out tunneling for really fast shit // need to make a polygon for the 4 dimensional position of the circle and do something clever with that
 	Collision col = collision(rock.shape, platform.shape);
 	if (col.collides) {
 		if(rock.state.type == RockState::FALLING && col.normal == VECTOR2_UP) {
@@ -141,52 +139,7 @@ void collide(Rock& rock, const Platform& platform) {
 		rock.shape.position += col.normal * col.penetration;
 		float j = linearImpulse(rock.velocity, VECTOR2_ZERO, mass(rock) , mass(platform), ROCK_RESTITUTION);
 		rock.velocity += (j/mass(rock)) * col.normal;
-		// rock.velocity += mass(rock) * col.normal * ROLLING_RESISTANCE_COEFFICIENT;
-		// Vector2 fric = friction(col.surfaceStart, col.surfaceEnd, mass(rock), rock.velocity, rock.shape.position) * FIXED_TIMESTEP;
-		// rock.velocity += fric;
-		// Vector2 velPlusFric = rock.velocity + fric;
-		// if (rock.velocity.x == 0.f) { fric.x = 0.f; }
-		// if (rock.velocity.y == 0.f) { fric.y = 0.f; }
-		// // XXX: the way we get friction we are always applying in the same direction
-		// // it should flip to oppose velocity
-		// if(-sign(velPlusFric.x) == sign(rock.velocity.x)) { // if sign inverts
-		// 	fric.x = 0.f;
-		// 	rock.velocity.x = 0.f;
-		// }
-		// if(-sign(velPlusFric.y) == sign(rock.velocity.y)){ // if sign inverts
-		// 	fric.y = 0.f;
-		// 	rock.velocity.y = 0.f;
-		// }
-		// FIXME: there is no rolling resistance or friction of any kind which feels yucky, plz fix
-		// I really want rocks to roll!
-		return;
 	}
-	// Then check if colliding at the end of my tragectory
-	// Circle nextFrameShape = rock.shape;
- 	// nextFrameShape.position += rock.velocity;
- 	// col = collision(nextFrameShape, platform.shape);
- 	// if( col.collides) {
- 	// 	nextFrameShape.position += col.normal * col.penetration;
- 	// 	rock.shape = nextFrameShape;
- 	// 	float j = linearImpulse(rock.velocity, VECTOR2_ZERO, mass(rock) , mass(platform), ROCK_RESTITUTION);
- 	// 	rock.velocity += (j/mass(rock)) * col.normal;
- 	// 	rock.velocity += mass(rock) * col.normal * ROLLING_RESISTANCE_COEFFICIENT;
-	// 	Vector2 fric = friction(col.surfaceStart, col.surfaceEnd, mass(rock), rock.velocity, rock.shape.position) * FIXED_TIMESTEP;
-	// 	std::cout << fric << std::endl;
-	// 	// if (rock.velocity.x == 0.f) { fric.x = 0.f; }
-	// 	// if (rock.velocity.y == 0.f) { fric.y = 0.f; }
-	// 	// Vector2 velPlusFric = rock.velocity + fric;
-	// 	// if(-sign(velPlusFric.x) == sign(rock.velocity.x)) { // if sign inverts
-	// 	// 	fric.x = 0.f;
-	// 	// 	rock.velocity.x = 0.f;
-	// 	// }
-	// 	// if(-sign(velPlusFric.y) == sign(rock.velocity.y)){ // if sign inverts
-	// 	// 	fric.y = 0.f;
-	// 	// 	rock.velocity.x = 0.f;
-	// 	// }
-	// 	rock.velocity += fric;
- 	// 	return;
- 	// }
 }
 
 void collide(Rock& rock, Rock& other_rock) {

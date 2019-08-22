@@ -1,6 +1,7 @@
 #include <iostream>
 #include "collision.hpp"
 #include "constants.hpp"
+#include "maths.hpp"
 #include "platform.hpp"
 #include "printing.hpp"
 #include "rock.hpp"
@@ -47,7 +48,15 @@ void clearSelection(Stage& stage) {
 inline bool validateAndSetPullPosition(Stage& stage,  Vector2 position) {
 	assert(stage.selection.active);
 	Rock& rock = findRock(stage, stage.selection.entity.id);
-	float squaredPullLength = squaredMagnitude(rock.shape.position - position);
+	Vector2 pull = rock.shape.position - position;
+	if(rock.state.type == RockState::STANDING) {
+		Vector2 surfaceVector = rock.state.standing.surfaceEnd - rock.state.standing.surfaceStart;
+		float pullAngle = cross(surfaceVector, pull) / (magnitude(surfaceVector) * magnitude(pull));
+		if (pullAngle <= 0.15) { // a x b = |a||b|sin(theta) and is sin > 0 for 0 < theta < PI and sin < 0 for PI < theta < 2*PI
+			return false;
+		}
+	}
+	float squaredPullLength = squaredMagnitude(pull);
 	if(squaredPullLength < STAGE_MAX_PULL_LENGTH_SQUARED) {
 		stage.pullPosition = position;
 		return true;
@@ -114,7 +123,8 @@ void processEndInput(Stage& stage, Vector2 position) {
 		Rock& rock = findRock(stage, stage.selection.entity.id);
 		Vector2 pull = rock.shape.position - stage.pullPosition;
 		float pullLength = std::abs(magnitude(pull));
-		float throwMag = (pullLength / STAGE_MAX_PULL_LENGTH) * ROCK_MAX_SPEED * 0.025f; // YAY magic!
+		// float throwMag = (pullLength / STAGE_MAX_PULL_LENGTH) * ROCK_MAX_SPEED * 0.025f; // YAY magic!
+		float throwMag = (pullLength / STAGE_MAX_PULL_LENGTH) * ROCK_MAX_SPEED; // YAY magic!
 		// float throwMag = (pullLength / STAGE_MAX_PULL_LENGTH) * ROCK_MAX_SPEED;
 		rock.shape.position += 0.01f * pull; // If you dont so this then to collision get all weird and bad things happen
 		Vector2 force = (pull/pullLength) * throwMag;
