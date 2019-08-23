@@ -10,3 +10,7 @@ struct Ship {
 };
 
 void updateShip(Ship& ship);
+
+inline float mass(const Ship& ship) {
+	return area(ship.shape) * SHIP_AREA_MASS_RATIO;
+}

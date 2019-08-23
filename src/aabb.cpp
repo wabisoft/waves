@@ -1,13 +1,12 @@
 #include <iostream>
 #include <cassert>
 #include "aabb.hpp"
+#include "maths.hpp"
 #include "printing.hpp"
 #include "stage.hpp"
 
 AABB::AABB(const Platform& platform) {
-	Vector2 diag = {platform.shape.width/2, platform.shape.height/2};
-	lower = platform.shape.position - diag;
-	upper = platform.shape.position + diag;
+	boundingPoints(platform.shape, lower, upper);
 	type = PLATFORM;
 	id = platform.id;
 }
@@ -26,9 +25,7 @@ AABB::AABB(const Rock& rock) {
 }
 
 AABB::AABB(const Ship& ship) {
-	Vector2 diag = {ship.shape.width/2, ship.shape.height/2};
-	lower = ship.shape.position - diag;
-	upper = ship.shape.position + diag;
+	boundingPoints(ship.shape, lower, upper);
 	type = SHIP;
 	id = ship.id;
 }

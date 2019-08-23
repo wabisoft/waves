@@ -36,6 +36,8 @@ struct Stage{
 	int numRocks = 0;
 	int numPlatforms = 0;
 	int numAABBS = 0;
+	int rockLimit = 0;
+	int usedRocks = 0;
 	bool paused = false;
 };
 

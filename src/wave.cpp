@@ -1,4 +1,3 @@
-// #include <iostream>
 #include "constants.hpp"
 #include "physics.hpp"
 #include "sea.hpp"

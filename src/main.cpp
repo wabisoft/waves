@@ -1,6 +1,8 @@
 #include <bitset>
 #include <iostream>
 #include <climits>
+#include <cstdlib>
+#include <ctime>
 
 #include <SFML/Window.hpp>
 
@@ -42,6 +44,8 @@ void test_shapes_and_shit() {
 
 	Graphics graphics;
 	initGraphics(graphics, "Waves!!!");
+	Clock clock;
+	std::srand(std::time(nullptr));
 	while(graphics.window.isOpen()) {
 		graphics.window.clear(sf::Color::Blue);
 		sf::Event event;
@@ -51,6 +55,13 @@ void test_shapes_and_shit() {
 			    case sf::Event::Closed:	graphics.window.close(); break;
 				default: break;
 			}
+		}
+		float updateDelta = clock.getElapsedTime().asSeconds();
+		if (updateDelta >= FIXED_TIMESTEP) {
+			// Yay rotation!
+			rectangle.rotation += PI * FIXED_TIMESTEP;
+			updateVertices(rectangle);
+			clock.restart();
 		}
 		drawPolygon(graphics, rectangle, sf::Color::White);
 		drawCircle(graphics, circle, sf::Color::White);
@@ -73,6 +84,10 @@ void test_shapes_and_shit() {
 			arr[1] = sf::Vertex(game2ScreenPos(graphics, normalOffset), sf::Color::Magenta);
 			graphics.window.draw(arr);
 		}
+		Vector2 l, u;
+		boundingPoints(rectangle, l, u);
+		Rectangle rr = makeRectangle(rectangle.position, u.x - l.x, u.y - l.y);
+		drawPolygon(graphics, rr, sf::Color(std::rand()%256,std::rand()%256,std::rand()%256));
 		graphics.window.display();
 	}
 }
@@ -90,7 +105,7 @@ void do_normal_shit() {
 	std::cout << "AABB: " << sizeof(AABB(stage.platforms[0])) << std::endl;
 	std::cout << "EntityType: " << sizeof((EntityType)1) << std::endl;
 	std::cout << "Vector2: " << sizeof(Vector2{0,0}) << std::endl;
-	// std::cout << "RockState: " << sizeof(RockState{}) << std::endl;
+	std::cout << "RockState: " << sizeof(RockState{}) << std::endl;
 	start(game);
 	run(game);
 	stop(game);

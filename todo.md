@@ -1,11 +1,11 @@
 ## TODO
-- [ ] Update polygon's vertices every frame with position and rotation;
+- [x] Update polygon's vertices every frame with position and rotation;
 - [x] Get Rocks sitting calmly on plarforms
-	- [ ] Lock rocks to a platform if they are in a continuous collision with it
-		- [ ] Not in love with the way this currently works. I think that the rock should check if it's velocity would move it from the platform and set it's state depend of that.
-	- [ ] roll rocks moving on platforms
+	- [x] Lock rocks to a platform if they are in a continuous collision with it
+		- [x] Not in love with the way this currently works. I think that the rock should check if it's velocity would move it from the platform and set it's state depend of that.
+	- [ ] roll rocks moving on platforms // Not sure if I actually care about this
 - [x] Get rocks launching off platforms
-- [ ] Get a ships riding waves (most of the hard work was done in v1 (should mostly just need porting ...knock on wood...)
+- [ ] Get ship riding waves (most of the hard work was done in v1 (should mostly just need porting ...knock on wood...)
 
 ## DONE
 - [x] Get platforms

@@ -96,7 +96,16 @@ struct Rectangle : Polygon<4>{
 inline float area(Circle & circle);
 inline float area(Rectangle& rectangle);
 template <int N>
-bool pointInsidePolygon(Vector2 point, Polygon<N>& polygon);
+inline void updateVertices(Polygon<N>& polygon);
+template <int N>
+inline bool pointInsidePolygon(Vector2 point, Polygon<N>& polygon);
+template <int N>
+inline Vector2 lower(const Polygon<N>& polygon); // gets the bottom left point of a polygon in relation to x, y axis
+template <int N>
+inline Vector2 upper(const Polygon<N>& polygon); // gets the top right point of a polygon in raltion to x, y axis
+template <int N>
+inline void boundingPoints(const Polygon<N>& polygon, Vector2& lower, Vector2& upper);
+
 
 #include "shapes.inl" // definitions for template functions and inlines
 

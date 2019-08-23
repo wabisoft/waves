@@ -145,10 +145,13 @@ void collide(Rock& rock, const Platform& platform) {
 void collide(Rock& rock, Rock& other_rock) {
 	Collision col = collision(rock.shape, other_rock.shape);
 	if (col.collides) {
-		rock.shape.position += col.normal * 0.5f * col.penetration;
-		other_rock.shape.position += -col.normal * 0.5f * col.penetration;
-		rock.velocity += linearImpulse(rock.velocity, other_rock.velocity, rock.shape.radius * ROCK_RADIUS_MASS_RATIO, other_rock.shape.radius * ROCK_RADIUS_MASS_RATIO, ROCK_RESTITUTION) * col.normal;
-		other_rock.velocity += linearImpulse(other_rock.velocity, other_rock.velocity, other_rock.shape.radius * ROCK_RADIUS_MASS_RATIO, rock.shape.radius * ROCK_RADIUS_MASS_RATIO, ROCK_RESTITUTION) * -1 * col.normal;
+		rock.shape.position += col.normal * col.penetration;
+		other_rock.shape.position += -col.normal * col.penetration;
+		float j = linearImpulse(rock.velocity, other_rock.velocity, mass(rock), mass(other_rock), ROCK_RESTITUTION);
+		// rock.velocity += linearImpulse(rock.velocity, other_rock.velocity, rock.shape.radius * ROCK_RADIUS_MASS_RATIO, other_rock.shape.radius * ROCK_RADIUS_MASS_RATIO, ROCK_RESTITUTION) * col.normal;
+		// other_rock.velocity += linearImpulse(other_rock.velocity, other_rock.velocity, other_rock.shape.radius * ROCK_RADIUS_MASS_RATIO, rock.shape.radius * ROCK_RADIUS_MASS_RATIO, ROCK_RESTITUTION) * -1 * col.normal;
+		rock.velocity += (j/mass(rock)) * col.normal;
+		other_rock.velocity += (j/mass(other_rock)) * -col.normal;
 	}
 }
 
@@ -159,6 +162,11 @@ void collide(Ship& ship, const Sea& sea) {
 }
 
 void collide(Ship& ship, const Platform& platform) {
+	Collision col = collision(ship.shape, platform.shape);
+	if(col.collides) {
+		ship.shape.position += col.normal * col.penetration;
+		// ship.velocity += linearImpulse(
+	}
 }
 
 void collide(Ship& ship, Rock& rock) {
@@ -174,7 +182,8 @@ Collision collision(const Circle& c1, const Circle& c2) {
 		Collision col;
 		col.collides = true;
 		col.intersection = c1.position + c1.radius * normalizedRelPos;
-		col.normal = normalized(col.intersection - c2.position);
+		// col.normal = normalized(col.intersection - c2.position);
+		col.normal = normalized(c1.position - c2.position);
 		col.penetration = std::abs(magnitude(relativePosition) - sumOfRadii);
 		return col;
 	} else {

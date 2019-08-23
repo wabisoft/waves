@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include <sstream>
 #include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
@@ -27,6 +28,7 @@ void initGraphics(Graphics & graphics, const char * title) {
 
 void draw(Graphics& graphics, Stage& stage) {
 	graphics.window.clear(sf::Color::Black);
+	drawGrid(graphics);
 	draw(graphics, stage.platforms, stage.numPlatforms);
 	draw(graphics, stage.sea);
 	if(stage.selection.active && stage.pullPosition != VECTOR2_ZERO) {
@@ -34,85 +36,74 @@ void draw(Graphics& graphics, Stage& stage) {
 		drawLine(graphics, rock.shape.position, stage.pullPosition, sf::Color::Blue);
 	}
 	drawRocks(graphics, stage);
+	drawShip(graphics, stage.ship);
 	drawInfoText(graphics, stage);
+	if (stage.paused) {
+		drawText(graphics, "Paused", {(float)graphics.videoMode.width/2, (float)graphics.videoMode.height/2}, 24);
+	}
 	graphics.window.display();
 }
 
 
 inline void draw(Graphics& graphics, const Sea& sea) {
-	static std::vector<sf::Vertex> vertices;
+	std::vector<sf::Vertex> vertices;
 	float step = 1 / graphics.ppu;
 	for (float i = 0; i < STAGE_WIDTH; i += step)
 	{
+		// this draw pattern causes the gpu hardware to interpolate the color alpha
+		// from 1 to 0 (found this by accident but I like it)
 		vertices.push_back(sf::Vertex(game2ScreenPos(graphics, {i, heightAtX(sea, i)}), SEA_COLOR));
-		vertices.push_back(sf::Vertex(game2ScreenPos(graphics, {i, 0}), SEA_COLOR));
+		vertices.push_back(sf::Vertex(game2ScreenPos(graphics, {i+step, heightAtX(sea, i+step)}), SEA_COLOR));
+		vertices.push_back(sf::Vertex(game2ScreenPos(graphics, {i, -5}), SEA_COLOR));
 	}
-	graphics.window.draw(&vertices[0], vertices.size(), sf::TriangleStrip);
-	vertices.clear();
+	graphics.window.draw(&vertices[0], vertices.size(), sf::Triangles);
+}
+
+inline void drawShip(Graphics& graphics, const Ship& ship) {
+
+	drawPolygon(graphics, ship.shape, sf::Color::White);
+	drawId(graphics, ship.id, ship.shape.position);
 }
 
 inline void drawRocks(Graphics& graphics, const Stage& stage) {
-	sf::Text idText;
-	idText.setFont(graphics.gameFont);
-	idText.setFillColor(sf::Color::White);
-	idText.setCharacterSize(15);
-	sf::CircleShape circle;
-	circle.setFillColor(sf::Color(0,0,0,0));
-	circle.setOutlineThickness(2);
-	sf::FloatRect bounds;
 	for (int i = 0; i < stage.numRocks; ++i){
-		float adjustedRadius = stage.rocks[i].shape.radius * graphics.ppu;
-		auto RockPosition = game2ScreenPos(graphics, stage.rocks[i].shape.position);
+		sf::Color c;
 		if (stage.selection.active && stage.rocks[i].id == stage.selection.entity.id) {
-			circle.setOutlineColor(sf::Color::Cyan);
-		}
-		else if (stage.rocks[i].sized) {
-			circle.setOutlineColor(sf::Color::Red);
+			c = sf::Color::Cyan;
+		} else if (stage.rocks[i].sized) {
+			c = sf::Color::Red;
 		} else {
-			circle.setOutlineColor(sf::Color::Green);
+			c = sf::Color::Green;
 		}
-		circle.setPosition(RockPosition);
-		circle.setRadius(adjustedRadius);
-		circle.setOrigin(adjustedRadius, adjustedRadius);
-		graphics.window.draw(circle);
-		idText.setPosition(RockPosition);
-		idText.setString((sf::String)std::to_string(stage.rocks[i].id));
-		bounds = idText.getGlobalBounds();
-		idText.setOrigin(bounds.width/2, bounds.height/2);
-		graphics.window.draw(idText);
+		drawCircle(graphics, stage.rocks[i].shape, c);
+		drawId(graphics, stage.rocks[i].id, stage.rocks[i].shape.position);
 	}
 }
 
 inline void draw(Graphics& graphics, const Platform* platforms, int numPlatforms) {
-	sf::Text idText;
-	idText.setFont(graphics.gameFont);
-	idText.setFillColor(sf::Color::White);
-	idText.setCharacterSize(15);
-	// sf::RectangleShape rectangle;
-	// rectangle.setFillColor(sf::Color::Magenta);
-	sf::FloatRect bounds;
 	for (int i = 0; i < numPlatforms; ++i){
 		drawPolygon(graphics, platforms[i].shape, sf::Color::Magenta);
-		// float adjustedWidth = platforms[i].width * graphics.ppu;
-		// float adjustedHeight = platforms[i].height * graphics.ppu;
-		// auto platformPosition = game2ScreenPos(graphics, platforms[i].position);
-		// rectangle.setPosition(platformPosition);
-		// rectangle.setSize({adjustedWidth, adjustedHeight});
-		// rectangle.setOrigin(adjustedWidth/2.f, adjustedHeight/2.f);
-		// graphics.window.draw(rectangle);
-		idText.setPosition(game2ScreenPos(graphics, platforms[i].shape.position));
-		idText.setString((sf::String)std::to_string(platforms[i].id));
-		bounds = idText.getGlobalBounds();
-		idText.setOrigin(bounds.width/2, bounds.height/2);
-		graphics.window.draw(idText);
+		drawId(graphics, platforms[i].id, platforms[i].shape.position);
 	}
 }
 
+inline void drawGrid(Graphics& graphics) {
+	// sf::VertexArray vertices(sf::Lines, (int)STAGE_WIDTH*2 + (int)STAGE_HEIGHT*2);
+	std::vector<sf::Vertex> vertices;
+	vertices.reserve((int)STAGE_WIDTH*2 + (int)STAGE_HEIGHT*2);
+	sf::Color c = sf::Color(175,175,175,32);
+	for(float i = 0; i < STAGE_WIDTH; ++i) {
+		vertices.push_back(sf::Vertex(game2ScreenPos(graphics, Vector2{i, 0.f}), c));
+		vertices.push_back(sf::Vertex(game2ScreenPos(graphics, Vector2{i, STAGE_HEIGHT}), c));
+	}
+	for(float i = 0; i < STAGE_HEIGHT; ++i) {
+		vertices.push_back(sf::Vertex(game2ScreenPos(graphics, Vector2{0.f, i}), c));
+		vertices.push_back(sf::Vertex(game2ScreenPos(graphics, Vector2{STAGE_WIDTH, i}), c));
+	}
+	graphics.window.draw(&vertices[0], vertices.size(), sf::Lines);
+}
+
 inline void drawInfoText(Graphics& graphics, const Stage& stage) {
-	sf::Text text;
-	text.setFont(graphics.gameFont);
-	text.setFillColor(sf::Color::White);
-	text.setCharacterSize(15);
 	std::stringstream infostream;
 	infostream << "Draw (Hz): 				" << 1/graphics.drawDelta << std::endl;
 	infostream << "Update (Hz): 			" << 1/graphics.updateDelta << std::endl;
@@ -126,17 +117,5 @@ inline void drawInfoText(Graphics& graphics, const Stage& stage) {
 		infostream << "V:						" << stage.rocks[0].velocity << std::endl;
 	}
 	infostream << "RockState:				" << stage.rocks[0].state.type << std::endl;
-	text.setString(infostream.str());
-	text.setPosition(3, 3);
-	text.setPosition(3, 3);
-	graphics.window.draw(text);
-
-	if (stage.paused) {
-		text.setCharacterSize(24);
-		text.setString("Paused");
-		auto bounds = text.getGlobalBounds();
-		text.setOrigin(bounds.width/2, bounds.height/2);
-		text.setPosition((float)graphics.videoMode.width/2, (float)graphics.videoMode.height/2);
-		graphics.window.draw(text);
-	}
+	drawText(graphics, infostream.str(), {3, 3}, 13);
 }

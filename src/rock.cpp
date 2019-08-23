@@ -12,7 +12,7 @@
 inline void updateFallingRock(Stage& stage, Rock& rock, int rock_idx) {
 	assert(rock.state.type == RockState::FALLING);
 	rock.velocity += GRAVITY * FIXED_TIMESTEP;
-	auto drag = dragForce(rock.velocity, 1.525f, rock.shape.radius * ROCK_RADIUS_MASS_RATIO);
+	auto drag = dragForce(rock.velocity, 1.225f, rock.shape.radius * ROCK_RADIUS_MASS_RATIO);
 	rock.velocity += drag * FIXED_TIMESTEP;
 	if(squaredMagnitude(rock.velocity) > SQUARED_TERMINAL_VELOCITY) {
 		rock.velocity = normalized(rock.velocity) * TERMINAL_VELOCITY;
@@ -84,6 +84,7 @@ uint8_t createRock(Stage& stage, Vector2 position, float radius){
 	new_rock.shape.position = position;
 	new_rock.shape.radius = radius;
 	stage.numRocks++;
+	stage.usedRocks++;
 	createAABB(stage, AABB(new_rock));
 	return new_rock.id;
 }

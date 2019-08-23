@@ -18,9 +18,10 @@ void update(Stage& stage, float deltaTime){
 		return;
 	}
 
-	if (stage.numRocks < 1) {
-		createRock(stage, stage.rockSpawn, ROCK_MAX_RADIUS - 1);
-	}
+	// Entity e = findRockAtPosition(stage, stage.rockSpawn);
+	// if (e.type == NONE && stage.usedRocks < stage.rockLimit) {
+	// 	createRock(stage, stage.rockSpawn, ROCK_MAX_RADIUS - 1);
+	// }
 	if (stage.numAABBS > MAX_AABBS)
 		std::cout << "what the actual fuck" << std::endl;
 	resolveCollisions(stage);
@@ -49,13 +50,13 @@ inline bool validateAndSetPullPosition(Stage& stage,  Vector2 position) {
 	assert(stage.selection.active);
 	Rock& rock = findRock(stage, stage.selection.entity.id);
 	Vector2 pull = rock.shape.position - position;
-	if(rock.state.type == RockState::STANDING) {
-		Vector2 surfaceVector = rock.state.standing.surfaceEnd - rock.state.standing.surfaceStart;
-		float pullAngle = cross(surfaceVector, pull) / (magnitude(surfaceVector) * magnitude(pull));
-		if (pullAngle <= 0.15) { // a x b = |a||b|sin(theta) and is sin > 0 for 0 < theta < PI and sin < 0 for PI < theta < 2*PI
-			return false;
-		}
-	}
+	// if(rock.state.type == RockState::STANDING) {
+	// 	Vector2 surfaceVector = rock.state.standing.surfaceEnd - rock.state.standing.surfaceStart;
+	// 	float pullAngle = cross(surfaceVector, pull) / (magnitude(surfaceVector) * magnitude(pull));
+	// 	if (pullAngle <= 0.15) { // a x b = |a||b|sin(theta) and is sin > 0 for 0 < theta < PI and sin < 0 for PI < theta < 2*PI
+	// 		return false;
+	// 	}
+	// }
 	float squaredPullLength = squaredMagnitude(pull);
 	if(squaredPullLength < STAGE_MAX_PULL_LENGTH_SQUARED) {
 		stage.pullPosition = position;

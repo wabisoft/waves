@@ -46,6 +46,7 @@ const float ROCK_RESTITUTION = 0.00001f; // FIXME: these numbers don't make sens
 const float PLATFORM_AREA_MASS_RATIO = 2.f/3.f;
 
 // Magic Ships
+const float SHIP_AREA_MASS_RATIO = 2.f/3.f;
 
 // Magic numbers for STAGE
 const float STAGE_MAX_PULL_LENGTH = 8.f;
