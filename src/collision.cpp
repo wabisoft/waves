@@ -6,6 +6,7 @@
 #include "entity.hpp"
 #include "collision.hpp"
 #include "constants.hpp"
+#include "maths.hpp"
 #include "physics.hpp"
 #include "platform.hpp"
 #include "printing.hpp"
@@ -105,8 +106,12 @@ void dispatchPotentialCollision(Stage& stage, const AABBPair& pair) {
 			if (aRock && bRock){ collide(*aRock, *bRock); }
 			else { assert(false); }
 			break;
-		case SHIP|SEA: break;
-		case SHIP|PLATFORM: break;
+		case SHIP|SEA: collide(stage.ship, stage.sea); break;
+		case SHIP|PLATFORM:
+			if (aPlatform) collide(stage.ship, *aPlatform);
+			else if (bPlatform) collide(stage.ship, *bPlatform);
+			else assert(false);
+			break;
 		default: break;
 	}
 }
@@ -130,7 +135,7 @@ void collide(Rock& rock, Sea& sea) {
 }
 
 void collide(Rock& rock, const Platform& platform) {
-	// FIXME: still need to figure out tunneling for really fast shit // need to make a polygon for the 4 dimensional position of the circle and do something clever with that
+	// FIXME: still need to figure out tunneling for really fast and small shit // need to make a polygon for the 4 dimensional position of the circle and do something clever with that
 	Collision col = collision(rock.shape, platform.shape);
 	if (col.collides) {
 		if(rock.state.type == RockState::FALLING && col.normal == VECTOR2_UP) {
@@ -144,12 +149,11 @@ void collide(Rock& rock, const Platform& platform) {
 
 void collide(Rock& rock, Rock& other_rock) {
 	Collision col = collision(rock.shape, other_rock.shape);
+	// FIXME: This is makeing some weird behavior, I think it's something to do with the order of collision resolution
 	if (col.collides) {
 		rock.shape.position += col.normal * col.penetration;
 		other_rock.shape.position += -col.normal * col.penetration;
 		float j = linearImpulse(rock.velocity, other_rock.velocity, mass(rock), mass(other_rock), ROCK_RESTITUTION);
-		// rock.velocity += linearImpulse(rock.velocity, other_rock.velocity, rock.shape.radius * ROCK_RADIUS_MASS_RATIO, other_rock.shape.radius * ROCK_RADIUS_MASS_RATIO, ROCK_RESTITUTION) * col.normal;
-		// other_rock.velocity += linearImpulse(other_rock.velocity, other_rock.velocity, other_rock.shape.radius * ROCK_RADIUS_MASS_RATIO, rock.shape.radius * ROCK_RADIUS_MASS_RATIO, ROCK_RESTITUTION) * -1 * col.normal;
 		rock.velocity += (j/mass(rock)) * col.normal;
 		other_rock.velocity += (j/mass(other_rock)) * -col.normal;
 	}
@@ -159,13 +163,28 @@ void collide(Rock& rock, Ship& ship) {
 }
 
 void collide(Ship& ship, const Sea& sea) {
+	float seaHeight = heightAtX(sea, ship.shape.position.x);
+	Vector2 lower, upper;
+	boundingPoints(ship.shape, lower, upper);
+	if ( seaHeight < lower.y) {
+		// we say this is no collision
+		return;
+	}
+	float displacedWater = area((const Rectangle&)ship.shape);
+	if (upper.y > seaHeight) {
+		displacedWater = (seaHeight - lower.y);
+	}
+	ship.velocity += VECTOR2_UP * displacedWater * GRAVITATIONAL_CONSTANT * FIXED_TIMESTEP;
+	auto drag = dragForce(ship.velocity, 100.f, mass(ship) * SHIP_AREA_MASS_RATIO);
+	ship.velocity += drag * FIXED_TIMESTEP;
 }
 
 void collide(Ship& ship, const Platform& platform) {
 	Collision col = collision(ship.shape, platform.shape);
 	if(col.collides) {
 		ship.shape.position += col.normal * col.penetration;
-		// ship.velocity += linearImpulse(
+		float j = linearImpulse(ship.velocity, VECTOR2_ZERO, mass(ship), mass(platform), SHIP_RESTITUTION);
+		ship.velocity += (j/mass(ship)) * col.normal;
 	}
 }
 

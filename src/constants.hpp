@@ -47,6 +47,8 @@ const float PLATFORM_AREA_MASS_RATIO = 2.f/3.f;
 
 // Magic Ships
 const float SHIP_AREA_MASS_RATIO = 2.f/3.f;
+const float SHIP_RESTITUTION = 0.00001f;
+const float SHIP_MAX_SPEED = 1.75f; // meters/second (remember to multiply by timestep)
 
 // Magic numbers for STAGE
 const float STAGE_MAX_PULL_LENGTH = 8.f;

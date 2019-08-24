@@ -19,7 +19,7 @@ struct Game {
 	Clock drawClock;
 	Clock updateClock;
 	ScreenInputState screenInputState;
-	float timeScale = 1.f;
+	float timeScale = 100.f;
 	bool end = false; // stop the game
 };
 

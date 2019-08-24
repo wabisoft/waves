@@ -14,17 +14,18 @@ void start(Game& game) {
 	game.stage = new Stage();
 	game.stage->sea.level = 13.3f;
 	createPlatform(*game.stage, {STAGE_WIDTH-35, STAGE_HEIGHT/2 -15}, 35, 30);
-	createPlatform(*game.stage, {STAGE_WIDTH-70, STAGE_HEIGHT/2 -15}, 35, 30);
+	// createPlatform(*game.stage, {STAGE_WIDTH-70, STAGE_HEIGHT/2 -15}, 35, 30);
 	createPlatform(*game.stage, {10.f, STAGE_HEIGHT/3}, 6, 2*STAGE_HEIGHT/3); // launching platform
 	// game.stage->rockSpawn = {10.f, 2*STAGE_HEIGHT/3 + 6};
-	game.stage->ship.shape = makeRectangle({STAGE_WIDTH/2, STAGE_HEIGHT/2 + 10}, 5, 3);
-	game.stage->ship.id = ++game.stage->id_src;
+	createShip(*game.stage, {STAGE_WIDTH/2, STAGE_HEIGHT-5}, 5, 3);
+	// game.stage->ship.shape = makeRectangle({STAGE_WIDTH/2, STAGE_HEIGHT-3 + 10}, 5, 3);
+	// game.stage->ship.id = ++game.stage->id_src;
 	game.stage->rockLimit = 4;
 	Vector2 rockSpawn = {STAGE_WIDTH-80, 2*STAGE_HEIGHT/3 + 6};
 	// game.stage->rockSpawn = {STAGE_WIDTH-50, 2*STAGE_HEIGHT/3 + 6};
-	createRock(*game.stage, rockSpawn, ROCK_MIN_RADIUS);
-	createRock(*game.stage, rockSpawn + Vector2{10.f, 0.f}, ROCK_MIN_RADIUS);
-	createRock(*game.stage, rockSpawn + Vector2{20.f, 0.f}, ROCK_MIN_RADIUS);
+	// createRock(*game.stage, rockSpawn, ROCK_MIN_RADIUS);
+	// createRock(*game.stage, rockSpawn + Vector2{10.f, 0.f}, ROCK_MIN_RADIUS);
+	// createRock(*game.stage, rockSpawn + Vector2{20.f, 0.f}, ROCK_MIN_RADIUS);
 	createRock(*game.stage, rockSpawn + Vector2{40.f, 0.f}, ROCK_MIN_RADIUS);
 	// TODO: Menu stuff
 	// TODO: Load first Stage, blah blah blah
