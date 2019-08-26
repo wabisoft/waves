@@ -16,7 +16,7 @@ inline void updateStandingShip(Ship& ship) {
 	// TODO: Something very similar to what we did in updateStandingRock
 }
 
-inline void updateSurfinShip(Ship& ship) {
+inline void updateSurfingShip(Ship& ship) {
 	// TODO: Keep the ship on the crest of the wave
 }
 
@@ -24,7 +24,7 @@ void updateShip(Ship& ship){
 	switch (ship.state.type) {
 		case ShipState::FALLING:  updateFallingShip(ship); break;
 		case ShipState::STANDING: break;
-		case ShipState::SURFIN: break;
+		case ShipState::SURFING: break;
 	}
 	updateVertices(ship.shape);
 }
