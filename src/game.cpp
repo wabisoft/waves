@@ -8,32 +8,37 @@
 #include "util.hpp"
 #include "maths.hpp"
 
+inline void loadStage(Game& game) {
+	// this is not how this function should work but for now let's hard code some level data
+	game.stage = Stage();
+	game.stage.sea.level = 13.3f;
+	createPlatform(game.stage, {STAGE_WIDTH-35, STAGE_HEIGHT/2 -15}, 35, 30);
+	// createPlatform(*game.stage, {STAGE_WIDTH-70, STAGE_HEIGHT/2 -15}, 35, 30);
+	createPlatform(game.stage, {10.f, STAGE_HEIGHT/3}, 6, 2*STAGE_HEIGHT/3); // launching platform
+	game.stage.rockSpawn = {10.f, 2*STAGE_HEIGHT/3 + 6};
+	createShip(game.stage, {STAGE_WIDTH/3, STAGE_HEIGHT-5}, 5, 3);
+	game.stage.rockLimit = 4;
+
+}
+
+inline void unloadStage(Game& game) {
+	game.stage = {};
+}
+
+inline void reloadStage(Game& game) {
+	unloadStage(game);
+	loadStage(game);
+}
+
 void start(Game& game) {
 	initGraphics(game.graphics, "Waves!!!");
-	// TODO: this should happen during stage loading which ideal is read from a file
-	game.stage = new Stage();
-	game.stage->sea.level = 13.3f;
-	createPlatform(*game.stage, {STAGE_WIDTH-35, STAGE_HEIGHT/2 -15}, 35, 30);
-	// createPlatform(*game.stage, {STAGE_WIDTH-70, STAGE_HEIGHT/2 -15}, 35, 30);
-	createPlatform(*game.stage, {10.f, STAGE_HEIGHT/3}, 6, 2*STAGE_HEIGHT/3); // launching platform
-	// game.stage->rockSpawn = {10.f, 2*STAGE_HEIGHT/3 + 6};
-	createShip(*game.stage, {STAGE_WIDTH/2, STAGE_HEIGHT-5}, 5, 3);
-	// game.stage->ship.shape = makeRectangle({STAGE_WIDTH/2, STAGE_HEIGHT-3 + 10}, 5, 3);
-	// game.stage->ship.id = ++game.stage->id_src;
-	game.stage->rockLimit = 4;
-	Vector2 rockSpawn = {STAGE_WIDTH-80, 2*STAGE_HEIGHT/3 + 6};
-	// game.stage->rockSpawn = {STAGE_WIDTH-50, 2*STAGE_HEIGHT/3 + 6};
-	// createRock(*game.stage, rockSpawn, ROCK_MIN_RADIUS);
-	// createRock(*game.stage, rockSpawn + Vector2{10.f, 0.f}, ROCK_MIN_RADIUS);
-	// createRock(*game.stage, rockSpawn + Vector2{20.f, 0.f}, ROCK_MIN_RADIUS);
-	createRock(*game.stage, rockSpawn + Vector2{40.f, 0.f}, ROCK_MIN_RADIUS);
+	loadStage(game);
 	// TODO: Menu stuff
 	// TODO: Load first Stage, blah blah blah
 }
 
 void run(Game& game) {
-	assert(game.stage != nullptr);
-	Stage& stage = *game.stage;
+	Stage& stage = game.stage;
 	int loopsPerUpdate = 0;
 	while (!game.end) {
 		processEvents(game);
@@ -52,22 +57,23 @@ void run(Game& game) {
 			draw(game.graphics, stage);
 			game.drawClock.restart();
 		}
+		if (game.stage.failed) { reloadStage(game); }
 	}
 }
 
 inline void startInput(Game& game, sf::Event& event) {
 	game.screenInputState.position = screen2GamePos(game.graphics, {event.mouseButton.x, event.mouseButton.y});
 	game.screenInputState.pressed = true;
-	processStartInput(*game.stage, game.screenInputState.position);
+	processStartInput(game.stage, game.screenInputState.position);
 }
 inline void continueInput(Game& game, sf::Event& event) {
 	game.screenInputState.position = screen2GamePos(game.graphics, {event.mouseMove.x, event.mouseMove.y});
-	processContinuingInput(*game.stage, game.screenInputState.position);
+	processContinuingInput(game.stage, game.screenInputState.position);
 }
 
 inline void endInput(Game& game, sf::Event& event) {
 	game.screenInputState.pressed = false;
-	processEndInput(*game.stage, game.screenInputState.position);
+	processEndInput(game.stage, game.screenInputState.position);
 }
 
 void processEvents(Game& game) {
@@ -90,7 +96,7 @@ void processEvents(Game& game) {
 
 void keyEvent(Game& game, sf::Event& event) {
 	switch (event.key.code) {
-		case sf::Keyboard::Key::P: game.stage->paused = !game.stage->paused; break;
+		case sf::Keyboard::Key::P: game.stage.paused = !game.stage.paused; break;
 		case sf::Keyboard::Key::Num1: game.timeScale = 1.f; break;
 		case sf::Keyboard::Key::Num2: game.timeScale = 2.f; break;
 		case sf::Keyboard::Key::Num3: game.timeScale = 3.f; break;
@@ -102,6 +108,5 @@ void keyEvent(Game& game, sf::Event& event) {
 }
 
 void stop(Game& game) {
-	delete game.stage;
 }
 

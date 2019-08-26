@@ -5,7 +5,8 @@
 		- [x] Not in love with the way this currently works. I think that the rock should check if it's velocity would move it from the platform and set it's state depend of that.
 	- [ ] roll rocks moving on platforms // Not sure if I actually care about this
 - [x] Get rocks launching off platforms
-- [ ] Get ship riding waves (most of the hard work was done in v1 (should mostly just need porting ...knock on wood...)
+- [x] Get ship riding waves (most of the hard work was done in v1 (should mostly just need porting ...knock on wood...)
+- [ ] Remove the notion of a "sea" and hold all the waves in the stage struct
 
 ## DONE
 - [x] Get platforms

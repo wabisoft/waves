@@ -17,6 +17,7 @@ struct Sea{
 };
 
 float heightAtX(const Sea& sea, float x); // return the y height of a sea at x
+Vector2 velocityAtX(const Sea& sea, float x); // return the velocity of all the waves at this poisition
 float slopeAtX(const Sea& sea, float x); // return the slope of the sea at x
 void fixedUpdate(Sea& sea); // Update the sea for this frame of the simulation
 void destroyWave(Sea& sea, Wave*);

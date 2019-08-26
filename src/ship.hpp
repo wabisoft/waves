@@ -9,16 +9,21 @@ struct ShipState {
 		Vector2 surfaceStart;
 		Vector2 surfaceEnd;
 	};
+	struct SurfingState {
+		uint8_t wave_id;
+	};
+
 	enum StateType {
 		FALLING = 1 << 0,
 		STANDING = 1 << 1,
 		SURFING = 1 << 2,
 	};
-	StateType type;
 
+	StateType type;
 	union {
 		StandingState standing;
 		FallingState falling;
+		SurfingState surfing;
 	};
 };
 
@@ -34,7 +39,7 @@ inline float mass(const Ship& ship) {
 	return area(ship.shape) * SHIP_AREA_MASS_RATIO;
 }
 
-void updateShip(Ship& ship);
+void updateShip(Stage& stage);
 uint8_t createShip(Stage& stage, Vector2 position, float width, float height);
 
 

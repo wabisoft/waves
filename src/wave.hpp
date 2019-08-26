@@ -21,11 +21,13 @@ struct Wave {
 };
 
 float heightAtX(const Wave& wave, float x);
+Vector2 velocityAtX(const Wave& wave, float x);
 float slopeAtX(const Wave & wave, float x); // derivative of height
 float minimumX(const Wave& wave);
 float maximumX(const Wave& wave);
 
-void updateWaves(Sea& sea);
+void updateWaves(Stage& stage);
 int createWave(Sea& sea, Vector2 position, float amplitude);
 
-// Wave& findClosestWave(Sea& sea, Vector2 position); // return the closest wave
+int findWaveAtX(const Sea& sea, float x);
+Wave& findWave(Sea& sea, uint8_t wave_id);

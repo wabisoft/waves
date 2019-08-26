@@ -39,12 +39,8 @@ struct Stage{
 	int rockLimit = 0;
 	int usedRocks = 0;
 	bool paused = false;
+	bool failed = false;
 };
-
-// void dispatchEvent(const Event& event){
-	// TODO: dispatch event and do things
-// }
-//
 
 void update(Stage& stage, float deltaTime);
 Entity makeSelectionAtPosition(Stage& stage, Vector2 position);

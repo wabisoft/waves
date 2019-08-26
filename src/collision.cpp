@@ -175,13 +175,31 @@ void collide(Ship& ship, const Sea& sea) {
 		displacedWater = (seaHeight - lower.y);
 	}
 	ship.velocity += VECTOR2_UP * displacedWater * GRAVITATIONAL_CONSTANT * FIXED_TIMESTEP;
+	ship.velocity += velocityAtX(sea, ship.shape.position.x) * FIXED_TIMESTEP;
 	auto drag = dragForce(ship.velocity, 100.f, mass(ship) * SHIP_AREA_MASS_RATIO);
 	ship.velocity += drag * FIXED_TIMESTEP;
-}
+
+	if (sea.numWaves < 0) { return; } // nothing to do for no waves
+	int closestWaveIndex = findWaveAtX(sea, ship.shape.position.x);
+	if (closestWaveIndex < 0) {
+		if (sea.numWaves > 0) assert(false);
+		return;
+	} // if there are no waves then do nothing
+	const Wave& wave = sea.waves[closestWaveIndex];
+	float distFromWave = std::abs(ship.shape.position.x - wave.position.x);
+	if (distFromWave < 0.1) {
+		ship.state = {};
+		ship.state.type = ShipState::SURFING;
+		ship.state.surfing.wave_id = wave.id;
+	}
+	}
 
 void collide(Ship& ship, const Platform& platform) {
 	Collision col = collision(ship.shape, platform.shape);
 	if(col.collides) {
+		if(ship.state.type != ShipState::STANDING && col.normal == VECTOR2_UP) {
+			ship.state = {ShipState::STANDING, {{col.surfaceStart, col.surfaceEnd}}};
+		}
 		ship.shape.position += col.normal * col.penetration;
 		float j = linearImpulse(ship.velocity, VECTOR2_ZERO, mass(ship), mass(platform), SHIP_RESTITUTION);
 		ship.velocity += (j/mass(ship)) * col.normal;

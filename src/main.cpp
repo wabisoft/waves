@@ -94,7 +94,7 @@ void test_shapes_and_shit() {
 
 void do_normal_shit() {
 	Game game;
-	Stage& stage = *game.stage;
+	Stage& stage = game.stage;
 	std::cout << "Game: " << sizeof(game) << std::endl;
 	std::cout << "Stage: " << sizeof(stage) << std::endl;
 	std::cout << "Ship : " << sizeof(stage.ship) << std::endl;

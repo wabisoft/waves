@@ -3,6 +3,7 @@
 
 #include "clock.hpp"
 #include "graphics.hpp"
+#include "stage.hpp"
 #include "prelude.hpp"
 
 // TODO: (maybe) We will likely need a game struct to hold on to graphics and
@@ -14,12 +15,12 @@ struct ScreenInputState {
 };
 
 struct Game {
-	Stage * stage;
+	Stage stage;
 	Graphics graphics;
 	Clock drawClock;
 	Clock updateClock;
 	ScreenInputState screenInputState;
-	float timeScale = 100.f;
+	float timeScale = 1.f;
 	bool end = false; // stop the game
 };
 

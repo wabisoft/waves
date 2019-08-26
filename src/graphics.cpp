@@ -117,5 +117,6 @@ inline void drawInfoText(Graphics& graphics, const Stage& stage) {
 		infostream << "V:						" << stage.rocks[0].velocity << std::endl;
 	}
 	infostream << "RockState:				" << stage.rocks[0].state.type << std::endl;
+	infostream << "ShipState:				" << stage.ship.state.type << std::endl;
 	drawText(graphics, infostream.str(), {3, 3}, 13);
 }

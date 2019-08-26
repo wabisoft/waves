@@ -20,14 +20,15 @@ void update(Stage& stage, float deltaTime){
 
 	// Entity e = findRockAtPosition(stage, stage.rockSpawn);
 	// if (e.type == NONE && stage.usedRocks < stage.rockLimit) {
-	// 	createRock(stage, stage.rockSpawn, ROCK_MAX_RADIUS - 1);
-	// }
+	if(stage.numRocks < 1) {
+		createRock(stage, stage.rockSpawn, ROCK_MAX_RADIUS - 1);
+	}
 	if (stage.numAABBS > MAX_AABBS)
 		std::cout << "what the actual fuck" << std::endl;
 	resolveCollisions(stage);
 	updateRocks(stage);
-	updateWaves(stage.sea);
-	updateShip(stage.ship);
+	updateWaves(stage);
+	updateShip(stage);
 }
 
 
@@ -128,7 +129,7 @@ void processEndInput(Stage& stage, Vector2 position) {
 		Vector2 force = (pull/pullLength) * throwMag;
 		rock.velocity += force;
 		rock.state = {RockState::FALLING, {}};
-		stage.selection = {};
+		stage.selection = Selection{};
 		stage.pullPosition = VECTOR2_ZERO;
 		stage.phase = SELECT;
 	}

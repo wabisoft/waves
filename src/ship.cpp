@@ -13,20 +13,51 @@ inline void updateFallingShip(Ship& ship) {
 }
 
 inline void updateStandingShip(Ship& ship) {
-	// TODO: Something very similar to what we did in updateStandingRock
+	assert(ship.state.type == ShipState::STANDING);
+	ship.velocity *= 0.75;
+	ship.velocity += GRAVITY * FIXED_TIMESTEP;
+	ship.shape.position += ship.velocity;
+
+	Vector2 futurePos = ship.shape.position + ship.velocity;
+	Vector2& start = ship.state.standing.surfaceStart;
+	Vector2& end = ship.state.standing.surfaceEnd;
+	Vector2 start2Rock = futurePos - start;
+	Vector2 start2End = end - start;
+	Vector2 normalizedStart2End = normalized(start2End);
+	float proj = dot(start2Rock, normalizedStart2End);
+	Vector2 anchor = start +  normalizedStart2End * proj;
+	Vector2 anchorRelPos = anchor - ship.shape.position;
+	float sqMagAnchorRelPos = squaredMagnitude(anchorRelPos);
+	float sqShipHalfHeight = (ship.shape.height/2) * (ship.shape.height / 2);
+	bool bound = bounded(start, end, anchor);
+	bool anchorOnSurface = sqMagAnchorRelPos <= sqShipHalfHeight;
+	bool staysInContact = bound && anchorOnSurface;
+	if (!staysInContact) {
+		ship.state = {ShipState::FALLING, {}};
+	}
+
 }
 
-inline void updateSurfingShip(Ship& ship) {
+inline void updateSurfingShip(Stage& stage, Ship& ship) {
 	// TODO: Keep the ship on the crest of the wave
+	Wave & wave = findWave(stage.sea, ship.state.surfing.wave_id);
+	ship.velocity.x = wave.velocity.x;
+	updateFallingShip(ship); // do all the same things you do for a falling ship
+	// ship.shape.position.x = wave.position.x;
 }
 
-void updateShip(Ship& ship){
+void updateShip(Stage& stage){
+	Ship& ship = stage.ship;
 	switch (ship.state.type) {
 		case ShipState::FALLING:  updateFallingShip(ship); break;
-		case ShipState::STANDING: break;
-		case ShipState::SURFING: break;
+		case ShipState::STANDING: updateStandingShip(ship); break;
+		case ShipState::SURFING: updateSurfingShip(stage, ship); break;
 	}
 	updateVertices(ship.shape);
+	Vector2& shipPos = ship.shape.position;
+	if (shipPos.x > STAGE_WIDTH || shipPos.x < 0 || shipPos.y < 0) {
+		stage.failed = true;
+	}
 }
 
 
