@@ -63,7 +63,7 @@ Vector2 velocityAtX(const Wave& wave, float x) {
 		if (max < x) { return VECTOR2_ZERO; }
 		float min = minimumX(wave);
 		float halfLength = (max - min)/2.f;
-		return (halfLength - distFromMid) * wave.velocity;
+		return ((halfLength - distFromMid)/halfLength) * wave.velocity;
 	}
 }
 
