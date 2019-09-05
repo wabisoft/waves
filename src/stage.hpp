@@ -33,9 +33,7 @@ struct Stage{
 	Rock rocks[MAX_ROCKS];
 	Platform platforms[MAX_PLATFORMS];
 	AABB aabbs[MAX_AABBS];
-	// std::vector<AABBPair> aabbPairs;
 	Vector2 rockSpawn;
-	// Vector2 pullPosition; // the position of the throw pull (just used for drawing)
 	Selection selection;
 	uint8_t id_src = 0;
 	int numRocks = 0;
