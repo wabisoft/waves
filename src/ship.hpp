@@ -13,7 +13,7 @@ struct ShipState {
 		uint8_t wave_id;
 	};
 
-	enum StateType {
+	enum StateType : uint8_t {
 		FALLING = 1 << 0,
 		STANDING = 1 << 1,
 		SURFING = 1 << 2,
