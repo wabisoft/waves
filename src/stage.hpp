@@ -10,15 +10,21 @@
 #include "ship.hpp"
 
 struct Selection {
+	enum State : uint8_t {
+		SELECT		= 1 << 0,
+		RESIZE 		= 1 << 1,
+		PULL 		= 1 << 2,
+	};
+	State state = SELECT;
 	Entity entity;
+	Vector2 entityPosition;
+	Vector2 pullPosition;
 	bool active = false;
 };
 
-enum Phase : uint8_t {
-	SELECT		= 1 << 0, // XXX: I think we can get away with just SELECT, RESIZE and PULL if we hold a sized flag in Rock
-	RESIZE 		= 1 << 1,
-	PREPULL 	= 1 << 2,
-	PULL 		= 1 << 3,
+struct WinCondition {
+	int timeInAreaForWin = 0;
+	Rectangle winArea;
 };
 
 struct Stage{
@@ -27,11 +33,8 @@ struct Stage{
 	Rock rocks[MAX_ROCKS];
 	Platform platforms[MAX_PLATFORMS];
 	AABB aabbs[MAX_AABBS];
-	// std::vector<AABBPair> aabbPairs;
 	Vector2 rockSpawn;
-	Vector2 pullPosition; // the position of the throw pull (just used for drawing)
 	Selection selection;
-	Phase phase = SELECT;
 	uint8_t id_src = 0;
 	int numRocks = 0;
 	int numPlatforms = 0;
