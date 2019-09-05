@@ -9,41 +9,22 @@
 #include "sea.hpp"
 #include "ship.hpp"
 
-struct SelectionState {
-	struct SelectState { };
-	struct ResizeState {
-		Entity entity;
-		Vector2 position;
-	};
-	struct PullState{
-		Entity entity;
-		Vector2 entityPosition;
-		Vector2 pullPosition;
-	};
-
-	enum StateType : uint8_t {
+struct Selection {
+	enum State : uint8_t {
 		SELECT		= 1 << 0,
 		RESIZE 		= 1 << 1,
 		PULL 		= 1 << 2,
 	};
-	StateType type;
-	union {
-		SelectState select;
-		ResizeState resize;
-		PullState pull;
-	};
-};
-
-struct Selection {
+	State state = SELECT;
 	Entity entity;
+	Vector2 entityPosition;
+	Vector2 pullPosition;
 	bool active = false;
-	SelectionState state = { SelectionState::SELECT, {} };
 };
 
-enum Phase : uint8_t {
-	SELECT		= 1 << 0, // XXX: I think we can get away with just SELECT, RESIZE and PULL if we hold a sized flag in Rock
-	RESIZE 		= 1 << 1,
-	PULL 		= 1 << 2,
+struct WinCondition {
+	int timeInAreaForWin = 0;
+	Rectangle winArea;
 };
 
 struct Stage{
@@ -56,7 +37,6 @@ struct Stage{
 	Vector2 rockSpawn;
 	// Vector2 pullPosition; // the position of the throw pull (just used for drawing)
 	Selection selection;
-	// Phase phase = SELECT;
 	uint8_t id_src = 0;
 	int numRocks = 0;
 	int numPlatforms = 0;

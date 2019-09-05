@@ -43,8 +43,7 @@ Entity makeSelectionAtPosition(Stage& stage, Vector2 position) {
 }
 
 void clearSelection(Stage& stage) {
-	stage.selection = {};
-	stage.phase = SELECT;
+	stage.selection = {}; // clears the selection
 }
 
 inline bool validateAndSetPullPosition(Stage& stage,  Vector2 position) {
@@ -60,69 +59,80 @@ inline bool validateAndSetPullPosition(Stage& stage,  Vector2 position) {
 	// }
 	float squaredPullLength = squaredMagnitude(pull);
 	if(squaredPullLength < STAGE_MAX_PULL_LENGTH_SQUARED) {
-		stage.pullPosition = position;
+		stage.selection.pullPosition = position;
 		return true;
 	} else {
 		Vector2 relPos = normalized(position - rock.shape.position);
-		stage.pullPosition = rock.shape.position + relPos * STAGE_MAX_PULL_LENGTH;
+		stage.selection.pullPosition = rock.shape.position + relPos * STAGE_MAX_PULL_LENGTH;
 		return true;
 	}
 }
 
 void processStartInput(Stage& stage, Vector2 position) {
-	if (stage.phase == SELECT) {
-		makeSelectionAtPosition(stage, position);
-		if (! stage.selection.active) {
-			return;
-		} else if (stage.selection.entity.type == ROCK) {
-			Rock& rock = findRock(stage, stage.selection.entity.id);
-			if (!rock.sized){
-				stage.phase = RESIZE;
-			} else {
-				stage.phase = PULL;
+
+	switch(stage.selection.state) {
+		case Selection::SELECT:
+			makeSelectionAtPosition(stage, position);
+			if (! stage.selection.active) {
+				return;
+			} else if (stage.selection.entity.type == ROCK) {
+				Rock& rock = findRock(stage, stage.selection.entity.id);
+				if (!rock.sized){
+					stage.selection.state = Selection::RESIZE;
+				} else {
+					stage.selection.state= Selection::PULL;
+				}
 			}
-		}
-	}
-	if(stage.phase == RESIZE) {
-		makeSelectionAtPosition(stage, position);
-	} else if (stage.phase == PULL) {
-		if(validateAndSetPullPosition(stage, position)){
-			stage.phase = PULL;
-		}
+			break;
+		case Selection::RESIZE:
+			makeSelectionAtPosition(stage, position);
+			break;
+		case Selection::PULL:
+			if(validateAndSetPullPosition(stage, position)){
+				stage.selection.state = Selection::PULL;
+			}
+			break;
 	}
 }
 
 void processContinuingInput(Stage& stage, Vector2 position) {
-	if(stage.phase == SELECT){
-		// Such empty...
-	} else if (stage.phase == RESIZE) {
-		if (stage.selection.active && stage.selection.entity.type == ROCK) {
-			resizeRock(stage, stage.selection.entity.id, position);
-		} else {
-			return;
-		}
-	} else if (stage.phase == PULL) {
-		validateAndSetPullPosition(stage, position);
+	switch(stage.selection.state) {
+		case Selection::SELECT:
+			// Such empty...
+ 			break;
+		case Selection::RESIZE:
+			if (stage.selection.active && stage.selection.entity.type == ROCK) {
+				resizeRock(stage, stage.selection.entity.id, position);
+			} else {
+				return;
+			}
+		break;
+		case Selection::PULL:
+			validateAndSetPullPosition(stage, position);
+			break;
 	}
 }
 
 void processEndInput(Stage& stage, Vector2 position) {
-	if (stage.phase == SELECT) {
-		// such empty ...
-	} else if (stage.phase == RESIZE) { // if we're resizing
+	switch(stage.selection.state) {
+		case Selection::SELECT:
+			// such empty ...
+		break;
+	case Selection::RESIZE: // if we're resizing
 		if (stage.selection.active) { // and we have a selection
 			resizeRock(stage, stage.selection.entity.id, position);
-			stage.phase = SELECT; // move on to throwing
+			stage.selection.state = Selection::SELECT; // move on to throwing
 			return;
 		} else {
 			stage.selection = Selection(); // otherwise safety clear the selection and move on
 			return;
 		}
-	} else if (stage.phase == PULL){ // if we're throwing
+		break;
+	case Selection::PULL: { // if we're throwing
 		assert(stage.selection.active); // I think we should always have a selection in this phase
 		validateAndSetPullPosition(stage, position);
 		Rock& rock = findRock(stage, stage.selection.entity.id);
-		Vector2 pull = rock.shape.position - stage.pullPosition;
+		Vector2 pull = rock.shape.position - stage.selection.pullPosition;
 		float pullLength = std::abs(magnitude(pull));
 		float throwMag = (pullLength / STAGE_MAX_PULL_LENGTH) * ROCK_MAX_SPEED;
 		rock.shape.position += 0.01f * pull; // If you dont so this then to collision get all weird and bad things happen
@@ -130,7 +140,9 @@ void processEndInput(Stage& stage, Vector2 position) {
 		rock.velocity += force;
 		rock.state = {RockState::FALLING, {}};
 		stage.selection = Selection{};
-		stage.pullPosition = VECTOR2_ZERO;
-		stage.phase = SELECT;
+		stage.selection.pullPosition = VECTOR2_ZERO;
+		clearSelection(stage);
+		}
+		break;
 	}
 }

@@ -31,9 +31,9 @@ void draw(Graphics& graphics, Stage& stage) {
 	drawGrid(graphics);
 	draw(graphics, stage.platforms, stage.numPlatforms);
 	draw(graphics, stage.sea);
-	if(stage.selection.active && stage.pullPosition != VECTOR2_ZERO) {
+	if(stage.selection.active && stage.selection.state == Selection::PULL && stage.selection.pullPosition != VECTOR2_ZERO) {
 		Rock& rock = findRock(stage, stage.selection.entity.id);
-		drawLine(graphics, rock.shape.position, stage.pullPosition, sf::Color::Blue);
+		drawLine(graphics, rock.shape.position, stage.selection.pullPosition, sf::Color::Blue);
 	}
 	drawRocks(graphics, stage);
 	drawShip(graphics, stage.ship);
@@ -116,7 +116,7 @@ inline void drawInfoText(Graphics& graphics, const Stage& stage) {
 		infostream << "P:						" << stage.rocks[0].shape.position<< std::endl;
 		infostream << "V:						" << stage.rocks[0].velocity << std::endl;
 	}
-	infostream << "RockState:				" << stage.rocks[0].state.type << std::endl;
-	infostream << "ShipState:				" << stage.ship.state.type << std::endl;
+	infostream << "RockState:				" << (int)stage.rocks[0].state.type << std::endl;
+	infostream << "ShipState:				" << (int)stage.ship.state.type << std::endl;
 	drawText(graphics, infostream.str(), {3, 3}, 13);
 }
