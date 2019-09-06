@@ -56,7 +56,9 @@ void updateShip(Stage& stage){
 	updateVertices(ship.shape);
 	Vector2& shipPos = ship.shape.position;
 	if (shipPos.x > STAGE_WIDTH || shipPos.x < 0 || shipPos.y < 0) {
-		stage.failed = true;
+		stage.state.type = StageState::FINISHED;
+		stage.state.finished.win = false;
+		// stage.failed = true;
 	}
 }
 

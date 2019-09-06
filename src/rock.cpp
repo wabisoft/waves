@@ -84,7 +84,7 @@ uint8_t createRock(Stage& stage, Vector2 position, float radius){
 	new_rock.shape.position = position;
 	new_rock.shape.radius = radius;
 	stage.numRocks++;
-	stage.usedRocks++;
+	// stage.usedRocks++;
 	createAABB(stage, AABB(new_rock));
 	return new_rock.id;
 }

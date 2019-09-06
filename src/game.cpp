@@ -17,7 +17,8 @@ inline void loadStage(Game& game) {
 	createPlatform(game.stage, {10.f, STAGE_HEIGHT/3}, 6, 2*STAGE_HEIGHT/3); // launching platform
 	game.stage.rockSpawn = {10.f, 2*STAGE_HEIGHT/3 + 6};
 	createShip(game.stage, {STAGE_WIDTH/3, STAGE_HEIGHT-5}, 5, 3);
-	game.stage.rockLimit = 4;
+	game.stage.state.type = StageState::RUNNING;
+	// game.stage.rockLimit = 4;
 
 }
 
@@ -57,7 +58,7 @@ void run(Game& game) {
 			draw(game.graphics, stage);
 			game.drawClock.restart();
 		}
-		if (game.stage.failed) { reloadStage(game); }
+		if (game.stage.state.type == StageState::FINISHED && !game.stage.state.finished.win) { reloadStage(game); }
 	}
 }
 
@@ -96,7 +97,13 @@ void processEvents(Game& game) {
 
 void keyEvent(Game& game, sf::Event& event) {
 	switch (event.key.code) {
-		case sf::Keyboard::Key::P: game.stage.paused = !game.stage.paused; break;
+		case sf::Keyboard::Key::P:
+			if (game.stage.state.type == StageState::PAUSED) {
+				game.stage.state.type = StageState::RUNNING;
+			} else {
+				game.stage.state.type = StageState::PAUSED;
+			}
+			break;
 		case sf::Keyboard::Key::Num1: game.timeScale = 1.f; break;
 		case sf::Keyboard::Key::Num2: game.timeScale = 2.f; break;
 		case sf::Keyboard::Key::Num3: game.timeScale = 3.f; break;
