@@ -22,9 +22,30 @@ struct Selection {
 	bool active = false;
 };
 
-struct WinCondition {
-	int timeInAreaForWin = 0;
-	Rectangle winArea;
+struct StageState {
+	struct Paused {
+		float time = 0.f;
+	};
+	struct Running {
+		float time = 0.f;
+	};
+	struct Finished {
+		bool win = false;
+	};
+	enum StateType : uint8_t {
+		PAUSED = 1 << 0,
+		RUNNING = 1 << 1,
+		FINISHED = 1 << 2,
+	};
+	StateType type = PAUSED;
+	Paused paused;
+	Running running;
+	Finished finished;
+};
+
+struct Win {
+	int timeInArea = 0;
+	Rectangle area;
 };
 
 struct Stage{
@@ -35,14 +56,16 @@ struct Stage{
 	AABB aabbs[MAX_AABBS];
 	Vector2 rockSpawn;
 	Selection selection;
+	Win win;
+	StageState state;
 	uint8_t id_src = 0;
 	int numRocks = 0;
 	int numPlatforms = 0;
 	int numAABBS = 0;
-	int rockLimit = 0;
-	int usedRocks = 0;
-	bool paused = false;
-	bool failed = false;
+	// int rockLimit = 0;
+	// int usedRocks = 0;
+	// bool paused = false;
+	// bool failed = false;
 };
 
 void update(Stage& stage, float deltaTime);

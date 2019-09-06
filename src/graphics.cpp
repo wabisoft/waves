@@ -38,7 +38,7 @@ void draw(Graphics& graphics, Stage& stage) {
 	drawRocks(graphics, stage);
 	drawShip(graphics, stage.ship);
 	drawInfoText(graphics, stage);
-	if (stage.paused) {
+	if (stage.state.type == StageState::PAUSED) {
 		drawText(graphics, "Paused", {(float)graphics.videoMode.width/2, (float)graphics.videoMode.height/2}, 24);
 	}
 	graphics.window.display();
@@ -108,6 +108,11 @@ inline void drawInfoText(Graphics& graphics, const Stage& stage) {
 	infostream << "Draw (Hz): 				" << 1/graphics.drawDelta << std::endl;
 	infostream << "Update (Hz): 			" << 1/graphics.updateDelta << std::endl;
 	infostream << "Loops/Update: 			" << graphics.loopsPerUpdate <<std::endl;
+	if (stage.state.type == StageState::RUNNING) {
+		infostream << "Running Time: 			" << stage.state.running.time <<std::endl;
+	} else if (stage.state.type == StageState::PAUSED) {
+		infostream << "Paused Time: 			" << stage.state.paused.time <<std::endl;
+	}
 	infostream << std::endl;
 	infostream << "#Rocks: 					" << stage.numRocks << std::endl;
 	infostream << "#Waves: 					" << stage.sea.numWaves << std::endl;

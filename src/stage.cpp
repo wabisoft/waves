@@ -14,21 +14,25 @@
 
 
 void update(Stage& stage, float deltaTime){
-	if (stage.paused) {
-		return;
-	}
+	switch(stage.state.type) {
+		case StageState::PAUSED:
+			stage.state.paused.time += deltaTime;
+			return; break;
 
-	// Entity e = findRockAtPosition(stage, stage.rockSpawn);
-	// if (e.type == NONE && stage.usedRocks < stage.rockLimit) {
-	if(stage.numRocks < 1) {
-		createRock(stage, stage.rockSpawn, ROCK_MAX_RADIUS - 1);
+		// NOTE: the absence of a break continues the switch, viz. default will still trigger
+		case StageState::RUNNING:
+			stage.state.running.time += deltaTime;
+		case StageState::FINISHED:
+		default: // keep running the simulation even if the game is over
+			if(stage.numRocks < 1) {
+				createRock(stage, stage.rockSpawn, ROCK_MAX_RADIUS - 1);
+			}
+			resolveCollisions(stage);
+			updateRocks(stage);
+			updateWaves(stage);
+			updateShip(stage);
+			break;
 	}
-	if (stage.numAABBS > MAX_AABBS)
-		std::cout << "what the actual fuck" << std::endl;
-	resolveCollisions(stage);
-	updateRocks(stage);
-	updateWaves(stage);
-	updateShip(stage);
 }
 
 
