@@ -124,12 +124,12 @@ void collide(Rock& rock, Sea& sea) {
 	Vector2 rockPosition = rock.shape.position;
 	Vector2 rockNextFramePosition = rock.shape.position + rock.velocity * FIXED_TIMESTEP;
 	if(rockPosition.y < sea.level) {
-		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI);
+		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x));
 		rock.active = 0;
 	} else if (rockPosition.y < heightAtX(sea, rockPosition.x)) {
 		// TODO: Find nearest wave and maybe distructively interfere with it?
 	} else if (rockNextFramePosition.y < sea.level) {
-		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI);
+		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x));
 		rock.active = 0;
 	}
 }
@@ -197,8 +197,12 @@ void collide(Ship& ship, const Sea& sea) {
 void collide(Ship& ship, const Platform& platform) {
 	Collision col = collision(ship.shape, platform.shape);
 	if(col.collides) {
-		if(ship.state.type != ShipState::STANDING && col.normal == VECTOR2_UP) {
-			ship.state = {ShipState::STANDING, {{col.surfaceStart, col.surfaceEnd}}};
+		if(ship.state.type != ShipState::STANDING) {
+			if (col.normal == VECTOR2_UP) {
+				ship.state = {ShipState::STANDING, {{col.surfaceStart, col.surfaceEnd}}};
+			} else {
+				ship.state = {ShipState::FALLING, {}};
+			}
 		}
 		ship.shape.position += col.normal * col.penetration;
 		float j = linearImpulse(ship.velocity, VECTOR2_ZERO, mass(ship), mass(platform), SHIP_RESTITUTION);

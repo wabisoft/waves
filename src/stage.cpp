@@ -30,7 +30,11 @@ void update(Stage& stage, float deltaTime){
 			resolveCollisions(stage);
 			updateRocks(stage);
 			updateWaves(stage);
-			updateShip(stage);
+			updateShip(stage, deltaTime);
+			if(stage.win.timeInArea >= stage.win.timeToWin) {
+				stage.state.type = StageState::FINISHED;
+				stage.state.finished.win = true;
+			}
 			break;
 	}
 }
@@ -149,4 +153,14 @@ void processEndInput(Stage& stage, Vector2 position) {
 		}
 		break;
 	}
+}
+
+Vector2 getPullForce(Stage& stage) {
+	assert(stage.selection.active && stage.selection.state == Selection::PULL);
+	Vector2 pull = stage.selection.entityPosition - stage.selection.pullPosition;
+	float pullLength = std::abs(magnitude(pull));
+	float throwMag = (pullLength / STAGE_MAX_PULL_LENGTH) * ROCK_MAX_SPEED;
+	// rock.shape.position += 0.01f * pull; // If you dont so this then to collision get all weird and bad things happen
+	return (pull/pullLength) * throwMag;
+
 }

@@ -44,8 +44,9 @@ struct StageState {
 };
 
 struct Win {
-	int timeInArea = 0;
-	Rectangle area;
+	float timeInArea = 0;
+	float timeToWin = 0.25;
+	Rectangle region;
 };
 
 struct Stage{
@@ -74,5 +75,6 @@ void clearSelection(Stage& stage);
 void processStartInput(Stage& stage, Vector2 position);
 void processContinuingInput(Stage& stage, Vector2 position);
 void processEndInput(Stage& stage, Vector2 position);
+Vector2 getPullForce(Stage& stage);
 
 inline bool validateAndSetPullPosition(Stage& stage, Vector2 position);

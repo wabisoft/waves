@@ -36,9 +36,8 @@ void updateWaves(Stage& stage){
 		} else {
 			wave.decay += FIXED_TIMESTEP * WAVE_NEGATIVE_DECAY_MULTIPLIER;
 		}
-
 		// Update velocity with timestep
-		wave.velocity[0] += FIXED_TIMESTEP * 0.1f * wave.amplitude;
+		wave.velocity[0] += FIXED_TIMESTEP * 0.05f * wave.amplitude * wave.direction;
 		wave.velocity += dragForce(wave.velocity, 1.225f, .4f);
 		// Update position with velocity;
 		wave.position += wave.velocity;
@@ -81,7 +80,7 @@ float maximumX(const Wave& wave) {
 	return wave.position.x + 2.5f * (1 / WAVE_WIDTH_MULTIPLIER);
 }
 
-int createWave(Sea& sea, Vector2 position, float amplitude){
+int createWave(Sea& sea, Vector2 position, float amplitude, short direction){
 	if(sea.numWaves >= MAX_WAVES) {
 		return -1;
 	}
@@ -91,6 +90,8 @@ int createWave(Sea& sea, Vector2 position, float amplitude){
 	new_wave.position = position;
 	new_wave.amplitude = amplitude;
 	new_wave.active = true;
+	assert(direction == -1 || direction == 1);
+	new_wave.direction = direction;
 	new_wave.id = ++sea.id_src;
 	return sea.numWaves++;
 }

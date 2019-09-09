@@ -39,7 +39,7 @@ inline float mass(const Ship& ship) {
 	return area(ship.shape) * SHIP_AREA_MASS_RATIO;
 }
 
-void updateShip(Stage& stage);
+void updateShip(Stage& stage, float deltaTime);
 uint8_t createShip(Stage& stage, Vector2 position, float width, float height);
 
 

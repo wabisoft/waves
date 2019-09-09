@@ -12,7 +12,8 @@ inline void updateFallingShip(Ship& ship) {
 	ship.shape.position += ship.velocity;
 }
 
-inline void updateStandingShip(Ship& ship) {
+inline void updateStandingShip(Stage& stage, float deltaTime) {
+	Ship& ship = stage.ship;
 	assert(ship.state.type == ShipState::STANDING);
 	ship.velocity *= 0.75;
 	ship.velocity += GRAVITY * FIXED_TIMESTEP;
@@ -35,6 +36,14 @@ inline void updateStandingShip(Ship& ship) {
 	if (!staysInContact) {
 		ship.state = {ShipState::FALLING, {}};
 	}
+	bool inWinRegion = true;
+	for(int i = 0; i < ship.shape.size; ++i) {
+		inWinRegion &= pointInsidePolygon(ship.shape.vertices[i], stage.win.region);
+		if (!inWinRegion) {break;}
+	}
+	if (inWinRegion) {
+		stage.win.timeInArea += deltaTime;
+	}
 
 }
 
@@ -46,11 +55,11 @@ inline void updateSurfingShip(Stage& stage, Ship& ship) {
 	// ship.shape.position.x = wave.position.x;
 }
 
-void updateShip(Stage& stage){
+void updateShip(Stage& stage, float deltaTime){
 	Ship& ship = stage.ship;
 	switch (ship.state.type) {
 		case ShipState::FALLING:  updateFallingShip(ship); break;
-		case ShipState::STANDING: updateStandingShip(ship); break;
+		case ShipState::STANDING: updateStandingShip(stage, deltaTime); break;
 		case ShipState::SURFING: updateSurfingShip(stage, ship); break;
 	}
 	updateVertices(ship.shape);

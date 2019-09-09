@@ -17,8 +17,8 @@ void initGraphics(Graphics & graphics, const char * title) {
 	graphics.settings.antialiasingLevel = 100;
 	graphics.videoMode = sf::VideoMode::getDesktopMode();
 	graphics.window.create(graphics.videoMode, title, sf::Style::Default, graphics.settings);
-	graphics.window.setFramerateLimit(100);
-	graphics.window.setVerticalSyncEnabled(true);
+	graphics.window.setFramerateLimit(1.f/FRAME_RATE);
+	// graphics.window.setVerticalSyncEnabled(true);
 	graphics.ppu = (float)graphics.videoMode.width / STAGE_WIDTH;
 	if (!graphics.gameFont.loadFromFile("assets/fonts/IBMPlexMono-Regular.ttf")){
 		std::cout << "Couldn't load font" << std::endl;
@@ -40,7 +40,10 @@ void draw(Graphics& graphics, Stage& stage) {
 	drawInfoText(graphics, stage);
 	if (stage.state.type == StageState::PAUSED) {
 		drawText(graphics, "Paused", {(float)graphics.videoMode.width/2, (float)graphics.videoMode.height/2}, 24);
+	} else if (stage.state.type == StageState::FINISHED && stage.state.finished.win == true) {
+		drawText(graphics, "You Win!", {(float)graphics.videoMode.width/2, (float)graphics.videoMode.height/2}, 24);
 	}
+	drawPolygon(graphics, stage.win.region, sf::Color(0, 204, 102));
 	graphics.window.display();
 }
 

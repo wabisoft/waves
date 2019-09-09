@@ -15,6 +15,8 @@ inline void loadStage(Game& game) {
 	createPlatform(game.stage, {STAGE_WIDTH-35, STAGE_HEIGHT/2 -15}, 35, 30);
 	// createPlatform(*game.stage, {STAGE_WIDTH-70, STAGE_HEIGHT/2 -15}, 35, 30);
 	createPlatform(game.stage, {10.f, STAGE_HEIGHT/3}, 6, 2*STAGE_HEIGHT/3); // launching platform
+	// makeRectangle(position, width, height);
+	game.stage.win.region = makeRectangle({STAGE_WIDTH-35, STAGE_HEIGHT/2 + 1.5}, 15, 5);
 	game.stage.rockSpawn = {10.f, 2*STAGE_HEIGHT/3 + 6};
 	createShip(game.stage, {STAGE_WIDTH/3, STAGE_HEIGHT-5}, 5, 3);
 	game.stage.state.type = StageState::RUNNING;

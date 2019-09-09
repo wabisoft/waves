@@ -98,8 +98,8 @@ Collision collision(const Circle& circle, const Polygon<N>& polygon) {
 						col.penetration = std::abs(relpos_mag - circle.radius);
 						col.surfaceStart = vertex;
 						col.surfaceEnd = other_vertex;
-						// col.normal = relpos / relpos_mag; // since we are on a corner we just push out away from vertex;
-						col.normal = normal;
+						col.normal = relpos / relpos_mag; // since we are on a corner we just push out away from vertex;
+						// col.normal = normal;
 						collisions.push_back(col);
 					}
 				}
