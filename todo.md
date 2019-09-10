@@ -30,6 +30,7 @@
 
 * Slow time as a mechanic of the game
 * Bouncy platforms
+* Speed independence for waves determined by ball "type" (more orthoganality)
 
 
 

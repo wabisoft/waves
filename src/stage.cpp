@@ -2,6 +2,7 @@
 #include "collision.hpp"
 #include "constants.hpp"
 #include "maths.hpp"
+#include "physics.hpp"
 #include "platform.hpp"
 #include "printing.hpp"
 #include "rock.hpp"
@@ -42,12 +43,14 @@ void update(Stage& stage, float deltaTime){
 
 Entity makeSelectionAtPosition(Stage& stage, Vector2 position) {
 	// For now we only select rocks so let's find our rock
-	Entity entity = findRockAtPosition(stage, position);
-	if (entity.id && entity.type != NONE) { // id defaults 0 and is always > 0 if it refers to an entity
-		stage.selection.entity = entity;
+	int rockIdx = findRockAtPosition(stage, position);
+	if (rockIdx >= 0 && rockIdx < stage.numRocks) {
+		Rock& rock = stage.rocks[rockIdx];
+		stage.selection.entity = {rock.id, ROCK};
 		stage.selection.active = true;
+		stage.selection.entityPosition = rock.shape.position;
 	}
-	return entity;
+	return stage.selection.entity;
 }
 
 void clearSelection(Stage& stage) {
@@ -157,10 +160,32 @@ void processEndInput(Stage& stage, Vector2 position) {
 
 Vector2 getPullForce(Stage& stage) {
 	assert(stage.selection.active && stage.selection.state == Selection::PULL);
-	Vector2 pull = stage.selection.entityPosition - stage.selection.pullPosition;
+	Rock& rock = findRock(stage, stage.selection.entity.id);
+	Vector2 pull = rock.shape.position - stage.selection.pullPosition;
 	float pullLength = std::abs(magnitude(pull));
 	float throwMag = (pullLength / STAGE_MAX_PULL_LENGTH) * ROCK_MAX_SPEED;
 	// rock.shape.position += 0.01f * pull; // If you dont so this then to collision get all weird and bad things happen
 	return (pull/pullLength) * throwMag;
 
+}
+
+std::vector<Vector2> pullParabola(Stage& stage) {
+	assert(stage.selection.active && stage.selection.state == Selection::PULL);
+	std::vector<Vector2> parabola;
+	Rock& rock = findRock(stage, stage.selection.entity.id);
+	Vector2 f = rock.velocity + getPullForce(stage);
+	Vector2 wouldBePosition = rock.shape.position;
+	const int stepsize = 5;
+	const float step = stepsize*FIXED_TIMESTEP; // look at the projectile would be position every 10 updates
+	const float t = 2; // (seconds)
+	const int size = (int)(t/step)+1;
+	parabola.reserve(size);
+	parabola.push_back(wouldBePosition);
+	for (int i = 1; i < size; ++i){
+		f += GRAVITY * step;
+		wouldBePosition += f * stepsize;
+		parabola.push_back(wouldBePosition);
+		if(outOfBounds(wouldBePosition)) { break; }
+	}
+	return parabola;
 }

@@ -14,6 +14,7 @@
 #include "graphics.hpp"
 #include "maths.hpp"
 #include "printing.hpp"
+#include "serialize.hpp"
 #include "stage.hpp"
 #include "util.hpp"
 
@@ -92,20 +93,31 @@ void test_shapes_and_shit() {
 	}
 }
 
+inline void test_deserializer() {
+	std::string data = "{\"sea_level\":13.3,\"platforms\":[{\"width\":35,\"height\":30,\"position\":[93,21],\"rotation\":0},{\"width\":6,\"height\":48,\"position\":[10,24],\"rotation\":0}],\"ship\":{\"width\":5,\"height\":3,\"position\":[42.6667,67],\"rotation\":0},\"rock_spawn\":[10,54],\"win\":{\"time\":0.25,\"region\":{\"width\":15,\"height\":5,\"position\":[93,37.5],\"rotation\":0}}}";
+	Error e;
+	Stage stage = deserializeStage(data, e);
+	if (e.no) {
+		std::cout << "Shoot!" << std::endl;
+	} else {
+		std::cout << "Yippee!" << std::endl;
+	}
+}
+
 void do_normal_shit() {
 	Game game;
 	Stage& stage = game.stage;
-	std::cout << "Game: " << sizeof(game) << std::endl;
-	std::cout << "Stage: " << sizeof(stage) << std::endl;
-	std::cout << "Ship : " << sizeof(stage.ship) << std::endl;
-	std::cout << "Sea: " << sizeof(stage.sea) << std::endl;
-	std::cout << "Rock: " << sizeof(stage.rocks[0]) << std::endl;
-	std::cout << "Wave: " << sizeof(stage.sea.waves[0]) << std::endl;
-	std::cout << "Platform: " << sizeof(stage.platforms[0]) << std::endl;
-	std::cout << "AABB: " << sizeof(AABB(stage.platforms[0])) << std::endl;
-	std::cout << "EntityType: " << sizeof((EntityType)1) << std::endl;
-	std::cout << "Vector2: " << sizeof(Vector2{0,0}) << std::endl;
-	std::cout << "RockState: " << sizeof(RockState{}) << std::endl;
+	// std::cout << "Game: " << sizeof(game) << std::endl;
+	// std::cout << "Stage: " << sizeof(stage) << std::endl;
+	// std::cout << "Ship : " << sizeof(stage.ship) << std::endl;
+	// std::cout << "Sea: " << sizeof(stage.sea) << std::endl;
+	// std::cout << "Rock: " << sizeof(stage.rocks[0]) << std::endl;
+	// std::cout << "Wave: " << sizeof(stage.sea.waves[0]) << std::endl;
+	// std::cout << "Platform: " << sizeof(stage.platforms[0]) << std::endl;
+	// std::cout << "AABB: " << sizeof(AABB(stage.platforms[0])) << std::endl;
+	// std::cout << "EntityType: " << sizeof((EntityType)1) << std::endl;
+	// std::cout << "Vector2: " << sizeof(Vector2{0,0}) << std::endl;
+	// std::cout << "RockState: " << sizeof(RockState{}) << std::endl;
 	start(game);
 	run(game);
 	stop(game);
@@ -114,5 +126,6 @@ void do_normal_shit() {
 int main() {
 	do_normal_shit();
 	// test_shapes_and_shit();
+	// test_deserializer();
 	return 0;
 }

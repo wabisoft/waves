@@ -7,6 +7,7 @@
 
 #include "constants.hpp"
 #include "graphics.hpp"
+#include "physics.hpp"
 #include "maths.hpp"
 #include "printing.hpp"
 #include "rock.hpp"
@@ -29,8 +30,8 @@ void initGraphics(Graphics & graphics, const char * title) {
 void draw(Graphics& graphics, Stage& stage) {
 	graphics.window.clear(sf::Color::Black);
 	drawGrid(graphics);
-	draw(graphics, stage.platforms, stage.numPlatforms);
-	draw(graphics, stage.sea);
+	drawPlatforms(graphics, stage.platforms, stage.numPlatforms);
+	drawSea(graphics, stage.sea);
 	if(stage.selection.active && stage.selection.state == Selection::PULL && stage.selection.pullPosition != VECTOR2_ZERO) {
 		Rock& rock = findRock(stage, stage.selection.entity.id);
 		drawLine(graphics, rock.shape.position, stage.selection.pullPosition, sf::Color::Blue);
@@ -44,11 +45,12 @@ void draw(Graphics& graphics, Stage& stage) {
 		drawText(graphics, "You Win!", {(float)graphics.videoMode.width/2, (float)graphics.videoMode.height/2}, 24);
 	}
 	drawPolygon(graphics, stage.win.region, sf::Color(0, 204, 102));
+	drawUI(graphics, stage);
 	graphics.window.display();
 }
 
 
-inline void draw(Graphics& graphics, const Sea& sea) {
+inline void drawSea(Graphics& graphics, const Sea& sea) {
 	std::vector<sf::Vertex> vertices;
 	float step = 1 / graphics.ppu;
 	for (float i = 0; i < STAGE_WIDTH; i += step)
@@ -63,7 +65,6 @@ inline void draw(Graphics& graphics, const Sea& sea) {
 }
 
 inline void drawShip(Graphics& graphics, const Ship& ship) {
-
 	drawPolygon(graphics, ship.shape, sf::Color::White);
 	drawId(graphics, ship.id, ship.shape.position);
 }
@@ -83,7 +84,7 @@ inline void drawRocks(Graphics& graphics, const Stage& stage) {
 	}
 }
 
-inline void draw(Graphics& graphics, const Platform* platforms, int numPlatforms) {
+inline void drawPlatforms(Graphics& graphics, const Platform* platforms, int numPlatforms) {
 	for (int i = 0; i < numPlatforms; ++i){
 		drawPolygon(graphics, platforms[i].shape, sf::Color::Magenta);
 		drawId(graphics, platforms[i].id, platforms[i].shape.position);
@@ -104,6 +105,25 @@ inline void drawGrid(Graphics& graphics) {
 		vertices.push_back(sf::Vertex(game2ScreenPos(graphics, Vector2{STAGE_WIDTH, i}), c));
 	}
 	graphics.window.draw(&vertices[0], vertices.size(), sf::Lines);
+}
+
+inline void drawUI(Graphics& graphics, Stage& stage) {
+	switch(stage.selection.state) {
+		case Selection::SELECT: break;
+		case Selection::RESIZE: break;
+		case Selection::PULL:
+			{
+				std::vector<Vector2> parabola = pullParabola(stage);
+				std::vector<sf::Vertex> drawVertices;
+				drawVertices.reserve(parabola.size());
+				sf::Color c = {183, 183,183};
+				for (Vector2 worldPoint : parabola) {
+					drawVertices.push_back(sf::Vertex(game2ScreenPos(graphics, worldPoint), c));
+				}
+				graphics.window.draw(&drawVertices[0], drawVertices.size(), sf::LineStrip);
+			}
+			break;
+	}
 }
 
 inline void drawInfoText(Graphics& graphics, const Stage& stage) {

@@ -115,14 +115,14 @@ Rock& findRock(Stage& stage, uint8_t rock_id) {
 	return stage.rocks[rock_idx];
 }
 
-Entity findRockAtPosition(Stage& stage, Vector2 position) {
+int findRockAtPosition(const Stage& stage, Vector2 position) {
 	for (int i = 0; i < stage.numRocks; ++i) {
 		float dist = magnitude(position - stage.rocks[i].shape.position);
 		if (dist <= stage.rocks[i].shape.radius) {
-			return {stage.rocks[i].id, ROCK};
+			return i;
 		}
 	}
-	return {};
+	return -1;
 }
 
 void resizeRock(Stage& stage, int rock_id, Vector2 position){

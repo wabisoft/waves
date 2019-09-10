@@ -1,24 +1,28 @@
 #include <iostream>
 #include "clock.hpp"
 #include "constants.hpp"
-#include "graphics.hpp"
-#include "stage.hpp"
-#include "rock.hpp"
 #include "game.hpp"
-#include "util.hpp"
+#include "graphics.hpp"
 #include "maths.hpp"
+#include "rock.hpp"
+#include "util.hpp"
+#include "serialize.hpp"
+#include "stage.hpp"
 
 inline void loadStage(Game& game) {
 	// this is not how this function should work but for now let's hard code some level data
-	game.stage = Stage();
-	game.stage.sea.level = 13.3f;
-	createPlatform(game.stage, {STAGE_WIDTH-35, STAGE_HEIGHT/2 -15}, 35, 30);
-	// createPlatform(*game.stage, {STAGE_WIDTH-70, STAGE_HEIGHT/2 -15}, 35, 30);
-	createPlatform(game.stage, {10.f, STAGE_HEIGHT/3}, 6, 2*STAGE_HEIGHT/3); // launching platform
-	// makeRectangle(position, width, height);
-	game.stage.win.region = makeRectangle({STAGE_WIDTH-35, STAGE_HEIGHT/2 + 1.5}, 15, 5);
-	game.stage.rockSpawn = {10.f, 2*STAGE_HEIGHT/3 + 6};
-	createShip(game.stage, {STAGE_WIDTH/3, STAGE_HEIGHT-5}, 5, 3);
+	std::string data = "{\"sea_level\":13.3,\"platforms\":[{\"width\":35,\"height\":30,\"position\":[93,21],\"rotation\":0},{\"width\":6,\"height\":48,\"position\":[10,24],\"rotation\":0}],\"ship\":{\"width\":5,\"height\":3,\"position\":[42.6667,67],\"rotation\":0},\"rock_spawn\":[10,54],\"win\":{\"time\":0.25,\"region\":{\"width\":15,\"height\":5,\"position\":[93,37.5],\"rotation\":0}}}";
+	Error e;
+	game.stage = deserializeStage(data, e);
+// 	game.stage = Stage();
+// 	game.stage.sea.level = 13.3f;
+// 	createPlatform(game.stage, {STAGE_WIDTH-35, STAGE_HEIGHT/2 -15}, 35, 30);
+// 	// createPlatform(*game.stage, {STAGE_WIDTH-70, STAGE_HEIGHT/2 -15}, 35, 30);
+// 	createPlatform(game.stage, {10.f, STAGE_HEIGHT/3}, 6, 2*STAGE_HEIGHT/3); // launching platform
+// 	// makeRectangle(position, width, height);
+// 	game.stage.win.region = makeRectangle({STAGE_WIDTH-35, STAGE_HEIGHT/2 + 1.5}, 15, 5);
+// 	game.stage.rockSpawn = {10.f, 2*STAGE_HEIGHT/3 + 6};
+// 	createShip(game.stage, {STAGE_WIDTH/3, STAGE_HEIGHT-5}, 5, 3);
 	game.stage.state.type = StageState::RUNNING;
 	// game.stage.rockLimit = 4;
 
@@ -36,6 +40,7 @@ inline void reloadStage(Game& game) {
 void start(Game& game) {
 	initGraphics(game.graphics, "Waves!!!");
 	loadStage(game);
+	std::cout << serialize(game.stage) << std::endl;
 	// TODO: Menu stuff
 	// TODO: Load first Stage, blah blah blah
 }

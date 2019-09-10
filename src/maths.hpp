@@ -109,7 +109,7 @@ inline void boundingPoints(const Polygon<N>& polygon, Vector2& lower, Vector2& u
 
 #include "shapes.inl" // definitions for template functions and inlines
 
-Rectangle makeRectangle(Vector2 p, float w, float h);
+Rectangle makeRectangle(Vector2 p, float w, float h, float rotation=0.f);
 
 /************
  * Geometry *

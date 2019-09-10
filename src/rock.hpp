@@ -45,7 +45,7 @@ uint8_t createRock(Stage& stage, Vector2 position, float radius);
 int deleteRockByIdx(Stage& stage, int rock_idx);
 int deleteRockById(Stage& stage, uint8_t rock_id);
 Rock& findRock(Stage& stage, uint8_t rock_id);
-Entity findRockAtPosition(Stage& stage, Vector2 position);
+int findRockAtPosition(const Stage& stage, Vector2 position);
 void resizeRock(Stage& stage, int rockId, Vector2 position);
 
 inline float area(const Rock& rock) {

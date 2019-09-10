@@ -76,5 +76,9 @@ void processStartInput(Stage& stage, Vector2 position);
 void processContinuingInput(Stage& stage, Vector2 position);
 void processEndInput(Stage& stage, Vector2 position);
 Vector2 getPullForce(Stage& stage);
+std::vector<Vector2> pullParabola(Stage& stage);
 
 inline bool validateAndSetPullPosition(Stage& stage, Vector2 position);
+inline bool outOfBounds(Vector2 position) {
+	return (position.x<0 ||position.x > STAGE_WIDTH || position.y < 0);
+}

@@ -25,10 +25,11 @@ struct Graphics {
 void initGraphics(Graphics & graphics, const char * title);
 
 void draw(Graphics& graphics, Stage& stage);
-inline void draw(Graphics& graphics, const Sea& sea);
+inline void drawSea(Graphics& graphics, const Sea& sea);
 inline void drawShip(Graphics& graphics, const Ship& ship);
 inline void drawRocks(Graphics& graphics, const Stage& stage);
-inline void draw(Graphics& graphics, const Platform* platforms, int numPlatforms);
+inline void drawPlatforms(Graphics& graphics, const Platform* platforms, int numPlatforms);
+inline void drawUI(Graphics& graphics, Stage& stage);
 
 inline void drawGrid(Graphics& graphics);
 inline void drawInfoText(Graphics& graphics, const Stage& stage);

@@ -4,11 +4,12 @@
  * Shape Stuff *
  ***************/
 
-Rectangle makeRectangle(Vector2 p, float w, float h) {
+Rectangle makeRectangle(Vector2 p, float w, float h, float rotation) {
 	Rectangle r;
 	r.width = w;
 	r.height = h;
 	r.position = p;
+	r.rotation = rotation;
 	float halfWidth = w/2.f;
 	float halfHeight = h/2.f;
 	r.model[0] = {-halfWidth, halfHeight}; // top left
