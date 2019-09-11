@@ -176,7 +176,7 @@ void collide(Ship& ship, const Sea& sea) {
 	}
 	ship.velocity += VECTOR2_UP * displacedWater * GRAVITATIONAL_CONSTANT * FIXED_TIMESTEP;
 	ship.velocity += velocityAtX(sea, ship.shape.position.x) * FIXED_TIMESTEP;
-	auto drag = dragForce(ship.velocity, 100.f, mass(ship) * SHIP_AREA_MASS_RATIO);
+	auto drag = dragForce(ship.velocity, 600.f, mass(ship) * SHIP_AREA_MASS_RATIO);
 	ship.velocity += drag * FIXED_TIMESTEP;
 
 	if (sea.numWaves < 0) { return; } // nothing to do for no waves

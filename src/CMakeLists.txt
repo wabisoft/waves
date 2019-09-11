@@ -25,7 +25,10 @@ file(GLOB wavesSource
 	"*.cpp"
 )
 
-add_executable(waves main.cpp ${wavesSource})
+add_executable(editor editor.cxx ${wavesSource})
+add_executable(game game.cxx ${wavesSource})
 
-target_compile_definitions(waves PRIVATE SFML_STATIC)
-target_link_libraries(waves sfml-window sfml-system sfml-graphics sfml-audio)
+target_compile_definitions(editor PRIVATE SFML_STATIC)
+target_compile_definitions(game PRIVATE SFML_STATIC)
+target_link_libraries(editor sfml-window sfml-system sfml-graphics sfml-audio)
+target_link_libraries(game sfml-window sfml-system sfml-graphics sfml-audio)

@@ -4,7 +4,6 @@
 #include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
 
-
 #include "constants.hpp"
 #include "graphics.hpp"
 #include "physics.hpp"
@@ -17,15 +16,15 @@
 void initGraphics(Graphics & graphics, const char * title) {
 	graphics.settings.antialiasingLevel = 100;
 	graphics.videoMode = sf::VideoMode::getDesktopMode();
-	graphics.window.create(graphics.videoMode, title, sf::Style::Default, graphics.settings);
-	// graphics.window.setFramerateLimit(1.f/FRAME_RATE);
-	// graphics.window.setVerticalSyncEnabled(true);
+	graphics.window.create(graphics.videoMode, title, sf::Style::Fullscreen, graphics.settings);
+	// TODO: Why doesn't the screen start at the top left corner?
+	graphics.window.setFramerateLimit(1.f/FRAME_RATE);
+	graphics.window.setVerticalSyncEnabled(true);
 	graphics.ppu = (float)graphics.videoMode.width / STAGE_WIDTH;
 	if (!graphics.gameFont.loadFromFile("assets/fonts/IBMPlexMono-Regular.ttf")){
 		std::cout << "Couldn't load font" << std::endl;
 	}
 }
-
 
 void drawStage(Graphics& graphics, Stage& stage) {
 	graphics.window.clear(sf::Color::Black);
@@ -45,7 +44,7 @@ void drawStage(Graphics& graphics, Stage& stage) {
 		drawText(graphics, "You Win!", {(float)graphics.videoMode.width/2, (float)graphics.videoMode.height/2}, 24);
 	}
 	drawPolygon(graphics, stage.win.region, sf::Color(0, 204, 102));
-	drawUI(graphics, stage);
+	drawPullParabola(graphics, stage);
 	graphics.window.display();
 }
 
@@ -107,7 +106,7 @@ inline void drawGrid(Graphics& graphics) {
 	graphics.window.draw(&vertices[0], vertices.size(), sf::Lines);
 }
 
-inline void drawUI(Graphics& graphics, Stage& stage) {
+inline void drawPullParabola(Graphics& graphics, Stage& stage) {
 	switch(stage.selection.state) {
 		case Selection::SELECT: break;
 		case Selection::RESIZE: break;
@@ -125,6 +124,7 @@ inline void drawUI(Graphics& graphics, Stage& stage) {
 			break;
 	}
 }
+
 
 inline void drawInfoText(Graphics& graphics, const Stage& stage) {
 	std::stringstream infostream;
@@ -148,3 +148,56 @@ inline void drawInfoText(Graphics& graphics, const Stage& stage) {
 	infostream << "ShipState:				" << (int)stage.ship.state.type << std::endl;
 	drawText(graphics, infostream.str(), {3, 3}, 13);
 }
+
+
+inline void drawText(Graphics& graphics, std::string text, sf::Vector2f position, int size, bool centered) {
+	sf::Text idText;
+	idText.setFont(graphics.gameFont);
+	idText.setFillColor(sf::Color::White);
+	idText.setCharacterSize(size);
+	idText.setPosition(position);
+	idText.setString((sf::String)text);
+	if(centered) {
+		sf::FloatRect bounds = idText.getGlobalBounds();
+		idText.setOrigin(bounds.width/2, bounds.height/2);
+	}
+	graphics.window.draw(idText);
+
+}
+
+
+
+inline void drawId(Graphics& graphics, int id, sf::Vector2f position) {
+	drawText(graphics, std::to_string(id), position, 15, true);
+}
+
+inline void drawId(Graphics& graphics, int id, Vector2 position) {
+	drawId(graphics , id, game2ScreenPos(graphics,position));
+}
+
+inline void drawCircle(Graphics& graphics, const Circle& circle, sf::Color c, bool fill) {
+	sf::CircleShape shape;
+	float radius = circle.radius * graphics.ppu;
+	auto pos = game2ScreenPos(graphics, circle.position);
+	shape.setPosition(pos);
+	shape.setRadius(radius);
+	shape.setOrigin(radius, radius);
+	if(!fill) {
+		shape.setFillColor(sf::Color(0,0,0,0));
+	} else {
+		shape.setFillColor(c);
+	}
+	shape.setOutlineColor(c);
+	shape.setOutlineThickness(1);
+	graphics.window.draw(shape);
+}
+
+inline void drawLine(Graphics& graphics, Vector2 a, Vector2 b, sf::Color c) {
+	sf::VertexArray sfVertices(sf::LineStrip, 2);
+	sfVertices[0] = sf::Vertex(game2ScreenPos(graphics, a), c);
+	sfVertices[1] = sf::Vertex(game2ScreenPos(graphics, b), c);
+	graphics.window.draw(sfVertices);
+}
+
+
+

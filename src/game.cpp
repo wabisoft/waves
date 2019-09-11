@@ -96,6 +96,7 @@ void keyEvent(Game& game, sf::Event& event) {
 				game.stage.state.type = StageState::PAUSED;
 			}
 			break;
+		case sf::Keyboard::Key::Q: game.end = true; break;
 		case sf::Keyboard::Key::Num1: game.timeScale = 1.f; break;
 		case sf::Keyboard::Key::Num2: game.timeScale = 2.f; break;
 		case sf::Keyboard::Key::Num3: game.timeScale = 3.f; break;
@@ -108,4 +109,6 @@ void keyEvent(Game& game, sf::Event& event) {
 
 void stop(Game& game) {
 }
+
+
 

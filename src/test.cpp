@@ -16,8 +16,8 @@
 #include "printing.hpp"
 #include "serialize.hpp"
 #include "stage.hpp"
+#include "test.hpp"
 #include "util.hpp"
-
 
 
 void test_shapes_and_shit() {
@@ -93,7 +93,7 @@ void test_shapes_and_shit() {
 	}
 }
 
-inline void test_deserializer() {
+void test_deserializer() {
 	std::string data = "{\"sea_level\":13.3,\"platforms\":[{\"width\":35,\"height\":30,\"position\":[93,21],\"rotation\":0},{\"width\":6,\"height\":48,\"position\":[10,24],\"rotation\":0}],\"ship\":{\"width\":5,\"height\":3,\"position\":[42.6667,67],\"rotation\":0},\"rock_spawn\":[10,54],\"win\":{\"time\":0.25,\"region\":{\"width\":15,\"height\":5,\"position\":[93,37.5],\"rotation\":0}}}";
 	Error e;
 	Stage stage = deserializeStage(data, e);
@@ -104,28 +104,47 @@ inline void test_deserializer() {
 	}
 }
 
-void do_normal_shit() {
-	Game game;
-	Stage& stage = game.stage;
-	// std::cout << "Game: " << sizeof(game) << std::endl;
-	// std::cout << "Stage: " << sizeof(stage) << std::endl;
-	// std::cout << "Ship : " << sizeof(stage.ship) << std::endl;
-	// std::cout << "Sea: " << sizeof(stage.sea) << std::endl;
-	// std::cout << "Rock: " << sizeof(stage.rocks[0]) << std::endl;
-	// std::cout << "Wave: " << sizeof(stage.sea.waves[0]) << std::endl;
-	// std::cout << "Platform: " << sizeof(stage.platforms[0]) << std::endl;
-	// std::cout << "AABB: " << sizeof(AABB(stage.platforms[0])) << std::endl;
-	// std::cout << "EntityType: " << sizeof((EntityType)1) << std::endl;
-	// std::cout << "Vector2: " << sizeof(Vector2{0,0}) << std::endl;
-	// std::cout << "RockState: " << sizeof(RockState{}) << std::endl;
-	start(game);
-	run(game);
-	stop(game);
-}
+void test_utils() {
+ 	int blah [10] =  {};
+	int blah_size = 0;
+	std::cout << "Empty" << std::endl;
+	print_array(blah, blah_size);
 
-int main() {
-	do_normal_shit();
-	// test_shapes_and_shit();
-	// test_deserializer();
-	return 0;
+	std::cout << "Inserting" << std::endl;
+	sorted_insert(1, blah, blah_size);
+	print_array(blah, blah_size);
+
+	sorted_insert(2, blah, blah_size);
+	print_array(blah, blah_size);
+
+
+	sorted_insert(8, blah, blah_size);
+	print_array(blah, blah_size);
+
+	sorted_insert(6, blah, blah_size);
+	print_array(blah, blah_size);
+
+	sorted_insert(3, blah, blah_size);
+	print_array(blah, blah_size);
+
+	std::cout << "Pre-sort" << std::endl;
+	print_array(blah, blah_size);
+ 	insertion_sort(blah, blah_size);
+	std::cout << "Post-sort" << std::endl;
+	print_array(blah, blah_size);
+	sorted_insert(4, blah, blah_size);
+	std::cout << "Insert 4" << std::endl;
+	print_array(blah, blah_size);
+	std::cout << "4 is at index: ";
+	std::cout << binary_find_where(4, blah, blah_size, [] (int a) { return a; });
+	std::cout << std::endl;
+	std::cout << "10 is at index: ";
+	std::cout << binary_find_where(10, blah, blah_size, [] (int a) { return a; });
+	std::cout << std::endl;
+	std::cout << "1 is at index: ";
+	std::cout << binary_find_where(1, blah, blah_size, [] (int a) { return a; });
+	std::cout << std::endl;
+	std::cout << "6 is at index: ";
+	std::cout << binary_find_where(6, blah, blah_size, [] (int a) { return a; });
+	std::cout << std::endl;
 }

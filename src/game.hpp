@@ -6,6 +6,7 @@
 #include "stage.hpp"
 #include "prelude.hpp"
 
+
 struct ScreenInputState {
 	Vector2 position;
 	bool pressed = false;
