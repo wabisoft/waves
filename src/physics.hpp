@@ -20,13 +20,6 @@ inline Vector2 dragForce(Vector2 velocity, float fluidDensity, float mass) {
     return drag;
 }
 
-// inline float impulse(Vector2 velocity, float mass1, float mass2, float restitution) {
-// 	float reducedMass = (mass1 * mass2)/(mass1 + mass2);
-// 	float coefficient = 1 + restitution;
-// 	float velocityDifference = magnitude(velocity) - magnitude(restitution * velocity);
-// 	return reducedMass * coefficient * velocityDifference;
-// }
-
 // NOTE: Don't forget to devide by the mass of the object you're using this on
 inline float linearImpulse(Vector2 velocity1, Vector2 velocity2, float mass1, float mass2, float restitution) {
 	float reducedMass = (mass1 * mass2)/(mass1 + mass2);

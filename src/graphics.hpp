@@ -19,12 +19,13 @@ struct Graphics {
 	float drawDelta = 0;
 	float updateDelta = 0;
 	int loopsPerUpdate = 0;
+	float desiredFrameRate = FRAME_RATE;
 };
 
 
 void initGraphics(Graphics & graphics, const char * title);
 
-void draw(Graphics& graphics, Stage& stage);
+void drawStage(Graphics& graphics, Stage& stage);
 inline void drawSea(Graphics& graphics, const Sea& sea);
 inline void drawShip(Graphics& graphics, const Ship& ship);
 inline void drawRocks(Graphics& graphics, const Stage& stage);

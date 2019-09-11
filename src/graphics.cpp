@@ -18,7 +18,7 @@ void initGraphics(Graphics & graphics, const char * title) {
 	graphics.settings.antialiasingLevel = 100;
 	graphics.videoMode = sf::VideoMode::getDesktopMode();
 	graphics.window.create(graphics.videoMode, title, sf::Style::Default, graphics.settings);
-	graphics.window.setFramerateLimit(1.f/FRAME_RATE);
+	// graphics.window.setFramerateLimit(1.f/FRAME_RATE);
 	// graphics.window.setVerticalSyncEnabled(true);
 	graphics.ppu = (float)graphics.videoMode.width / STAGE_WIDTH;
 	if (!graphics.gameFont.loadFromFile("assets/fonts/IBMPlexMono-Regular.ttf")){
@@ -27,7 +27,7 @@ void initGraphics(Graphics & graphics, const char * title) {
 }
 
 
-void draw(Graphics& graphics, Stage& stage) {
+void drawStage(Graphics& graphics, Stage& stage) {
 	graphics.window.clear(sf::Color::Black);
 	drawGrid(graphics);
 	drawPlatforms(graphics, stage.platforms, stage.numPlatforms);
