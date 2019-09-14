@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "clock.hpp"
 #include "prelude.hpp"
 #include "stage.hpp"
@@ -11,32 +13,46 @@
 
 struct Editor;
 struct Button;
+struct Action;
+struct Mouse;
 
-typedef sf::Rect<int> Recti;
+typedef sf::Rect<float> Rectf;
 
 struct Button {
-	Recti rect = {0,0,0,0};
+	sf::Vector2f position;
+	float width = 0;
+	float height= 0;
 	std::string label = "";
-	void (*action)(Editor& editor);
+	void (*action)(Editor& editor, Action& action);
 };
 
+struct ToggleButton : Button {
+	bool toggled = false;
+};
+
+struct ToggleButtonCluster {
+	sf::Vector2f position;
+	std::vector<ToggleButton> buttons;
+};
+
+struct Mouse {
+	sf::Vector2i startPosition;
+	sf::Vector2i currentPosition;
+	sf::Vector2i endPosition;
+	sf::Mouse::Button button;
+	bool pressed = false;
+};
 
 struct Editor {
-	struct Mouse {
-		sf::Vector2i startPosition;
-		sf::Vector2i currentPosition;
-		sf::Vector2i endPosition;
-		sf::Mouse::Button button;
-		bool pressed = false;
-	};
 
-	enum Component : uint8_t{
-		NONE = 1 << 0,
-		ROCK = 1 << 0,
-		SHIP = 1 << 0,
-		PLATFORM = 1 << 0,
-		ROCK_SPAWN = 1 << 0,
-		WIN_REGION = 1 << 0
+	enum Component {
+		NONE = -1,
+		ROCK = 0,
+		SHIP = 1,
+		PLATFORM,
+		ROCK_SPAWN,
+		WIN_REGION,
+		SIZE
 	};
 
 	enum Mode {
@@ -47,14 +63,26 @@ struct Editor {
 
 	Stage stage;
 	Mouse mouse;
-	Component currentComponent = NONE;
+	Component currentComponent = SHIP;
 	Mode mode = DEFAULT;
+};
+
+struct Action {
+	Mouse mouse; // Do I need such a struct? maybe I can get by with just a position (sf::Vector2i)
 };
 
 void initEditor(Editor& editor);
 void handleEvents(Editor& editor, sf::Window& window);
 void keyEvent(Editor&, sf::Event);
-void startInput(Editor&, sf::Event);
-void continueInput(Editor&, sf::Event);
-void endInput(Editor&, sf::Event);
+void startMouseInput(Editor&, sf::Event::MouseButtonEvent);
+void continueMouseInput(Editor&, sf::Event::MouseMoveEvent);
+void endMouseInput(Editor&, sf::Event::MouseButtonEvent);
 
+/***********
+ * Actions *
+ ***********/
+void placeRock(Editor& editor, Action& action);
+void placeShip(Editor& editor, Action& action);
+void placePlatform(Editor& editor, Action& action);
+void placeRockSpawn(Editor& editor, Action& action);
+void placeWinRegion(Editor& editor, Action& action);

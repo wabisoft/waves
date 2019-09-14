@@ -151,18 +151,17 @@ inline void drawInfoText(Graphics& graphics, const Stage& stage) {
 
 
 inline void drawText(Graphics& graphics, std::string text, sf::Vector2f position, int size, bool centered) {
-	sf::Text idText;
-	idText.setFont(graphics.gameFont);
-	idText.setFillColor(sf::Color::White);
-	idText.setCharacterSize(size);
-	idText.setPosition(position);
-	idText.setString((sf::String)text);
+	sf::Text sfText;
+	sfText.setFont(graphics.gameFont);
+	sfText.setFillColor(sf::Color::White);
+	sfText.setCharacterSize(size);
+	sfText.setPosition(position);
+	sfText.setString((sf::String)text);
 	if(centered) {
-		sf::FloatRect bounds = idText.getGlobalBounds();
-		idText.setOrigin(bounds.width/2, bounds.height/2);
+		sf::FloatRect bounds = sfText.getGlobalBounds();
+		sfText.setOrigin(bounds.width/2, bounds.height/2);
 	}
-	graphics.window.draw(idText);
-
+	graphics.window.draw(sfText);
 }
 
 

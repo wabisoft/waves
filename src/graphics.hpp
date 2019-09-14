@@ -61,7 +61,7 @@ struct EditorGraphics {
 	sf::VideoMode videoMode;
 	sf::RenderTexture StageTexture;
 	sf::RenderTexture UITexture;
-	sf::Font gameFont;
+	sf::Font editorFont;
 	int style = sf::Style::Default;
 	Clock clock;
 	int framerate = 60;
@@ -71,4 +71,5 @@ void initGraphics(EditorGraphics&, sf::RenderWindow&);
 // void destroyEditorGraphics(EditorGraphics&);
 //
 void draw(EditorGraphics&, Editor&, sf::RenderWindow&);
-
+inline void drawUI(EditorGraphics& graphics, Editor& editor);
+inline void drawStage(EditorGraphics& graphics, Editor& editor);

@@ -41,5 +41,6 @@ inline float mass(const Ship& ship) {
 
 void updateShip(Stage& stage, float deltaTime);
 uint8_t createShip(Stage& stage, Vector2 position, float width, float height);
+uint8_t createShip(Stage& stage, Rectangle rect);
 
 

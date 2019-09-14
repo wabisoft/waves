@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+
 #include "clock.hpp"
 #include "constants.hpp"
 #include "game.hpp"
@@ -11,8 +13,15 @@
 
 inline void loadStage(Game& game) {
 	// this is not how this function should work but for now let's hard code some level data
-	std::string data = "{\"sea_level\":13.3,\"platforms\":[{\"width\":35,\"height\":30,\"position\":[93,21],\"rotation\":0},{\"width\":6,\"height\":48,\"position\":[10,24],\"rotation\":0}],\"ship\":{\"width\":5,\"height\":3,\"position\":[42.6667,67],\"rotation\":0},\"rock_spawn\":[10,54],\"win\":{\"time\":0.25,\"region\":{\"width\":15,\"height\":5,\"position\":[93,37.5],\"rotation\":0}}}";
-	Error e;
+	// std::string data = "{\"sea_level\":13.3,\"platforms\":[{\"width\":35,\"height\":30,\"position\":[93,21],\"rotation\":0},{\"width\":6,\"height\":48,\"position\":[10,24],\"rotation\":0}],\"ship\":{\"width\":5,\"height\":3,\"position\":[42.6667,67],\"rotation\":0},\"rock_spawn\":[10,54],\"win\":{\"time\":0.25,\"region\":{\"width\":15,\"height\":5,\"position\":[93,37.5],\"rotation\":0}}}";
+	std::string data = "";
+	std::ifstream ifs("assets/levels/level1.json", std::ifstream::in);
+	if(!ifs.is_open()) { std::cout << "Fuck!" << std::endl; throw "fuck";}
+	while (!ifs.eof()) {
+		data += ifs.get();
+	}
+	ifs.close();
+	SerializeError e;
 	game.stage = deserializeStage(data, e);
 	game.stage.state.type = StageState::RUNNING;
 }
@@ -55,18 +64,14 @@ void run(Game& game) {
 }
 
 inline void startInput(Game& game, sf::Event& event) {
-	game.screenInputState.position = screen2GamePos(game.graphics, {event.mouseButton.x, event.mouseButton.y});
-	game.screenInputState.pressed = true;
-	processStartInput(game.stage, game.screenInputState.position);
+ 	processStartInput(game.stage, screen2GamePos(game.graphics, {event.mouseButton.x, event.mouseButton.y}));
 }
 inline void continueInput(Game& game, sf::Event& event) {
-	game.screenInputState.position = screen2GamePos(game.graphics, {event.mouseMove.x, event.mouseMove.y});
-	processContinuingInput(game.stage, game.screenInputState.position);
+	processContinuingInput(game.stage, screen2GamePos(game.graphics, {event.mouseMove.x, event.mouseMove.y}));
 }
 
 inline void endInput(Game& game, sf::Event& event) {
-	game.screenInputState.pressed = false;
-	processEndInput(game.stage, game.screenInputState.position);
+ 	processEndInput(game.stage, screen2GamePos(game.graphics, {event.mouseButton.x, event.mouseButton.y}));
 }
 
 void processEvents(Game& game) {

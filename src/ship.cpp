@@ -84,3 +84,18 @@ uint8_t createShip(Stage& stage, Vector2 position, float width, float height) {
 	createAABB(stage, AABB(ship));
 	return ship.id;
 }
+
+uint8_t createShip(Stage& stage, Rectangle rect) {
+	if (stage.ship.active){
+		return -1; // we don't want to make more than one ship probably.
+	}
+	Ship& ship = stage.ship;
+	ship.active = true;
+	ship.id = ++stage.id_src;
+	ship.shape = rect;
+	ship.velocity = VECTOR2_ZERO;
+	createAABB(stage, AABB(ship));
+	return ship.id;
+}
+
+

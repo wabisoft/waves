@@ -7,20 +7,16 @@
 #include "prelude.hpp"
 
 
-struct ScreenInputState {
-	Vector2 position;
-	bool pressed = false;
-};
 
 struct Game {
 	Stage stage;
 	Graphics graphics;
-	Clock drawClock;
 	Clock updateClock;
-	ScreenInputState screenInputState;
+	Clock drawClock;
 	float timeScale = 1.f;
 	bool end = false; // stop the game
 };
+
 
 void start(Game& game);
 void run(Game& game);
