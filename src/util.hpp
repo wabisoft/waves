@@ -5,6 +5,10 @@
 #include "constants.hpp"
 
 
+/**************
+ * Algorithms *
+ **************/
+
 template<typename T, typename Pred>
 inline void insertion_sort(T* t, const int count, Pred predicate) {
 	for(int i = 1; i<count; ++i) {
@@ -100,4 +104,7 @@ inline int binary_find_where(U search, const T* const t, const int count, Prop p
 	return -1;
 }
 
-void test_utils();
+
+
+
+
