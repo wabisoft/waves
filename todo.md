@@ -1,6 +1,5 @@
 ## TODO
 - [ ] Make a stage editor
-- [ ] Probably rework the way graphics is done (don't like that it's it's own object, should just be a set of function that act on a RenderTarget?)
 - [ ] Remove the notion of a "sea" and hold all the waves in the stage struct
 
 ## DONE
@@ -16,6 +15,7 @@
 - [x] Get rocks launching off platforms
 - [x] Get ship riding waves (most of the hard work was done in v1 (should mostly just need porting ...knock on wood...)
 - [x] Be able to save/load a stage to/from JSON (code in serialize.hpp/.cpp)
+- [x] Probably rework the way graphics is done (don't like that it's it's own object, should just be a set of function that act on a RenderTarget?)
 
 
 ## Bug
