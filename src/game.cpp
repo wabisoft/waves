@@ -36,63 +36,49 @@ inline void reloadStage(Game& game) {
 }
 
 void start(Game& game) {
-	initGraphics(game.graphics, "Waves!!!");
 	loadStage(game);
 }
 
-void run(Game& game) {
+void update(Game& game) {
 	Stage& stage = game.stage;
-	int loopsPerUpdate = 0;
-	while (!game.end) {
-		processEvents(game);
-		float updateDelta = game.updateClock.getElapsedTime().asSeconds();
-		if (updateDelta >= FIXED_TIMESTEP * game.timeScale) {
-			game.graphics.updateDelta = updateDelta;
-			game.graphics.loopsPerUpdate = loopsPerUpdate;
-			update(stage, updateDelta);
-			game.updateClock.restart();
-			loopsPerUpdate = 0;
-		} else { ++loopsPerUpdate; }
-		float drawDelta = game.drawClock.getElapsedTime().asSeconds();
-		if (drawDelta >= FRAME_RATE) {
-			game.graphics.drawDelta = drawDelta;
-			drawStage(game.graphics, stage);
-			game.drawClock.restart();
-		}
-		if (game.stage.state.type == StageState::FINISHED && !game.stage.state.finished.win) { reloadStage(game); }
+	float updateDelta = game.updateClock.getElapsedTime().asSeconds();
+	if (updateDelta >= FIXED_TIMESTEP * game.timeScale) {
+		update(stage, updateDelta);
+		game.updateClock.restart();
+		game.loopsPerUpdate = 0;
+	} else { ++game.loopsPerUpdate; }
+	if (game.stage.state.type == StageState::FINISHED && !game.stage.state.finished.win) {
+		reloadStage(game);
 	}
 }
 
-inline void startInput(Game& game, sf::Event& event) {
- 	processStartInput(game.stage, screen2GamePos(game.graphics, {event.mouseButton.x, event.mouseButton.y}));
+inline void startInput(Game& game, const sf::Event& event, const sf::RenderTarget& target) {
+ 	processStartInput(game.stage, screen2GamePos(target, {event.mouseButton.x, event.mouseButton.y}));
 }
-inline void continueInput(Game& game, sf::Event& event) {
-	processContinuingInput(game.stage, screen2GamePos(game.graphics, {event.mouseMove.x, event.mouseMove.y}));
-}
-
-inline void endInput(Game& game, sf::Event& event) {
- 	processEndInput(game.stage, screen2GamePos(game.graphics, {event.mouseButton.x, event.mouseButton.y}));
+inline void continueInput(Game& game, const sf::Event& event, const sf::RenderTarget& target) {
+	processContinuingInput(game.stage, screen2GamePos(target, {event.mouseMove.x, event.mouseMove.y}));
 }
 
-void processEvents(Game& game) {
-	sf::Event event;
-	while (game.graphics.window.pollEvent(event)) {
-		// TODO (owen): Factor the identical portions of mouse and touch input into functions or something
-		switch (event.type) {
-		    case sf::Event::Closed:	game.end = true; break;
-	        case sf::Event::KeyPressed: keyEvent(game, event);
-			case sf::Event::MouseButtonPressed: startInput(game, event); break;
-			case sf::Event::MouseMoved: continueInput(game, event); break;
-			case sf::Event::MouseButtonReleased: endInput(game, event); break;
-	        case sf::Event::TouchBegan: startInput(game, event); break;
-	        case sf::Event::TouchMoved: continueInput(game, event); break;
-	        case sf::Event::TouchEnded: endInput(game, event); break;
-			default: break;
-		}
+inline void endInput(Game& game, const sf::Event& event, const sf::RenderTarget& target) {
+ 	processEndInput(game.stage, screen2GamePos(target, {event.mouseButton.x, event.mouseButton.y}));
+}
+
+void processEvent(Game& game, const sf::Event& event, const sf::RenderTarget& target) {
+	// TODO (owen): Factor the identical portions of mouse and touch input into functions or something
+	switch (event.type) {
+	    case sf::Event::Closed:	game.end = true; break;
+	    case sf::Event::KeyPressed: keyEvent(game, event);
+		case sf::Event::MouseButtonPressed: startInput(game, event, target); break;
+		case sf::Event::MouseMoved: continueInput(game, event, target); break;
+		case sf::Event::MouseButtonReleased: endInput(game, event, target); break;
+	    case sf::Event::TouchBegan: startInput(game, event, target); break;
+	    case sf::Event::TouchMoved: continueInput(game, event, target); break;
+	    case sf::Event::TouchEnded: endInput(game, event, target); break;
+		default: break;
 	}
 }
 
-void keyEvent(Game& game, sf::Event& event) {
+void keyEvent(Game& game, const sf::Event& event) {
 	switch (event.key.code) {
 		case sf::Keyboard::Key::P:
 			if (game.stage.state.type == StageState::PAUSED) {

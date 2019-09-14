@@ -15,39 +15,56 @@
 /************************
  *  Game Graphics stuff *
  ************************/
-struct Graphics {
-	sf::ContextSettings settings;
-	sf::VideoMode videoMode;
-	sf::RenderWindow window;
-	sf::Font gameFont;
-	float ppu = 0; // pixelsPerUnit;
-	float drawDelta = 0;
-	float updateDelta = 0;
-	int loopsPerUpdate = 0;
-	float desiredFrameRate = FRAME_RATE;
-};
 
+extern sf::Font font;
+void initGraphics();
+void drawStage(sf::RenderTarget&, Stage&);
+inline void drawSea(sf::RenderTarget&, const Sea&);
+inline void drawShip(sf::RenderTarget&, const Ship&);
+inline void drawRocks(sf::RenderTarget&, const Stage&);
+inline void drawPlatforms(sf::RenderTarget&, const Stage&);
+inline void drawPullParabola(sf::RenderTarget&, Stage&);
+inline void drawGrid(sf::RenderTarget&);
+inline void drawInfoText(sf::RenderTarget& graphics, const Stage& stage);
 
-void initGraphics(Graphics & graphics, const char * title);
-void drawStage(Graphics& graphics, Stage& stage);
-inline void drawSea(Graphics& graphics, const Sea& sea);
-inline void drawShip(Graphics& graphics, const Ship& ship);
-inline void drawRocks(Graphics& graphics, const Stage& stage);
-inline void drawPlatforms(Graphics& graphics, const Platform* platforms, int numPlatforms);
-inline void drawPullParabola(Graphics& graphics, Stage& stage);
-inline void drawGrid(Graphics& graphics);
-inline void drawInfoText(Graphics& graphics, const Stage& stage);
-inline sf::Vector2f game2ScreenPos(const Graphics& graphics, const Vector2 &v);
-inline Vector2 screen2GamePos(const Graphics& graphics, const sf::Vector2i &v);
-inline void drawLine(Graphics& graphics, Vector2 a, Vector2 b, sf::Color c);
-inline void drawCircle(Graphics& graphics, const Circle& circle, sf::Color c, bool fill=false);
 template <int N>
-inline void drawPolygon(Graphics& graphics, const Polygon<N>& polygon, sf::Color c);
-inline void drawText(Graphics& graphics, std::string text, sf::Vector2f position, int size=15, bool centered=false);
-inline void drawId(Graphics& graphics, int id, sf::Vector2f position);
-inline void drawId(Graphics& graphics, int id, Vector2 position);
+inline void drawPolygon(sf::RenderTarget&, const Polygon<N>&, sf::Color);
+inline void drawText(sf::RenderTarget&, std::string, sf::Vector2f, int=15, bool=false);
+inline void drawId(sf::RenderTarget&, int, sf::Vector2f);
+inline void drawId(sf::RenderTarget&, int, Vector2);
+inline void drawCircle(sf::RenderTarget&, const Circle&, sf::Color, bool=false);
+inline void drawLine(sf::RenderTarget&, Vector2, Vector2, sf::Color);
 
-#include "graphics.inl"
+inline sf::Vector2f game2ScreenPos(const sf::RenderTarget&, const Vector2 &);
+inline Vector2 screen2GamePos(const sf::RenderTarget&, const sf::Vector2i &);
+float ppu(sf::RenderTarget&);
+
+template <int N>
+void drawPolygon(sf::RenderTarget& target, const Polygon<N>& polygon, sf::Color c) {
+	sf::VertexArray sfVertices(sf::LineStrip, N+1);
+	for (int i = 0; i < N; ++i) {
+		sfVertices[i] = sf::Vertex(game2ScreenPos(target, polygon.vertices[i]), c);
+	}
+	sfVertices[N] = sfVertices[0];
+	target.draw(sfVertices);
+}
+
+inline float pixelsPerUnit(const sf::RenderTarget& target) {
+	sf::Vector2u targetSize = target.getSize();
+	return (float)targetSize.x / STAGE_WIDTH;
+}
+
+inline sf::Vector2f game2ScreenPos(const sf::RenderTarget& target, const Vector2 &v) {
+	sf::Vector2u targetSize = target.getSize();
+	float ppu = pixelsPerUnit(target);
+	return sf::Vector2f(v[0] * ppu, targetSize.y - (v[1] * ppu));
+}
+
+inline Vector2 screen2GamePos(const sf::RenderTarget& target, const sf::Vector2i &v) {
+	sf::Vector2u targetSize = target.getSize();
+	float ppu = pixelsPerUnit(target);
+	return Vector2{(float)v.x, std::fabs((float)targetSize.y - (float)v.y)} / ppu;
+}
 
 
 #include "editor.hpp"
@@ -73,3 +90,4 @@ void initGraphics(EditorGraphics&, sf::RenderWindow&);
 void draw(EditorGraphics&, Editor&, sf::RenderWindow&);
 inline void drawUI(EditorGraphics& graphics, Editor& editor);
 inline void drawStage(EditorGraphics& graphics, Editor& editor);
+

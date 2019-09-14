@@ -20,7 +20,7 @@
 #include "util.hpp"
 
 
-void test_shapes_and_shit() {
+void test_shapes_and_shit(sf::RenderWindow& window) {
 	// Testing shapes and shit
 	Rectangle rectangle = makeRectangle({STAGE_WIDTH/2, STAGE_HEIGHT/2}, 30, 5);
 	Circle circle = {{STAGE_WIDTH/2-14, STAGE_HEIGHT/2 + 5}, 3.f};
@@ -43,17 +43,16 @@ void test_shapes_and_shit() {
 		std::cout << "p3 outside rectangle" << std::endl;
 	}
 
-	Graphics graphics;
-	initGraphics(graphics, "Waves!!!");
 	Clock clock;
 	std::srand(std::time(nullptr));
-	while(graphics.window.isOpen()) {
-		graphics.window.clear(sf::Color::Blue);
+	bool stop = false;
+	while(!stop) {
+		window.clear(sf::Color::Blue);
 		sf::Event event;
-		while (graphics.window.pollEvent(event))
+		while (window.pollEvent(event))
 	 	{
 			switch (event.type) {
-			    case sf::Event::Closed:	graphics.window.close(); break;
+			    case sf::Event::Closed:	stop = true; break;
 				default: break;
 			}
 		}
@@ -64,8 +63,8 @@ void test_shapes_and_shit() {
 			updateVertices(rectangle);
 			clock.restart();
 		}
-		drawPolygon(graphics, rectangle, sf::Color::White);
-		drawCircle(graphics, circle, sf::Color::White);
+		drawPolygon(window, rectangle, sf::Color::White);
+		drawCircle(window, circle, sf::Color::White);
 
 		Vector2 intersection;
 		float depth = 0;
@@ -76,20 +75,20 @@ void test_shapes_and_shit() {
 			c.setRadius(2);
 			c.setOrigin(2, 2);
 			c.setFillColor(sf::Color::Red);
-			c.setPosition(game2ScreenPos(graphics, col.intersection));
-			graphics.window.draw(c);
+			c.setPosition(game2ScreenPos(window, col.intersection));
+			window.draw(c);
 			// draw the normal
 			Vector2 normalOffset = col.intersection + 1 * col.normal;
 			sf::VertexArray arr(sf::Lines, 2);
-			arr[0] = sf::Vertex(game2ScreenPos(graphics, col.intersection), sf::Color::Magenta);
-			arr[1] = sf::Vertex(game2ScreenPos(graphics, normalOffset), sf::Color::Magenta);
-			graphics.window.draw(arr);
+			arr[0] = sf::Vertex(game2ScreenPos(window, col.intersection), sf::Color::Magenta);
+			arr[1] = sf::Vertex(game2ScreenPos(window, normalOffset), sf::Color::Magenta);
+			window.draw(arr);
 		}
 		Vector2 l, u;
 		boundingPoints(rectangle, l, u);
 		Rectangle rr = makeRectangle(rectangle.position, u.x - l.x, u.y - l.y);
-		drawPolygon(graphics, rr, sf::Color(std::rand()%256,std::rand()%256,std::rand()%256));
-		graphics.window.display();
+		drawPolygon(window, rr, sf::Color(std::rand()%256,std::rand()%256,std::rand()%256));
+		window.display();
 	}
 }
 
