@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "serialize.hpp"
 #include "json.hpp"
 
@@ -87,32 +88,42 @@ inline Rectangle extractRectangle(JSON j, JSONError& e) {
 }
 
 
-Stage deserializeStage(std::string data, SerializeError& err) {
-	Stage stage;
+bool loadStageFromString(std::string data, Stage& stage, SerializeError& err) {
 	JSONError e;
 	JSON json = getJSON(data.begin(), data.end(), e);
-	if(e.no) {err.what = e.what; return stage;}
+	if(e.no) {err.what = e.what; return false;}
 	if(json.type != JSON::OBJECT) {
 		err.what = "Stage data should be a valid json object";
-		return stage;
+		return false;
 	}
 	JSONObject object = getObject(json, e);
-	if(e.no) {err.what = e.what; return stage;}
+	if(e.no) {err.what = e.what; return false;}
 	stage.sea.level = getNumber(getValue(object, "sea_level"), e);
-	if(e.no) {err.what = e.what; return stage;}
+	if(e.no) {err.what = e.what; return false;}
 	auto platformRectangles = extractArray(getValue(object, "platforms"), e, &extractRectangle);
-	if(e.no) {err.what = e.what; return stage;}
+	if(e.no) {err.what = e.what; return false;}
 	for(Rectangle &r : platformRectangles) {
 		createPlatform(stage, r);
 	}
 	Rectangle r = extractRectangle(getValue(object, "ship"), e);
-	if(e.no) {err.what = e.what; return stage;}
+	if(e.no) {err.what = e.what; return false;}
 	createShip(stage, r);
 	stage.rockSpawn = extractVector2(getValue(object, "rock_spawn"), e);
 	JSONObject jWinObject = getObject(getValue(object, "win"), e);
-	if(e.no) {err.what = e.what; return stage;}
+	if(e.no) {err.what = e.what; return false;}
 	stage.win.timeToWin = getNumber(getValue(jWinObject, "time"), e);
 	stage.win.region = extractRectangle(getValue(jWinObject, "region"), e);
-	return stage;
+	return true;
 }
 
+
+bool loadStageFromFile(std::string filename, Stage& stage, SerializeError& err) {
+	std::string data = "";
+	std::ifstream ifs(filename, std::ifstream::in);
+	if(!ifs.is_open()) { err.what = "Could not open file: " + filename; return false; }
+	while (!ifs.eof()) {
+		data += ifs.get();
+	}
+	ifs.close();
+	return loadStageFromString(data, stage, err);
+}

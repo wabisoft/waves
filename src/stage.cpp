@@ -189,3 +189,4 @@ std::vector<Vector2> pullParabola(Stage& stage) {
 	}
 	return parabola;
 }
+

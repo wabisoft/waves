@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 #include "constants.hpp"
 #include "entity.hpp"
@@ -37,7 +38,7 @@ struct StageState {
 		RUNNING = 1 << 1,
 		FINISHED = 1 << 2,
 	};
-	StateType type = PAUSED;
+	StateType type = RUNNING;
 	Paused paused;
 	Running running;
 	Finished finished;
@@ -82,3 +83,5 @@ inline bool validateAndSetPullPosition(Stage& stage, Vector2 position);
 inline bool outOfBounds(Vector2 position) {
 	return (position.x<0 ||position.x > STAGE_WIDTH || position.y < 0);
 }
+
+
