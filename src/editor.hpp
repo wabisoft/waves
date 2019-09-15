@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 #include "clock.hpp"
 #include "prelude.hpp"
@@ -27,6 +28,7 @@ struct Editor {
 		DEFAULT,
 	};
 
+	std::string filename;
 	Stage stage;
 	Component currentComponent = SHIP;
 	Mode mode = DEFAULT;

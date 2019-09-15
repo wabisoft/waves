@@ -26,12 +26,12 @@ std::string ExePath() {
 inline bool OpenAGodDamnFile(sf::RenderWindow& window, std::string& filename, const char* PopupTitle, const char* filter = "Any File\0*.*\0\0") {
 	OPENFILENAME ofn;
 	char buffer[MAX_PATH];
-	if(filename.empty()){
+	if(!filename.empty()){
 		sprintf(buffer, "%s", filename.c_str());
 	} else {
 		ZeroMemory( &buffer, sizeof( buffer ) );
+    	GetModuleFileName( NULL, buffer, MAX_PATH );
 	}
-    GetModuleFileName( NULL, buffer, MAX_PATH );
 	ZeroMemory( &ofn,      sizeof( ofn ) );
 	ofn.lStructSize  = sizeof( ofn );
 	ofn.hwndOwner    = window.getSystemHandle();  // If you have a window to center over, put its HANDLE here
@@ -48,32 +48,62 @@ inline bool OpenAGodDamnFile(sf::RenderWindow& window, std::string& filename, co
 	else return false;
 }
 
+inline bool SaveAGodDamnFile(sf::RenderWindow& window, std::string& filename, const char* PopupTitle, const char* filter = "Any File\0*.*\0\0") {
+	OPENFILENAME ofn;
+	char buffer[MAX_PATH];
+	if(!filename.empty()){
+		sprintf(buffer, "%s", filename.c_str());
+	} else {
+		ZeroMemory( &buffer, sizeof( buffer ) );
+    	GetModuleFileName( NULL, buffer, MAX_PATH );
+	}
+	ZeroMemory( &ofn,      sizeof( ofn ) );
+	ofn.lStructSize  = sizeof( ofn );
+	ofn.hwndOwner    = window.getSystemHandle();  // If you have a window to center over, put its HANDLE here
+	ofn.lpstrFilter  = filter;
+	ofn.lpstrFile    = buffer;
+	ofn.nMaxFile     = MAX_PATH;
+	ofn.lpstrTitle   = PopupTitle;
+	ofn.Flags        = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
+	if (GetSaveFileNameA( &ofn ))
+	{
+		filename = std::string(buffer);
+		return true;
+	}
+	else return false;
+}
+
 inline void drawEditorGui(sf::RenderWindow& window, Editor& editor) {
 	// ImGui::SetNextWindowPos({3, 3});
 	if(ImGui::BeginMainMenuBar()) {
 		if (ImGui::BeginMenu("File")){
 			if(ImGui::MenuItem("Open", "Ctrl+O")) {
 			 // TODO open things I guess
-			 	std::string filename;;
-			 	if(OpenAGodDamnFile(window, filename, "Select a level to edit")) {
+			 	if(OpenAGodDamnFile(window, editor.filename, "Select a level to edit", "JSON Files\0*.json\0\0")) {
 					editor.stage = {};
 					SerializeError e;
-					if(loadStageFromFile(filename, editor.stage, e)) {
+					if(loadStageFromFile(editor.filename, editor.stage, e)) {
 						if(ImGui::BeginPopup("Load Failed")) {
-							ImGui::Text("Failed to load file: %s (%s)", filename.c_str(), e.what.c_str());
+							ImGui::Text("Failed to load file: %s (%s)", editor.filename.c_str(), e.what.c_str());
 							ImGui::EndPopup();
 						}
-
 					}
 				} else {
 					if(ImGui::BeginPopup("Open Failed")) {
-						ImGui::Text("Failed to open file: %s", filename);
+						ImGui::Text("Failed to open file: %s", editor.filename.c_str());
 						ImGui::EndPopup();
 					}
 				}
-				// OPENFILENAME ofn;
-				// ZeroMemory(
     		}
+
+			if(ImGui::MenuItem("Save", "Ctrl+S")) {
+				// TODO: Serialize stage and write to filename in editor.filename
+			}
+			if(ImGui::MenuItem("Save As...", "Ctrl+Shift+S")) {
+				// TODO: Select file, Serialize stage and write to filename in editor.filename
+			 	if(SaveAGodDamnFile(window, editor.filename, "Select a level to edit", "JSON Files\0*.json\0\0")) {
+				}
+			}
 			ImGui::EndMenu();
 		}
 		ImGui::EndMainMenuBar();
