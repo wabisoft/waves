@@ -30,7 +30,7 @@ int main() {
 		update(game);
 		float drawDelta = drawClock.getElapsedTime().asSeconds();
 		if (drawDelta >= FRAME_RATE) {
-			drawStage(window, game.stage);
+			drawStage(window, game.stage, true);
 			window.display();
 			drawClock.restart();
 		}

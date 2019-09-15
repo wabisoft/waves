@@ -1,36 +1,45 @@
 
+#include <SFML/Graphics.hpp>
+#include <iostream>
+#include <string>
+
 #include "editor.hpp"
 #include "graphics.hpp"
-
-// int main() {
-// 	Editor editor;
-// 	initEditor(editor);
-// 	sf::RenderWindow window;
-// 	EditorGraphics graphics;
-// 	initGraphics(graphics, window);
-// 	while(window.isOpen()) {
-// 		handleEvents(editor, window);
-// 		draw(graphics, editor, window);
-// 	}
-// };
-
 #include "imgui.h"
 #include "imgui-SFML.h"
+#include "imgui_stdlib.h"
 
-#include <SFML/Graphics/RenderWindow.hpp>
-#include <SFML/System/Clock.hpp>
-#include <SFML/Window/Event.hpp>
-#include <SFML/Graphics/CircleShape.hpp>
+inline void drawEditorGui(sf::RenderWindow& window, Editor& editor) {
+	// ImGui::SetNextWindowPos({3, 3});
+    ImGui::Begin("Editor");
+	std::string blah = "";
+	ImGui::InputText("thingy", &blah);
+    ImGui::Button("Look at this pretty button");
+	ImGui::BeginGroup();
+	ImGui::InputFloat("SeaLevel", &editor.stage.sea.level);
+    ImGui::EndGroup();
+    ImGui::End();
+    ImGui::SFML::Render(window);
+}
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(640, 480), "ImGui + SFML = <3");
-    window.setFramerateLimit(60);
+	sf::RenderWindow window;
+	sf::ContextSettings settings;
+	sf::VideoMode videoMode = sf::VideoMode::getDesktopMode();
+	settings.antialiasingLevel = 100;
+	window.create(videoMode, "Waves: Editor", sf::Style::Default, settings);
+	// TODO: Why doesn't the screen start at the top left corner?
+	window.setFramerateLimit(1.f/FRAME_RATE);
+	window.setVerticalSyncEnabled(true);
+	if (!font.loadFromFile("assets/fonts/IBMPlexMono-Regular.ttf")){
+	 	std::cout << "Couldn't load font" << std::endl;
+	}
+
     ImGui::SFML::Init(window);
 
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
-
+	Clock drawClock;
+	Editor editor;
     sf::Clock deltaClock;
     while (window.isOpen()) {
         sf::Event event;
@@ -44,15 +53,12 @@ int main()
 
         ImGui::SFML::Update(window, deltaClock.restart());
 
-        ImGui::Begin("Hello, world!");
-        ImGui::Button("Look at this pretty button");
-        ImGui::End();
-
         window.clear();
-        window.draw(shape);
-        ImGui::SFML::Render(window);
+		drawStage(window, editor.stage);
+		drawEditorGui(window, editor);
         window.display();
     }
 
     ImGui::SFML::Shutdown();
+	return 0;
 }

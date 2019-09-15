@@ -52,28 +52,17 @@ void update(Game& game) {
 	}
 }
 
-inline void startInput(Game& game, const sf::Event& event, const sf::RenderTarget& target) {
- 	processStartInput(game.stage, screen2GamePos(target, {event.mouseButton.x, event.mouseButton.y}));
-}
-inline void continueInput(Game& game, const sf::Event& event, const sf::RenderTarget& target) {
-	processContinuingInput(game.stage, screen2GamePos(target, {event.mouseMove.x, event.mouseMove.y}));
-}
-
-inline void endInput(Game& game, const sf::Event& event, const sf::RenderTarget& target) {
- 	processEndInput(game.stage, screen2GamePos(target, {event.mouseButton.x, event.mouseButton.y}));
-}
-
 void processEvent(Game& game, const sf::Event& event, const sf::RenderTarget& target) {
 	// TODO (owen): Factor the identical portions of mouse and touch input into functions or something
 	switch (event.type) {
 	    case sf::Event::Closed:	game.end = true; break;
 	    case sf::Event::KeyPressed: keyEvent(game, event);
-		case sf::Event::MouseButtonPressed: startInput(game, event, target); break;
-		case sf::Event::MouseMoved: continueInput(game, event, target); break;
-		case sf::Event::MouseButtonReleased: endInput(game, event, target); break;
-	    case sf::Event::TouchBegan: startInput(game, event, target); break;
-	    case sf::Event::TouchMoved: continueInput(game, event, target); break;
-	    case sf::Event::TouchEnded: endInput(game, event, target); break;
+		case sf::Event::MouseButtonPressed: processStartInput(game.stage, screen2GamePos(target, {event.mouseButton.x, event.mouseButton.y})); break;
+		case sf::Event::MouseMoved: processContinuingInput(game.stage, screen2GamePos(target, {event.mouseMove.x, event.mouseMove.y})); break;
+		case sf::Event::MouseButtonReleased: processEndInput(game.stage, screen2GamePos(target, {event.mouseButton.x, event.mouseButton.y})); break;
+	    case sf::Event::TouchBegan: processStartInput(game.stage, screen2GamePos(target, {event.mouseButton.x, event.mouseButton.y})); break;
+	    case sf::Event::TouchMoved: processContinuingInput(game.stage, screen2GamePos(target, {event.mouseMove.x, event.mouseMove.y})); break;
+	    case sf::Event::TouchEnded: processEndInput(game.stage, screen2GamePos(target, {event.mouseButton.x, event.mouseButton.y})); break;
 		default: break;
 	}
 }

@@ -26,7 +26,7 @@ void initGraphics() {
 
 }
 
-void drawStage(sf::RenderTarget& target, Stage& stage) {
+void drawStage(sf::RenderTarget& target, Stage& stage, bool drawInfo) {
 	target.clear(sf::Color::Black);
 	drawGrid(target);
 	drawPlatforms(target, stage);
@@ -37,7 +37,7 @@ void drawStage(sf::RenderTarget& target, Stage& stage) {
 	}
 	drawRocks(target, stage);
 	drawShip(target, stage.ship);
-	drawInfoText(target, stage);
+	if(drawInfo) {drawInfoText(target, stage);}
 	sf::Vector2u targetSize = target.getSize();
 	if (stage.state.type == StageState::PAUSED) {
 		drawText(target, "Paused", {(float)targetSize.x/2, (float)targetSize.y/2}, 24);
