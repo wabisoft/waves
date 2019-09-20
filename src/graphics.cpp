@@ -26,9 +26,11 @@ void initGraphics() {
 
 }
 
-void drawStage(sf::RenderTarget& target, Stage& stage, bool drawInfo) {
+void drawStage(sf::RenderTarget& target, Stage& stage,  bool showGrid) {
 	target.clear(sf::Color::Black);
-	drawGrid(target);
+	if (showGrid ) {
+		drawGrid(target);
+	}
 	drawPlatforms(target, stage);
 	drawSea(target, stage.sea);
 	if(stage.selection.active && stage.selection.state == Selection::PULL && stage.selection.pullPosition != VECTOR2_ZERO) {
@@ -37,7 +39,6 @@ void drawStage(sf::RenderTarget& target, Stage& stage, bool drawInfo) {
 	}
 	drawRocks(target, stage);
 	drawShip(target, stage.ship);
-	if(drawInfo) {drawInfoText(target, stage);}
 	sf::Vector2u targetSize = target.getSize();
 	if (stage.state.type == StageState::PAUSED) {
 		drawText(target, "Paused", {(float)targetSize.x/2, (float)targetSize.y/2}, 24);
@@ -51,14 +52,14 @@ void drawStage(sf::RenderTarget& target, Stage& stage, bool drawInfo) {
 
 inline void drawSea(sf::RenderTarget& target, const Sea& sea) {
 	std::vector<sf::Vertex> vertices;
-	float step = 1 / pixelsPerUnit(target);
+	float step = 1 / pixelsPerUnit(target).x;
 	for (float i = 0; i < STAGE_WIDTH; i += step)
 	{
 		// this draw pattern causes the gpu hardware to interpolate the color alpha
 		// from 1 to 0 (found this by accident but I like it)
 		vertices.push_back(sf::Vertex(game2ScreenPos(target, {i, heightAtX(sea, i)}), SEA_COLOR));
 		vertices.push_back(sf::Vertex(game2ScreenPos(target, {i+step, heightAtX(sea, i+step)}), SEA_COLOR));
-		vertices.push_back(sf::Vertex(game2ScreenPos(target, {i, -5}), SEA_COLOR));
+		vertices.push_back(sf::Vertex(game2ScreenPos(target, {i, 0}), SEA_COLOR));
 	}
 	target.draw(&vertices[0], vertices.size(), sf::Triangles);
 }
@@ -126,11 +127,11 @@ inline void drawPullParabola(sf::RenderTarget& target, Stage& stage) {
 }
 
 
-inline void drawInfoText(sf::RenderTarget& target, const Stage& stage) {
+void drawInfoText(sf::RenderTarget& target, const Stage& stage, float drawDelta, float updateDelta, int loopsPerUpdate) {
 	std::stringstream infostream;
-	// infostream << "Draw (Hz): 				" << 1/graphics.drawDelta << std::endl;
-	// infostream << "Update (Hz): 			" << 1/graphics.updateDelta << std::endl;
-	// infostream << "Loops/Update: 			" << graphics.loopsPerUpdate <<std::endl;
+	infostream << "Draw (Hz): 				" << 1/drawDelta << std::endl;
+	infostream << "Update (Hz): 			" << 1/updateDelta << std::endl;
+	infostream << "Loops/Update: 			" << loopsPerUpdate <<std::endl;
 	if (stage.state.type == StageState::RUNNING) {
 		infostream << "Running Time: 			" << stage.state.running.time <<std::endl;
 	} else if (stage.state.type == StageState::PAUSED) {
@@ -153,6 +154,7 @@ inline void drawText(sf::RenderTarget& target, std::string text, sf::Vector2f po
 	sf::Text sfText((sf::String)text, font, size);
 	sfText.setFillColor(sf::Color::White);
 	sfText.setPosition(position);
+	auto blah = sfText.getLocalBounds();
 	if(centered) {
 		sf::FloatRect bounds = sfText.getGlobalBounds();
 		sfText.setOrigin(bounds.width/2, bounds.height/2);
@@ -170,19 +172,21 @@ inline void drawId(sf::RenderTarget& target, int id, Vector2 position) {
 
 inline void drawCircle(sf::RenderTarget& target, const Circle& circle, sf::Color c, bool fill) {
 	sf::CircleShape shape;
-	float ppu = pixelsPerUnit(target);
-	float radius = circle.radius * ppu;
+	Vector2 ppu = pixelsPerUnit(target);
+	// float radius = circle.radius * ppu;
 	auto pos = game2ScreenPos(target, circle.position);
 	shape.setPosition(pos);
-	shape.setRadius(radius);
-	shape.setOrigin(radius, radius);
+	shape.setRadius(circle.radius);
+	shape.setOrigin(circle.radius, circle.radius);
+	shape.setScale(ppu.x, ppu.y);
 	if(!fill) {
 		shape.setFillColor(sf::Color(0,0,0,0));
 	} else {
 		shape.setFillColor(c);
 	}
-	shape.setOutlineColor(c);
-	shape.setOutlineThickness(1);
+	// shape.setOutlineColor(c);
+	shape.setFillColor(c);
+	// shape.setOutlineThickness(1);
 	target.draw(shape);
 }
 

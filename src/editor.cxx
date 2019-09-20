@@ -10,68 +10,7 @@
 #include "editor.hpp"
 #include "graphics.hpp"
 #include "serialize.hpp"
-
-
-#include <windows.h>
-
-std::string ExePath() {
-    char buffer[MAX_PATH];
-    GetModuleFileName( NULL, buffer, MAX_PATH );
-    std::string::size_type pos = std::string( buffer ).find_last_of( "\\/" );
-    return std::string( buffer ).substr( 0, pos);
-}
-
-
-
-inline bool OpenAGodDamnFile(sf::RenderWindow& window, std::string& filename, const char* PopupTitle, const char* filter = "Any File\0*.*\0\0") {
-	OPENFILENAME ofn;
-	char buffer[MAX_PATH];
-	if(!filename.empty()){
-		sprintf(buffer, "%s", filename.c_str());
-	} else {
-		ZeroMemory( &buffer, sizeof( buffer ) );
-    	GetModuleFileName( NULL, buffer, MAX_PATH );
-	}
-	ZeroMemory( &ofn,      sizeof( ofn ) );
-	ofn.lStructSize  = sizeof( ofn );
-	ofn.hwndOwner    = window.getSystemHandle();  // If you have a window to center over, put its HANDLE here
-	ofn.lpstrFilter  = filter;
-	ofn.lpstrFile    = buffer;
-	ofn.nMaxFile     = MAX_PATH;
-	ofn.lpstrTitle   = PopupTitle;
-	ofn.Flags        = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
-	if (GetOpenFileNameA( &ofn ))
-	{
-		filename = std::string(buffer);
-		return true;
-	}
-	else return false;
-}
-
-inline bool SaveAGodDamnFile(sf::RenderWindow& window, std::string& filename, const char* PopupTitle, const char* filter = "Any File\0*.*\0\0") {
-	OPENFILENAME ofn;
-	char buffer[MAX_PATH];
-	if(!filename.empty()){
-		sprintf(buffer, "%s", filename.c_str());
-	} else {
-		ZeroMemory( &buffer, sizeof( buffer ) );
-    	GetModuleFileName( NULL, buffer, MAX_PATH );
-	}
-	ZeroMemory( &ofn,      sizeof( ofn ) );
-	ofn.lStructSize  = sizeof( ofn );
-	ofn.hwndOwner    = window.getSystemHandle();  // If you have a window to center over, put its HANDLE here
-	ofn.lpstrFilter  = filter;
-	ofn.lpstrFile    = buffer;
-	ofn.nMaxFile     = MAX_PATH;
-	ofn.lpstrTitle   = PopupTitle;
-	ofn.Flags        = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
-	if (GetSaveFileNameA( &ofn ))
-	{
-		filename = std::string(buffer);
-		return true;
-	}
-	else return false;
-}
+#include "win32_file.hpp"
 
 inline void drawEditorGui(sf::RenderWindow& window, Editor& editor) {
 	// ImGui::SetNextWindowPos({3, 3});
@@ -79,7 +18,7 @@ inline void drawEditorGui(sf::RenderWindow& window, Editor& editor) {
 		if (ImGui::BeginMenu("File")){
 			if(ImGui::MenuItem("Open", "Ctrl+O")) {
 			 // TODO open things I guess
-			 	if(OpenAGodDamnFile(window, editor.filename, "Select a level to edit", "JSON Files\0*.json\0\0")) {
+			 	if(selectAFileForOpen(window, editor.filename, "Select a level to edit", "JSON Files\0*.json\0\0")) {
 					editor.stage = {};
 					SerializeError e;
 					if(loadStageFromFile(editor.filename, editor.stage, e)) {
@@ -101,7 +40,7 @@ inline void drawEditorGui(sf::RenderWindow& window, Editor& editor) {
 			}
 			if(ImGui::MenuItem("Save As...", "Ctrl+Shift+S")) {
 				// TODO: Select file, Serialize stage and write to filename in editor.filename
-			 	if(SaveAGodDamnFile(window, editor.filename, "Select a level to edit", "JSON Files\0*.json\0\0")) {
+			 	if(selectAFileForSave(window, editor.filename, "Select a level to edit", "JSON Files\0*.json\0\0")) {
 				}
 			}
 			ImGui::EndMenu();
@@ -120,13 +59,13 @@ int main()
 {
 	sf::RenderWindow window;
 	sf::ContextSettings settings;
-	sf::VideoMode videoMode = sf::VideoMode::getDesktopMode();
+	sf::VideoMode videoMode = {800, 450};
 	settings.antialiasingLevel = 100;
 	window.create(videoMode, "Waves: Editor", sf::Style::Default, settings);
 	// TODO: Why doesn't the screen start at the top left corner?
 	window.setFramerateLimit(1.f/FRAME_RATE);
 	window.setVerticalSyncEnabled(true);
-	window.setPosition({0,0});
+	// window.setPosition({0,0});
 	if (!font.loadFromFile("assets/fonts/IBMPlexMono-Regular.ttf")){
 	 	std::cout << "Couldn't load font" << std::endl;
 	}
@@ -145,17 +84,28 @@ int main()
         while (window.pollEvent(event)) {
             ImGui::SFML::ProcessEvent(event);
 
-            if (event.type == sf::Event::Closed) {
-                window.close();
+            switch(event.type) {
+				case sf::Event::Closed:
+                	window.close();
+					break;
+				case sf::Event::Resized:
+					{
+						auto view = window.getView();
+						view.setCenter({event.size.width/2.f, event.size.height/2.f});
+						view.setSize({(float)event.size.width, (float)event.size.height});
+						window.setView(view);
+					}
+					break;
+				default: break;
             }
         }
 
         ImGui::SFML::Update(window, deltaClock.restart());
 
         window.clear();
-		drawStage(window, editor.stage);
+		drawStage(window, editor.stage, true);
 		drawEditorGui(window, editor);
-        window.display();
+		window.display();
     }
 
     ImGui::SFML::Shutdown();

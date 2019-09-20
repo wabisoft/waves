@@ -48,6 +48,7 @@ void update(Game& game) {
 		update(stage, updateDelta);
 		game.updateClock.restart();
 		game.loopsPerUpdate = 0;
+		game.updateDelta = updateDelta;
 	} else { ++game.loopsPerUpdate; }
 	if (game.stage.state.type == StageState::FINISHED && !game.stage.state.finished.win) {
 		reloadStage(game);
