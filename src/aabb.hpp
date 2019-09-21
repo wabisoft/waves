@@ -22,6 +22,10 @@ uint8_t createAABB(Stage& stage, AABB aabb);
 int deleteAABBByIdx(Stage& stage, int aabb_idx);
 int deleteAABBById(Stage& stage, uint8_t aabb_id);
 
+inline float area(const AABB aabb) {
+	return (aabb.upper.x - aabb.lower.x) * (aabb.upper.y - aabb.lower.y);
+}
+
 inline bool operator==(const AABB& a, const AABB& b) {
 		return a.id == b.id && a.type == b.type; // note that we do not compare vectors because floats are all shitty
 }

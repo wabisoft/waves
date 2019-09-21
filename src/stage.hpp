@@ -13,7 +13,6 @@
 struct Selection {
 	enum State : uint8_t {
 		SELECT		= 1 << 0,
-		RESIZE 		= 1 << 1,
 		PULL 		= 1 << 2,
 	};
 	State state = SELECT;
@@ -64,10 +63,7 @@ struct Stage{
 	int numRocks = 0;
 	int numPlatforms = 0;
 	int numAABBS = 0;
-	// int rockLimit = 0;
-	// int usedRocks = 0;
-	// bool paused = false;
-	// bool failed = false;
+	RockType rockType = {RockType::RED};
 };
 
 void update(Stage& stage, float deltaTime);

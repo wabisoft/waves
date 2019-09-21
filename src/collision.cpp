@@ -117,10 +117,8 @@ void dispatchPotentialCollision(Stage& stage, const AABBPair& pair) {
 }
 
 
-void collide(Rock& rock, Sea& sea) {
-	if (!rock.active){
-		return;
-	}
+inline void collideRed(Rock& rock, Sea& sea) {
+	assert(rock.type.type == RockType::RED);
 	Vector2 rockPosition = rock.shape.position;
 	Vector2 rockNextFramePosition = rock.shape.position + rock.velocity * FIXED_TIMESTEP;
 	if(rockPosition.y < sea.level) {
@@ -131,6 +129,61 @@ void collide(Rock& rock, Sea& sea) {
 	} else if (rockNextFramePosition.y < sea.level) {
 		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x));
 		rock.active = 0;
+	}
+}
+
+inline void collideGreen(Rock& rock, Sea& sea) {
+	assert(rock.type.type == RockType::GREEN);
+	float seaHeight = heightAtX(sea, rock.shape.position.x);
+	Vector2 lower = {rock.shape.position.x, rock.shape.position.y - rock.shape.radius};
+	Vector2 upper = {rock.shape.position.x, rock.shape.position.y + rock.shape.radius};
+	if ( seaHeight < lower.y) {
+		// we say this is no collision
+		return;
+	}
+	float displacedWater = area(rock.shape);
+	if (upper.y > seaHeight) {
+		// float h= seaHeight - lower.y;
+		// float r= rock.shape.radius;
+		// displacedWater = r * r * std::acos((r-h)/r) * (r-h) * std::sqrt(2*r*h - h*h);
+		displacedWater = seaHeight - lower.y;
+	}
+	rock.velocity += VECTOR2_UP * displacedWater * GRAVITATIONAL_CONSTANT * FIXED_TIMESTEP;
+	rock.velocity += velocityAtX(sea, rock.shape.position.x) * FIXED_TIMESTEP;
+	auto drag = dragForce(rock.velocity, 600.f, mass(rock));
+	// auto drag = dragForce(rock.velocity, 600.f, area(AABB(rock))*SHIP_AREA_MASS_RATIO);
+	rock.velocity += drag * FIXED_TIMESTEP;
+
+	if(rock.state.type != RockState::FLOATING) {
+		rock.state = {RockState::FLOATING, {0.f}};
+	}
+	if (sea.numWaves < 0) { return; } // nothing to do for no waves
+	int closestWaveIndex = findWaveAtX(sea, rock.shape.position.x);
+	if (closestWaveIndex < 0) {
+		if (sea.numWaves > 0) assert(false);
+		return;
+	} // if there are no waves then do nothing
+	const Wave& wave = sea.waves[closestWaveIndex];
+	float distFromWave = std::abs(rock.shape.position.x - wave.position.x);
+	if (distFromWave < 0.1) {
+		rock.state = {};
+		// rock.state.type = ShipState::SURFING;
+		// rock.state.surfing.wave_id = wave.id;
+	}
+}
+
+inline void collideBlue(Rock& rock, Sea& sea) {
+	assert(rock.type.type == RockType::BLUE);
+}
+
+void collide(Rock& rock, Sea& sea) {
+	if (!rock.active){
+		return;
+	}
+	switch(rock.type.type) {
+		case RockType::RED: return collideRed(rock, sea); break;
+		case RockType::GREEN: return collideGreen(rock, sea); break;
+		case RockType::BLUE: return collideBlue(rock, sea); break;
 	}
 }
 
@@ -192,7 +245,7 @@ void collide(Ship& ship, const Sea& sea) {
 		ship.state.type = ShipState::SURFING;
 		ship.state.surfing.wave_id = wave.id;
 	}
-	}
+}
 
 void collide(Ship& ship, const Platform& platform) {
 	Collision col = collision(ship.shape, platform.shape);

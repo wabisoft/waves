@@ -43,7 +43,7 @@ void drawStage(sf::RenderTarget& target, Stage& stage,  bool showGrid) {
 	if (stage.state.type == StageState::PAUSED) {
 		drawText(target, "Paused", {(float)targetSize.x/2, (float)targetSize.y/2}, 24);
 	} else if (stage.state.type == StageState::FINISHED && stage.state.finished.win == true) {
-		drawText(target, "Good Job!", {(float)targetSize.x/2, (float)targetSize.y/2}, 24);
+		drawText(target, "Good Job!", {(float)targetSize.x/2, (float)targetSize.y/2}, 24, true);
 	}
 	drawPolygon(target, stage.win.region, sf::Color(0, 204, 102));
 	drawPullParabola(target, stage);
@@ -58,10 +58,10 @@ inline void drawSea(sf::RenderTarget& target, const Sea& sea) {
 		// this draw pattern causes the gpu hardware to interpolate the color alpha
 		// from 1 to 0 (found this by accident but I like it)
 		vertices.push_back(sf::Vertex(game2ScreenPos(target, {i, heightAtX(sea, i)}), SEA_COLOR));
-		vertices.push_back(sf::Vertex(game2ScreenPos(target, {i+step, heightAtX(sea, i+step)}), SEA_COLOR));
-		vertices.push_back(sf::Vertex(game2ScreenPos(target, {i, 0}), SEA_COLOR));
+		// vertices.push_back(sf::Vertex(game2ScreenPos(target, {i+step, heightAtX(sea, i+step)}), SEA_COLOR));
+		// vertices.push_back(sf::Vertex(game2ScreenPos(target, {i, 0}), SEA_COLOR));
 	}
-	target.draw(&vertices[0], vertices.size(), sf::Triangles);
+	target.draw(&vertices[0], vertices.size(), sf::LineStrip);
 }
 
 inline void drawShip(sf::RenderTarget& target, const Ship& ship) {
@@ -72,12 +72,17 @@ inline void drawShip(sf::RenderTarget& target, const Ship& ship) {
 inline void drawRocks(sf::RenderTarget& target, const Stage& stage) {
 	for (int i = 0; i < stage.numRocks; ++i){
 		sf::Color c;
-		if (stage.selection.active && stage.rocks[i].id == stage.selection.entity.id) {
-			c = sf::Color::Cyan;
-		} else if (stage.rocks[i].sized) {
-			c = sf::Color::Red;
-		} else {
-			c = sf::Color::Green;
+		// if (stage.selection.active && stage.rocks[i].id == stage.selection.entity.id) {
+		// 	c = sf::Color::Cyan;
+		// } else if (stage.rocks[i].sized) {
+		// 	c = sf::Color::Red;
+		// } else {
+		// 	c = sf::Color::Green;
+		// }
+		switch(stage.rocks[i].type.type) {
+			case RockType::RED: c = sf::Color::Red; break;
+			case RockType::GREEN: c = sf::Color::Green; break;
+			case RockType::BLUE: c = sf::Color::Blue; break;
 		}
 		drawCircle(target, stage.rocks[i].shape, c);
 		drawId(target, stage.rocks[i].id, stage.rocks[i].shape.position);
@@ -110,7 +115,6 @@ inline void drawGrid(sf::RenderTarget& target) {
 inline void drawPullParabola(sf::RenderTarget& target, Stage& stage) {
 	switch(stage.selection.state) {
 		case Selection::SELECT: break;
-		case Selection::RESIZE: break;
 		case Selection::PULL:
 			{
 				std::vector<Vector2> parabola = pullParabola(stage);

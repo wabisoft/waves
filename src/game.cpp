@@ -86,6 +86,9 @@ void keyEvent(Game& game, const sf::Event& event) {
 		case sf::Keyboard::Key::Num4: game.timeScale = 4.f; break;
 		case sf::Keyboard::Key::Num5: game.timeScale = 100.f; break;
 		case sf::Keyboard::Key::Num6: game.timeScale = 1000.f; break;
+		case sf::Keyboard::Key::R: game.stage.rockType = {RockType::RED}; break;
+		case sf::Keyboard::Key::G: game.stage.rockType = {RockType::GREEN}; break;
+		case sf::Keyboard::Key::B: game.stage.rockType = {RockType::BLUE}; break;
 		default: break;
 	}
 }
