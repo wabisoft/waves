@@ -16,6 +16,7 @@ struct Wave {
 	float decay = 0.f;
 	float time = 0.f;
 	short direction = 1;
+	short sign = 1;
 	bool active = false;
 	bool grow = true;
 	uint8_t id = 0;
@@ -28,7 +29,7 @@ float minimumX(const Wave& wave);
 float maximumX(const Wave& wave);
 
 void updateWaves(Stage& stage);
-int createWave(Sea& sea, Vector2 position, float amplitude, short direction);
+int createWave(Sea& sea, Vector2 position, float amplitude, short direction, short sign);
 
 int findWaveAtX(const Sea& sea, float x);
 Wave& findWave(Sea& sea, uint8_t wave_id);

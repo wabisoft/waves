@@ -122,12 +122,12 @@ inline void collideRed(Rock& rock, Sea& sea) {
 	Vector2 rockPosition = rock.shape.position;
 	Vector2 rockNextFramePosition = rock.shape.position + rock.velocity * FIXED_TIMESTEP;
 	if(rockPosition.y < sea.level) {
-		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x));
+		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x), 1);
 		rock.active = 0;
 	} else if (rockPosition.y < heightAtX(sea, rockPosition.x)) {
 		// TODO: Find nearest wave and maybe distructively interfere with it?
 	} else if (rockNextFramePosition.y < sea.level) {
-		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x));
+		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x), 1);
 		rock.active = 0;
 	}
 }
@@ -174,6 +174,18 @@ inline void collideGreen(Rock& rock, Sea& sea) {
 
 inline void collideBlue(Rock& rock, Sea& sea) {
 	assert(rock.type.type == RockType::BLUE);
+	Vector2 rockPosition = rock.shape.position;
+	Vector2 rockNextFramePosition = rock.shape.position + rock.velocity * FIXED_TIMESTEP;
+	if(rockPosition.y < sea.level) {
+		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x), -1);
+		rock.active = 0;
+	} else if (rockPosition.y < heightAtX(sea, rockPosition.x)) {
+		// TODO: Find nearest wave and maybe distructively interfere with it?
+	} else if (rockNextFramePosition.y < sea.level) {
+		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x), -1);
+		rock.active = 0;
+	}
+
 }
 
 void collide(Rock& rock, Sea& sea) {
