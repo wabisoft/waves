@@ -90,7 +90,9 @@ inline Rectangle extractRectangle(JSON j, JSONError& e) {
 
 bool loadStageFromString(std::string data, Stage& stage, SerializeError& err) {
 	JSONError e;
-	JSON json = getJSON(data.begin(), data.end(), e);
+	string_it litStart = data.begin();
+	string_it litEnd = data.end();
+	JSON json = getJSON(litStart, litEnd, e);
 	if(e.no) {err.what = e.what; return false;}
 	if(json.type != JSON::OBJECT) {
 		err.what = "Stage data should be a valid json object";
