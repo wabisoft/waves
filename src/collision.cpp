@@ -23,20 +23,16 @@ void resolveCollisions(Stage& stage) {
 	for(int i = 0; i < numAABBs; ++i) {
 		switch (aabbs[i].type) {
 		case ROCK:
-			{
-				int rock_idx = binary_find_where(aabbs[i].id, stage.rocks, stage.numRocks, [](const Rock& rock){ return rock.id;});
-				assert(rock_idx > -1);
-				aabbs[i] = AABB(stage.rocks[rock_idx]);
-			}
-		break;
+			aabbs[i] = AABB(*findRock(stage, aabbs[i].id));
+			break;
 		case SHIP:
 			aabbs[i] = AABB(stage.ship);
-		break;
+			break;
 		case PLATFORM:
 			// NOTE: since platforms are static, their AABBS shouldn't need updating, I'll leave the case here in case
-		break;
+			break;
 		default:
-		break;
+			break;
 		}
 	}
 	// then resort the list (insertion sort is a "slow" sorting method
@@ -79,14 +75,14 @@ void dispatchPotentialCollision(Stage& stage, const AABBPair& pair) {
 	Platform* aPlatform = nullptr;
 	// Platform* aPlatform = nullptr;
 	switch(pair.a.type) {
-		case ROCK:	aRock = &findRock(stage, pair.a.id); break;
+		case ROCK:	aRock = &*findRock(stage, pair.a.id); break;
 		case PLATFORM:	aPlatform = &findPlatform(stage, pair.a.id); break;
 		default: break;
 	}
 	Rock* bRock = nullptr;
 	Platform* bPlatform= nullptr;
 	switch(pair.b.type) {
-		case ROCK:	bRock = &findRock(stage, pair.b.id); break;
+		case ROCK:	bRock = &*findRock(stage, pair.b.id); break;
 		case PLATFORM:	bPlatform = &findPlatform(stage, pair.b.id); break;
 		default: break;
 	}

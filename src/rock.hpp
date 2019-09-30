@@ -61,17 +61,18 @@ struct Rock {
 	uint8_t id = 0;
 };
 
+typedef std::vector<Rock>::iterator RockIt;
+
 inline float mass(Rock& rock) {
 	return rock.shape.radius * ROCK_RADIUS_MASS_RATIO;
 }
 
-float getTimeDeltaForRock(Rock& rock, float deltaTime);
 void updateRocks(Stage& stage, float deltaTime);
 uint8_t createRock(Stage& stage, Vector2 position, float radius, RockType type);
-int deleteRockByIdx(Stage& stage, int rock_idx);
-int deleteRockById(Stage& stage, uint8_t rock_id);
-Rock& findRock(Stage& stage, uint8_t rock_id);
-int findRockAtPosition(const Stage& stage, Vector2 position);
+RockIt deleteRock(Stage& stage, RockIt rockIt);
+RockIt deleteRock(Stage* stage, uint8_t rockId);
+RockIt findRock(Stage& stage, uint8_t rock_id);
+RockIt findRockAtPosition(Stage& stage, Vector2 position);
 void resizeRock(Stage& stage, int rockId, Vector2 position);
 
 inline float area(const Rock& rock) {

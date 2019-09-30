@@ -52,7 +52,7 @@ struct Win {
 struct Stage{
 	Sea sea;
 	Ship ship;
-	Rock rocks[MAX_ROCKS];
+	std::vector<Rock> rocks;
 	Platform platforms[MAX_PLATFORMS];
 	AABB aabbs[MAX_AABBS];
 	Vector2 rockSpawn;
@@ -60,7 +60,6 @@ struct Stage{
 	Win win;
 	StageState state;
 	uint8_t id_src = 0;
-	int numRocks = 0;
 	int numPlatforms = 0;
 	int numAABBS = 0;
 	RockType rockType = {RockType::RED};

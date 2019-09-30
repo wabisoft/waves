@@ -24,7 +24,7 @@ void update(Stage& stage, float deltaTime){
 			stage.state.running.time += deltaTime;
 		case StageState::FINISHED: break;
 	}
-	if(stage.numRocks < 1) {
+	if(stage.rocks.size() < 1) {
 		createRock(stage, stage.rockSpawn, ROCK_MAX_RADIUS - 1, stage.rockType);
 	}
 	resolveCollisions(stage);
@@ -40,12 +40,11 @@ void update(Stage& stage, float deltaTime){
 
 Entity makeSelectionAtPosition(Stage& stage, Vector2 position) {
 	// For now we only select rocks so let's find our rock
-	int rockIdx = findRockAtPosition(stage, position);
-	if (rockIdx >= 0 && rockIdx < stage.numRocks) {
-		Rock& rock = stage.rocks[rockIdx];
-		stage.selection.entity = {rock.id, ROCK};
+	RockIt rockIt = findRockAtPosition(stage, position);
+	if (rockIt != stage.rocks.end()) {
+		stage.selection.entity = { rockIt->id, ROCK };
 		stage.selection.active = true;
-		stage.selection.entityPosition = rock.shape.position;
+		stage.selection.entityPosition = rockIt->shape.position;
 	}
 	return stage.selection.entity;
 }
@@ -56,7 +55,7 @@ void clearSelection(Stage& stage) {
 
 inline bool validateAndSetPullPosition(Stage& stage,  Vector2 position) {
 	assert(stage.selection.active);
-	Rock& rock = findRock(stage, stage.selection.entity.id);
+	Rock& rock = *findRock(stage, stage.selection.entity.id);
 	Vector2 pull = rock.shape.position - position;
 	float squaredPullLength = squaredMagnitude(pull);
 	if(squaredPullLength < STAGE_MAX_PULL_LENGTH_SQUARED) {
@@ -116,7 +115,7 @@ void processEndInput(Stage& stage, Vector2 position) {
 	case Selection::PULL: { // if we're throwing
 		assert(stage.selection.active); // I think we should always have a selection in this phase
 		validateAndSetPullPosition(stage, position);
-		Rock& rock = findRock(stage, stage.selection.entity.id);
+		Rock& rock = *findRock(stage, stage.selection.entity.id);
 		Vector2 pull = rock.shape.position - stage.selection.pullPosition;
 		float pullLength = std::abs(magnitude(pull));
 		float throwMag = (pullLength / STAGE_MAX_PULL_LENGTH) * ROCK_MAX_SPEED;
@@ -134,7 +133,7 @@ void processEndInput(Stage& stage, Vector2 position) {
 
 Vector2 getPullForce(Stage& stage) {
 	assert(stage.selection.active && stage.selection.state == Selection::PULL);
-	Rock& rock = findRock(stage, stage.selection.entity.id);
+	Rock& rock = *findRock(stage, stage.selection.entity.id);
 	Vector2 pull = rock.shape.position - stage.selection.pullPosition;
 	float pullLength = std::abs(magnitude(pull));
 	float throwMag = (pullLength / STAGE_MAX_PULL_LENGTH) * ROCK_MAX_SPEED;
@@ -145,7 +144,7 @@ Vector2 getPullForce(Stage& stage) {
 std::vector<Vector2> pullParabola(Stage& stage) {
 	assert(stage.selection.active && stage.selection.state == Selection::PULL);
 	std::vector<Vector2> parabola;
-	Rock& rock = findRock(stage, stage.selection.entity.id);
+	Rock& rock = *findRock(stage, stage.selection.entity.id);
 	Vector2 f = rock.velocity + getPullForce(stage);
 	Vector2 wouldBePosition = rock.shape.position;
 	const int stepsize = 10;

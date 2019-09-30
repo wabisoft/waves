@@ -34,7 +34,7 @@ void drawStage(sf::RenderTarget& target, Stage& stage,  bool showGrid) {
 	drawPlatforms(target, stage);
 	drawSea(target, stage.sea);
 	if(stage.selection.active && stage.selection.state == Selection::PULL && stage.selection.pullPosition != VECTOR2_ZERO) {
-		Rock& rock = findRock(stage, stage.selection.entity.id);
+		Rock& rock = *findRock(stage, stage.selection.entity.id);
 		drawLine(target, rock.shape.position, stage.selection.pullPosition, sf::Color::Blue);
 	}
 	drawRocks(target, stage);
@@ -70,22 +70,15 @@ inline void drawShip(sf::RenderTarget& target, const Ship& ship) {
 }
 
 inline void drawRocks(sf::RenderTarget& target, const Stage& stage) {
-	for (int i = 0; i < stage.numRocks; ++i){
+	for(const Rock& rock : stage.rocks) {
 		sf::Color c;
-		// if (stage.selection.active && stage.rocks[i].id == stage.selection.entity.id) {
-		// 	c = sf::Color::Cyan;
-		// } else if (stage.rocks[i].sized) {
-		// 	c = sf::Color::Red;
-		// } else {
-		// 	c = sf::Color::Green;
-		// }
-		switch(stage.rocks[i].type.type) {
+		switch(rock.type.type) {
 			case RockType::RED: c = sf::Color::Red; break;
 			case RockType::GREEN: c = sf::Color::Green; break;
 			case RockType::BLUE: c = sf::Color::Blue; break;
 		}
-		drawCircle(target, stage.rocks[i].shape, c);
-		drawId(target, stage.rocks[i].id, stage.rocks[i].shape.position);
+		drawCircle(target, rock.shape, c);
+		drawId(target, rock.id, rock.shape.position);
 	}
 }
 
@@ -142,10 +135,10 @@ void drawInfoText(sf::RenderTarget& target, const Stage& stage, float drawDelta,
 		infostream << "Paused Time: 			" << stage.state.paused.time <<std::endl;
 	}
 	infostream << std::endl;
-	infostream << "#Rocks: 					" << stage.numRocks << std::endl;
+	infostream << "#Rocks: 					" << stage.rocks.size() << std::endl;
 	infostream << "#Waves: 					" << stage.sea.numWaves << std::endl;
 	infostream << "#AABBs: 					" << stage.numAABBS << std::endl;
-	if(stage.numRocks > 0 ) {
+	if(stage.rocks.size() > 0 ) {
 		infostream << "P:						" << stage.rocks[0].shape.position<< std::endl;
 		infostream << "V:						" << stage.rocks[0].velocity << std::endl;
 	}

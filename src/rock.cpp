@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "typedefs.hpp"
 #include "aabb.hpp"
 #include "collision.hpp"
 #include "constants.hpp"
@@ -9,7 +10,8 @@
 #include "stage.hpp"
 #include "util.hpp"
 
-inline void updateFallingRock(Stage& stage, Rock& rock, int rock_idx, float deltaTime) {
+inline RockIt updateFallingRock(Stage& stage, RockIt rockIt, float deltaTime) {
+	Rock& rock = *rockIt;
 	assert(rock.state.type == RockState::FALLING);
 	rock.velocity += GRAVITY * deltaTime;
 	auto drag = dragForce(rock.velocity, 1.225f, rock.shape.radius * ROCK_RADIUS_MASS_RATIO);
@@ -18,11 +20,13 @@ inline void updateFallingRock(Stage& stage, Rock& rock, int rock_idx, float delt
 		rock.velocity = normalized(rock.velocity) * TERMINAL_VELOCITY;
 	}
 	rock.shape.position += rock.velocity;
+	return rockIt;
 }
 
-inline void updateStandingRock(Stage& stage, Rock& rock, int rock_idx, float deltaTime) {
+inline RockIt updateStandingRock(Stage& stage, RockIt rockIt, float deltaTime) {
 	// TODO: this function does a lot of useless caching for debugging purposes,
 	// clean that up eventually
+	Rock& rock = *rockIt;
 	assert(rock.state.type == RockState::STANDING);
 	// Do the actual update
 	rock.velocity *= 0.75; // shitty friction
@@ -47,9 +51,11 @@ inline void updateStandingRock(Stage& stage, Rock& rock, int rock_idx, float del
 	if (!staysInContact) {
 		rock.state = {RockState::FALLING, {}};
 	}
+	return rockIt;
 }
 
-inline void updateFloatingRock(Stage& stage, Rock& rock, int rock_idx, float deltaTime) {
+inline RockIt updateFloatingRock(Stage& stage, RockIt rockIt, float deltaTime) {
+	Rock& rock = *rockIt;
 	assert(rock.state.type == RockState::FLOATING);
 	rock.state.floating.timeFloating += deltaTime;
 	if(rock.state.floating.timeFloating > ROCK_MAX_FLOAT_TIME) {
@@ -58,95 +64,78 @@ inline void updateFloatingRock(Stage& stage, Rock& rock, int rock_idx, float del
 			// if this rock is selected we need to clear it
 			clearSelection(stage);
 		}
-		deleteRockByIdx(stage, rock_idx);
+		return deleteRock(stage, rockIt);
 	}
 	rock.velocity += GRAVITY * deltaTime;
 	auto drag = dragForce(rock.velocity, 1.225f, rock.shape.radius * ROCK_RADIUS_MASS_RATIO);
 	rock.velocity += drag * deltaTime;
 	rock.shape.position += rock.velocity;
-
+	return rockIt;
 }
 
 void updateRocks(Stage& stage, float deltaTime) {
-	Rock* rocks = stage.rocks;
-	for (int i = 0; i < stage.numRocks; ++i) {
-		clamp(rocks[i].velocity, ROCK_MAX_SPEED); // clamp the rock speed
-		if (rocks[i].shape.position.x < 0 || rocks[i].shape.position.x > STAGE_WIDTH || rocks[i].shape.position.y < 0 || rocks[i].active == false) {
+	for (RockIt rockIt = stage.rocks.begin(); rockIt != stage.rocks.end(); ++rockIt) {
+		Rock& rock = *rockIt;
+		clamp(rock.velocity, ROCK_MAX_SPEED); // clamp the rock speed
+		if (rock.shape.position.x < 0 || rock.shape.position.x > STAGE_WIDTH || rock.shape.position.y < 0 || rock.active == false) {
 			// remove our aabb from the stage aabb array
-			if (stage.selection.entity.id == rocks[i].id) {
+			if (stage.selection.entity.id == rock.id) {
 				// if this rock is selected we need to clear it
 				clearSelection(stage);
 			}
-			deleteRockByIdx(stage, i);
+			rockIt = deleteRock(stage, rockIt);
+		} else {
+			switch (rock.state.type) {
+				case RockState::FALLING:  rockIt = updateFallingRock(stage, rockIt, deltaTime); break;
+				case RockState::STANDING: rockIt = updateStandingRock(stage, rockIt, deltaTime); break;
+				case RockState::FLOATING: rockIt = updateFloatingRock(stage, rockIt, deltaTime); break;
+			}
 		}
-		switch (rocks[i].state.type) {
-			case RockState::FALLING: updateFallingRock(stage, rocks[i], i,  deltaTime); break;
-			case RockState::STANDING: updateStandingRock(stage, rocks[i], i, deltaTime); break;
-			case RockState::FLOATING: updateFloatingRock(stage, rocks[i], i, deltaTime); break;
-		}
+		if (rockIt == stage.rocks.end()) break; // because our vector can change sizes while we're iterating
 	}
 }
 
-uint8_t createRock(Stage& stage, Vector2 position, float radius, RockType type){
+uint8 createRock(Stage& stage, Vector2 position, float radius, RockType type){
 	// NOTE (!!!): The implementation of the routine must keep rocks in order of id so that the array can be
 	// binary searched in findRock
-	if (stage.numRocks >= MAX_ROCKS){
-		// Ideally there are a fixed number of rocks and we shouldn't need any error handling here
-		// but just incase
-		return -1;
-	}
-	int new_rock_idx = stage.numRocks;
-	Rock& new_rock = *(stage.rocks + new_rock_idx);
-	new_rock = Rock();
+	Rock new_rock;
 	new_rock.active = true;
 	new_rock.id = ++stage.id_src;
 	new_rock.shape.position = position;
 	new_rock.shape.radius = radius;
 	new_rock.type = type;
-	stage.numRocks++;
-	// stage.usedRocks++;
+	stage.rocks.push_back(new_rock);
 	createAABB(stage, AABB(new_rock));
 	return new_rock.id;
 }
 
-inline int deleteRockByIdx(Stage& stage, int rock_idx){
-	deleteAABBById(stage, stage.rocks[rock_idx].id);
-	stage.rocks[rock_idx] = Rock();
-	for (int j = rock_idx; j < stage.numRocks-1; j++){
-			stage.rocks[j] = stage.rocks[j+1];
-			stage.rocks[j+1] = Rock();
-	}
-	return --stage.numRocks;
+RockIt deleteRock(Stage& stage, RockIt rockIt) {
+	deleteAABBById(stage, rockIt->id);
+	return stage.rocks.erase(rockIt);
 }
 
-inline int deleteRockById(Stage& stage, uint8_t rock_id){
-	Rock * rocks = stage.rocks;
-	for(int i = 0; i < stage.numRocks; i++){
-		if (rocks[i].id == rock_id){
-			return deleteRockByIdx(stage, i);
+RockIt deleteRock(Stage& stage, uint8 rockId) {
+	return deleteRock(stage, findRock(stage, rockId));
+}
+
+RockIt findRock(Stage& stage, uint8 rockId) {
+	RockIt rockIt = std::lower_bound(stage.rocks.begin(), stage.rocks.end(), rockId, [](const Rock& r, uint8 id) -> bool { return r.id < id; });
+	assert(rockIt != stage.rocks.end()); 
+	return rockIt;
+}
+
+RockIt findRockAtPosition(Stage& stage, Vector2 position) {
+	for(RockIt rockIt = stage.rocks.begin(); rockIt != stage.rocks.end(); ++rockIt){ 
+		float dist = magnitude(position - rockIt->shape.position);
+		if (dist <= rockIt->shape.radius) {
+			return rockIt;
 		}
 	}
-	return -1;
-}
-
-Rock& findRock(Stage& stage, uint8_t rock_id) {
-	int rock_idx = binary_find_where(rock_id, stage.rocks, stage.numRocks, [](const Rock& rock){return rock.id;});
-	assert(rock_idx > -1); // see binary find where
-	return stage.rocks[rock_idx];
-}
-
-int findRockAtPosition(const Stage& stage, Vector2 position) {
-	for (int i = 0; i < stage.numRocks; ++i) {
-		float dist = magnitude(position - stage.rocks[i].shape.position);
-		if (dist <= stage.rocks[i].shape.radius) {
-			return i;
-		}
-	}
-	return -1;
+	return stage.rocks.end();
 }
 
 void resizeRock(Stage& stage, int rock_id, Vector2 position){
-	Rock& rock = findRock(stage, rock_id);
+	Rock& rock = *findRock(stage, rock_id);
 	Vector2 relPos = position - rock.shape.position;
 	float squaredSize = squaredMagnitude(relPos);
 	if(squaredSize > ROCK_MIN_RADIUS_SQUARED && squaredSize < ROCK_MAX_RADIUS_SQUARED) {
