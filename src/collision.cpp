@@ -76,14 +76,14 @@ void dispatchPotentialCollision(Stage& stage, const AABBPair& pair) {
 	// Platform* aPlatform = nullptr;
 	switch(pair.a.type) {
 		case ROCK:	aRock = &*findRock(stage, pair.a.id); break;
-		case PLATFORM:	aPlatform = &findPlatform(stage, pair.a.id); break;
+		case PLATFORM:	aPlatform = &*findPlatform(stage, pair.a.id); break;
 		default: break;
 	}
 	Rock* bRock = nullptr;
 	Platform* bPlatform= nullptr;
 	switch(pair.b.type) {
 		case ROCK:	bRock = &*findRock(stage, pair.b.id); break;
-		case PLATFORM:	bPlatform = &findPlatform(stage, pair.b.id); break;
+		case PLATFORM:	bPlatform = &*findPlatform(stage, pair.b.id); break;
 		default: break;
 	}
 	switch(pair.a.type | pair.b.type){

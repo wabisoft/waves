@@ -53,14 +53,14 @@ struct Stage{
 	Sea sea;
 	Ship ship;
 	std::vector<Rock> rocks;
-	Platform platforms[MAX_PLATFORMS];
+	std::vector<Platform> platforms;
+	// Platform platforms[MAX_PLATFORMS];
 	AABB aabbs[MAX_AABBS];
 	Vector2 rockSpawn;
 	Selection selection;
 	Win win;
 	StageState state;
 	uint8_t id_src = 0;
-	int numPlatforms = 0;
 	int numAABBS = 0;
 	RockType rockType = {RockType::RED};
 };

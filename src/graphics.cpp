@@ -83,9 +83,9 @@ inline void drawRocks(sf::RenderTarget& target, const Stage& stage) {
 }
 
 inline void drawPlatforms(sf::RenderTarget& target, const Stage& stage) {
-	for (int i = 0; i < stage.numPlatforms; ++i){
-		drawPolygon(target, stage.platforms[i].shape, sf::Color::Magenta);
-		drawId(target, stage.platforms[i].id, stage.platforms[i].shape.position);
+	for (const Platform& platform : stage.platforms) {
+		drawPolygon(target, platform.shape, sf::Color::Magenta);
+		drawId(target, platform.id, platform.shape.position);
 	}
 }
 
@@ -142,7 +142,8 @@ void drawInfoText(sf::RenderTarget& target, const Stage& stage, float drawDelta,
 		infostream << "P:						" << stage.rocks[0].shape.position<< std::endl;
 		infostream << "V:						" << stage.rocks[0].velocity << std::endl;
 	}
-	infostream << "RockState:				" << (int)stage.rocks[0].state.type << std::endl;
+	if (!stage.rocks.empty())
+		infostream << "RockState:				" << (int)stage.rocks[0].state.type << std::endl;
 	infostream << "ShipState:				" << (int)stage.ship.state.type << std::endl;
 	drawText(target, infostream.str(), {3, 3}, 13);
 }

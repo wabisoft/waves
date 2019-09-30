@@ -8,7 +8,7 @@
 
 // Serialize
 std::string serialize(const Stage& stage);
-std::string serialize(const Platform * platforms, const int numPlatforms);
+std::string serialize(const std::vector<Platform> platforms);
 std::string serialize(const Rectangle& rectangle);
 std::string serialize(const Vector2 v);
 std::string serialize(const Win w);
