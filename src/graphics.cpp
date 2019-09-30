@@ -137,7 +137,7 @@ void drawInfoText(sf::RenderTarget& target, const Stage& stage, float drawDelta,
 	infostream << std::endl;
 	infostream << "#Rocks: 					" << stage.rocks.size() << std::endl;
 	infostream << "#Waves: 					" << stage.sea.numWaves << std::endl;
-	infostream << "#AABBs: 					" << stage.numAABBS << std::endl;
+	infostream << "#AABBs: 					" << stage.aabbs.size() << std::endl;
 	if(stage.rocks.size() > 0 ) {
 		infostream << "P:						" << stage.rocks[0].shape.position<< std::endl;
 		infostream << "V:						" << stage.rocks[0].velocity << std::endl;

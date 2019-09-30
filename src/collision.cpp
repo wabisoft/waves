@@ -16,51 +16,36 @@
 
 void resolveCollisions(Stage& stage) {
 	// NOTE (owen): if it starts to get slow this is definately a place we can optimize
-	int& numAABBs = stage.numAABBS;
-	if (numAABBs == 0) return;
-	AABB* aabbs = stage.aabbs;
+	if (stage.aabbs.size() == 0) return;
 	auto aabbSortPredicate = [](AABB a, AABB b) { return a.lower.x < b.lower.x; };
-	for(int i = 0; i < numAABBs; ++i) {
-		switch (aabbs[i].type) {
-		case ROCK:
-			aabbs[i] = AABB(*findRock(stage, aabbs[i].id));
-			break;
-		case SHIP:
-			aabbs[i] = AABB(stage.ship);
-			break;
-		case PLATFORM:
-			// NOTE: since platforms are static, their AABBS shouldn't need updating, I'll leave the case here in case
-			break;
-		default:
-			break;
-		}
-	}
+	// update the AABBs
+	updateAABBS(stage);
 	// then resort the list (insertion sort is a "slow" sorting method
 	// but is very fast in an almost sorted list, which due to spatial coherence
 	// this list should be)
-	insertion_sort(aabbs, numAABBs, aabbSortPredicate);
+	insertion_sort<AABB>(stage.aabbs.begin(), stage.aabbs.end(), aabbSortPredicate);
 
 	std::vector<AABBPair> pairs;
 	pairs.reserve(2*MAX_AABBS); // In a worst case scenario we could really have like MAX_ABBS^2 collisions but let's be optimistic
 
 	AABB seaAAABB = AABB(stage.sea); // because the sea AABB spans the entire stage, we don't want to include it in the sweep list as it will slow down the algorithm
 	// start with the first aabb upper as the max
-	float max = aabbs[0].upper.x;
+	float max = stage.aabbs[0].upper.x;
 	// Loop the aabbs and look for collisions
-	pairs.push_back({aabbs[0], seaAAABB}); // just check everyone for collision with sea
-	for (int i = 1; i < numAABBs; ++i){
-		pairs.push_back({aabbs[i], seaAAABB}); // just check everyone for collision with sea
+	pairs.push_back({AABBPair::BOTH, stage.aabbs[0], seaAAABB}); // just check everyone for collision with sea
+	for (int i = 1; i < stage.aabbs.size(); ++i){
+		pairs.push_back({AABBPair::BOTH, stage.aabbs[i], seaAAABB}); // just check everyone for collision with sea
 		for (int j = i-1; j >= 0; --j) {
-			if (aabbs[j].upper.x > aabbs[i].lower.x) {
+			if (stage.aabbs[j].upper.x > stage.aabbs[i].lower.x) {
 				// OPTMZ: sweep y-axis too
-				pairs.push_back({aabbs[i], aabbs[j]});
+				pairs.push_back({AABBPair::BOTH, stage.aabbs[i], stage.aabbs[j]});
 			}
 			// if the current collider is right of the right most point of our
 			// biggest-so-far box then we don't need to keep looking back
-			if (aabbs[i].lower.x > max) break;
+			if (stage.aabbs[i].lower.x > max) break;
 		}
 		// if this box's AABB is the biggest we've seen so far then remember it
-		max = (aabbs[i].upper.x > max) ? aabbs[i].upper.x : max;
+		max = (stage.aabbs[i].upper.x > max) ? stage.aabbs[i].upper.x : max;
 	}
 	for (int i = 0; i < pairs.size(); ++i) {
 		dispatchPotentialCollision(stage, pairs[i]);

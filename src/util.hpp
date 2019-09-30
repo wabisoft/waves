@@ -8,6 +8,20 @@
 /**************
  * Algorithms *
  **************/
+template <typename T, typename Iter, typename Pred>
+void insertion_sort(Iter begin, Iter end, Pred predicate) {
+	for (auto it = begin; it != end; ++it) {
+		std::rotate(std::upper_bound(begin, it, *it, predicate), it, std::next(it));
+	}
+}
+
+template <typename T, typename It, typename Pred>
+typename std::vector<T>::iterator sorted_insert(std::vector<T>& v, T item, Pred predicate) {
+	return v.insert(
+		std::upper_bound<It, T>(v.begin(), v.end(), item, predicate),
+		item
+	);
+}
 
 template<typename T, typename Pred>
 inline void insertion_sort(T* t, const int count, Pred predicate) {
@@ -25,40 +39,40 @@ inline void insertion_sort(T* t, const int count) {
 	return insertion_sort(t, count, [](T a, T b) { return a<b; });
 }
 
-template <typename T, typename Pred>
-inline void sorted_insert(T t_item, T* t, int & count, Pred predicate) {
-	if (count == 0) {
-		t[0] = t_item;
-		++count;
-		return;
-	}
-	for(int i = 0; i<count; ++i){
-		if(predicate(t[i],t_item)) {
-			if (i == count - 1) { // at the end of array
-				t[i+1] = t_item;
-				++count;
-				return;
-			}
-			continue;
-		} else {
-			T swap;
-			swap = t[i];
-			t[i] = t_item;
-			for (int j = i+1; j<count+1; ++j){
-				T swap_swap = swap;
-				swap = t[j];
-				t[j] = swap_swap;
-			}
-			++count;
-			break;
-		}
-	}
-}
+// template <typename T, typename Pred>
+// inline void sorted_insert(T t_item, T* t, int & count, Pred predicate) {
+// 	if (count == 0) {
+// 		t[0] = t_item;
+// 		++count;
+// 		return;
+// 	}
+// 	for(int i = 0; i<count; ++i){
+// 		if(predicate(t[i],t_item)) {
+// 			if (i == count - 1) { // at the end of array
+// 				t[i+1] = t_item;
+// 				++count;
+// 				return;
+// 			}
+// 			continue;
+// 		} else {
+// 			T swap;
+// 			swap = t[i];
+// 			t[i] = t_item;
+// 			for (int j = i+1; j<count+1; ++j){
+// 				T swap_swap = swap;
+// 				swap = t[j];
+// 				t[j] = swap_swap;
+// 			}
+// 			++count;
+// 			break;
+// 		}
+// 	}
+// }
 
-template <typename T>
-inline void sorted_insert(T t_item, T* t, int & count) {
-	return sorted_insert(t_item, t, count, [](T a, T b) { return a<b; });
-}
+// template <typename T>
+// inline void sorted_insert(T t_item, T* t, int & count) {
+// 	return sorted_insert(t_item, t, count, [](T a, T b) { return a<b; });
+// }
 
 template <typename T, typename BinaryPred>
 inline int find_where(const T t_item, const T* const t, const int count, BinaryPred predicate) {

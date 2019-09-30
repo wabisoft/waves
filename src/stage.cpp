@@ -15,6 +15,7 @@
 
 
 void update(Stage& stage, float deltaTime){
+	assert(stage.id_src < (uint8)(-1)); // 255
 	switch(stage.state.type) {
 		case StageState::PAUSED:
 			stage.state.paused.time += deltaTime;
@@ -36,7 +37,6 @@ void update(Stage& stage, float deltaTime){
 		stage.state.finished.win = true;
 	}
 }
-
 
 Entity makeSelectionAtPosition(Stage& stage, Vector2 position) {
 	// For now we only select rocks so let's find our rock

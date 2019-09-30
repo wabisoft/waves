@@ -110,7 +110,7 @@ uint8 createRock(Stage& stage, Vector2 position, float radius, RockType type){
 }
 
 RockIt deleteRock(Stage& stage, RockIt rockIt) {
-	deleteAABBById(stage, rockIt->id);
+	deleteAABB(stage, rockIt->id);
 	return stage.rocks.erase(rockIt);
 }
 
