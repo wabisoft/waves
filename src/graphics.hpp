@@ -32,7 +32,7 @@ inline void drawPolygon(sf::RenderTarget&, const Polygon<N>&, sf::Color);
 inline void drawText(sf::RenderTarget&, std::string, sf::Vector2f, int=15, bool=false);
 inline void drawId(sf::RenderTarget&, int, sf::Vector2f);
 inline void drawId(sf::RenderTarget&, int, Vector2);
-inline void drawCircle(sf::RenderTarget&, const Circle&, sf::Color, bool=false);
+inline void drawCircle(sf::RenderTarget&, const Circle&, sf::Color, bool fill=false);
 inline void drawLine(sf::RenderTarget&, Vector2, Vector2, sf::Color);
 
 inline sf::Vector2f game2ScreenPos(const sf::RenderTarget&, Vector2);

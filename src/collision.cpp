@@ -26,7 +26,7 @@ void resolveCollisions(Stage& stage) {
 	insertion_sort<AABB>(stage.aabbs.begin(), stage.aabbs.end(), aabbSortPredicate);
 
 	std::vector<AABBPair> pairs;
-	pairs.reserve(2*MAX_AABBS); // In a worst case scenario we could really have like MAX_ABBS^2 collisions but let's be optimistic
+	pairs.reserve(2*stage.aabbs.size()); // In a worst case scenario we could really have like # ABBS^2 collisions but let's be optimistic
 
 	AABB seaAAABB = AABB(stage.sea); // because the sea AABB spans the entire stage, we don't want to include it in the sweep list as it will slow down the algorithm
 	// start with the first aabb upper as the max
