@@ -13,6 +13,9 @@ void updateAABBS(Stage& stage) {
 			case SHIP:
 				aabb = AABB(stage.ship);
 				break;
+			case SEA:
+				aabb = AABB(stage.sea);
+				break;
 			case PLATFORM:
 				aabb = AABB(*findPlatform(stage, aabb.id));
 				break;
@@ -50,7 +53,7 @@ AABB::AABB(const Ship& ship) {
 AABB::AABB(const Sea& sea) {
 	float maxHeight = sea.level;
 	for(short i = 0; i < sea.numWaves; ++i) {
-		maxHeight = std::max(maxHeight, heightAtX(sea.waves[i], sea.waves[i].position.x));
+		maxHeight = std::max(maxHeight, sea.level + heightAtX(sea.waves[i], sea.waves[i].position.x));
 	}
 	lower = {0.f, 0.f};
 	upper = {STAGE_WIDTH, maxHeight};
@@ -59,7 +62,20 @@ AABB::AABB(const Sea& sea) {
 }
 
 uint8_t createAABB(Stage& stage, AABB aabb) {
-	sorted_insert<AABB, AABBIt>(stage.aabbs, aabb, [](AABB a, AABB b) { return a.lower.x < b.lower.x; });
+	stage.aabbs.push_back(aabb);
+	// TODO: make these predicates named functions or cache the lambdas someplace
+	auto xSortPredicate = [&stage](int aId, int bId) {
+		AABB a = *findAABB(stage, aId);
+		AABB b = *findAABB(stage, bId);
+		return a.lower.x < b.lower.x;
+	};
+	auto ySortPredicate = [&stage](int aId, int bId) {
+		AABB a = *findAABB(stage, aId);
+		AABB b = *findAABB(stage, bId);
+		return a.lower.y < b.lower.y;
+	};
+	sorted_insert<uint8, std::vector<uint8>::iterator>(stage.xAxisOrder, aabb.id, xSortPredicate); // keep the x axis sorted
+	sorted_insert<uint8, std::vector<uint8>::iterator>(stage.yAxisOrder, aabb.id, ySortPredicate); // keep the y axis sorted
 	return aabb.id;
 }
 
@@ -70,9 +86,20 @@ AABBIt findAABB(Stage& stage, uint8 aabbId) {
 }
 
 AABBIt deleteAABB(Stage& stage, AABBIt aabbIt) {
+	uint8 aabbId = aabbIt->id;
+	// look for id in xAxisOrdering
+	auto search = find_if(stage.xAxisOrder.begin(), stage.xAxisOrder.end(), [aabbId](uint8 id) -> bool { return aabbId == id; });	
+	assert(search != stage.xAxisOrder.end()); // don't look for unicorns!
+	// delete from xAxisOrdering
+	stage.xAxisOrder.erase(search);
+	// look for id in yAxisOrdering
+	search = find_if(stage.yAxisOrder.begin(), stage.yAxisOrder.end(), [aabbId](uint8 id) -> bool { return aabbId == id; });	
+	assert(search != stage.yAxisOrder.end()); // don't look for unicorns!
+	// delete from yAxisOrdering
+	stage.yAxisOrder.erase(search);
 	return stage.aabbs.erase(aabbIt);
 }
 
 AABBIt deleteAABB(Stage& stage, uint8 aabbId) {
-	return stage.aabbs.erase(findAABB(stage, aabbId));
+	return deleteAABB(stage, findAABB(stage, aabbId));
 }

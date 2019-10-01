@@ -23,32 +23,83 @@ void resolveCollisions(Stage& stage) {
 	// then resort the list (insertion sort is a "slow" sorting method
 	// but is very fast in an almost sorted list, which due to spatial coherence
 	// this list should be)
-	insertion_sort<AABB>(stage.aabbs.begin(), stage.aabbs.end(), aabbSortPredicate);
+
+	// TODO: make these predicates named functions or cache the lambdas someplace
+	auto xSortPredicate = [&stage](int aId, int bId) {
+		AABB a = *findAABB(stage, aId);
+		AABB b = *findAABB(stage, bId);
+		return a.lower.x < b.lower.x;
+	};
+	auto ySortPredicate = [&stage](int aId, int bId) {
+		AABB a = *findAABB(stage, aId);
+		AABB b = *findAABB(stage, bId);
+		return a.lower.y < b.lower.y;
+	};
+	insertion_sort<AABB>(stage.xAxisOrder.begin(), stage.xAxisOrder.end(), xSortPredicate);
+	insertion_sort<AABB>(stage.yAxisOrder.begin(), stage.yAxisOrder.end(), ySortPredicate);
 
 	std::vector<AABBPair> pairs;
-	pairs.reserve(2*MAX_AABBS); // In a worst case scenario we could really have like MAX_ABBS^2 collisions but let's be optimistic
+	pairs.reserve(2 * stage.aabbs.size()); // optimistic reserve TODO: cache the pairs
+	assert(stage.xAxisOrder.size() == stage.yAxisOrder.size() && stage.xAxisOrder.size() == stage.aabbs.size());
+	for (int a = 0; a< 2; ++a) {
+		// do the x axis on the fist pass
+		AABBPair::Axis axis = AABBPair::X_AXIS;
+		std::vector<uint8> axisOrder = stage.xAxisOrder;
+		auto check = [&axis](Vector2 point) -> float {
+			return (axis == AABBPair::X_AXIS) ? point.x : point.y;
+		};
 
-	AABB seaAAABB = AABB(stage.sea); // because the sea AABB spans the entire stage, we don't want to include it in the sweep list as it will slow down the algorithm
-	// start with the first aabb upper as the max
-	float max = stage.aabbs[0].upper.x;
-	// Loop the aabbs and look for collisions
-	pairs.push_back({AABBPair::BOTH, stage.aabbs[0], seaAAABB}); // just check everyone for collision with sea
-	for (int i = 1; i < stage.aabbs.size(); ++i){
-		pairs.push_back({AABBPair::BOTH, stage.aabbs[i], seaAAABB}); // just check everyone for collision with sea
-		for (int j = i-1; j >= 0; --j) {
-			if (stage.aabbs[j].upper.x > stage.aabbs[i].lower.x) {
-				// OPTMZ: sweep y-axis too
-				pairs.push_back({AABBPair::BOTH, stage.aabbs[i], stage.aabbs[j]});
-			}
-			// if the current collider is right of the right most point of our
-			// biggest-so-far box then we don't need to keep looking back
-			if (stage.aabbs[i].lower.x > max) break;
+		// do the y axis on the second pass
+		if (a > 0) {
+			axis = AABBPair::Y_AXIS;
+			axisOrder = stage.yAxisOrder;
 		}
-		// if this box's AABB is the biggest we've seen so far then remember it
-		max = (stage.aabbs[i].upper.x > max) ? stage.aabbs[i].upper.x : max;
+
+		// start with the first aabb upper as the max
+		AABB start = *findAABB(stage, axisOrder[0]);
+		float max = check(start.upper);
+		// Loop the aabbs and look for collisions
+		for (int i = 1; i < axisOrder.size(); ++i) {
+			AABB current = *findAABB(stage, axisOrder[i]);
+			for (int j = i - 1; j >= 0; --j) {
+				AABB previous = *findAABB(stage, axisOrder[j]);
+				float prevUp = check(previous.upper);
+				float curLow = check(current.lower);
+				if (prevUp > curLow) {
+				// if (check(previous.upper) > check(current.lower)) {
+					// if the pairs list is empty
+					if (pairs.empty()) {
+						assert(axis == AABBPair::X_AXIS); // this should only happen on the x-axis because of the short circuit at the bottom of the outermost loop
+						pairs.push_back({axis, current, previous});
+					} else {
+						// otherwise
+						auto pairPredicate = [&previous, &current](AABBPair& pair) -> bool {
+							return (pair.a == previous && pair.b == current) || (pair.a == current && pair.b == previous);
+						};
+						// look for the pair in the pairs list
+						auto search = std::find_if(pairs.begin(), pairs.end(), pairPredicate);
+						// if you find it then set the axis
+						if (search != pairs.end()) {
+							search->setAxis(axis);
+						} else {
+							// otherwise add the pair to the list
+							pairs.push_back({axis, current, previous});
+						}
+					}
+				}
+				// if the current collider is right of the right most point of our
+				// biggest-so-far box then we don't need to keep looking back
+				if (check(current.lower) > max) break;
+			}
+			// if this box's AABB is the biggest we've seen so far then remember it
+			max = (check(current.upper) > max) ? check(current.upper) : max;
+		}
+		if (pairs.empty()) { break; } // if there's no collisions on the first axis then don't bother with the second
 	}
-	for (int i = 0; i < pairs.size(); ++i) {
-		dispatchPotentialCollision(stage, pairs[i]);
+	for (AABBPair& pair: pairs) {
+		if (collides(pair)) {
+			dispatchPotentialCollision(stage, pair);
+		}
 	}
 }
 
