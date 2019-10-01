@@ -16,55 +16,36 @@
 
 void resolveCollisions(Stage& stage) {
 	// NOTE (owen): if it starts to get slow this is definately a place we can optimize
-	int& numAABBs = stage.numAABBS;
-	if (numAABBs == 0) return;
-	AABB* aabbs = stage.aabbs;
+	if (stage.aabbs.size() == 0) return;
 	auto aabbSortPredicate = [](AABB a, AABB b) { return a.lower.x < b.lower.x; };
-	for(int i = 0; i < numAABBs; ++i) {
-		switch (aabbs[i].type) {
-		case ROCK:
-			{
-				int rock_idx = binary_find_where(aabbs[i].id, stage.rocks, stage.numRocks, [](const Rock& rock){ return rock.id;});
-				assert(rock_idx > -1);
-				aabbs[i] = AABB(stage.rocks[rock_idx]);
-			}
-		break;
-		case SHIP:
-			aabbs[i] = AABB(stage.ship);
-		break;
-		case PLATFORM:
-			// NOTE: since platforms are static, their AABBS shouldn't need updating, I'll leave the case here in case
-		break;
-		default:
-		break;
-		}
-	}
+	// update the AABBs
+	updateAABBS(stage);
 	// then resort the list (insertion sort is a "slow" sorting method
 	// but is very fast in an almost sorted list, which due to spatial coherence
 	// this list should be)
-	insertion_sort(aabbs, numAABBs, aabbSortPredicate);
+	insertion_sort<AABB>(stage.aabbs.begin(), stage.aabbs.end(), aabbSortPredicate);
 
 	std::vector<AABBPair> pairs;
-	pairs.reserve(2*MAX_AABBS); // In a worst case scenario we could really have like MAX_ABBS^2 collisions but let's be optimistic
+	pairs.reserve(2*stage.aabbs.size()); // In a worst case scenario we could really have like # ABBS^2 collisions but let's be optimistic
 
 	AABB seaAAABB = AABB(stage.sea); // because the sea AABB spans the entire stage, we don't want to include it in the sweep list as it will slow down the algorithm
 	// start with the first aabb upper as the max
-	float max = aabbs[0].upper.x;
+	float max = stage.aabbs[0].upper.x;
 	// Loop the aabbs and look for collisions
-	pairs.push_back({aabbs[0], seaAAABB}); // just check everyone for collision with sea
-	for (int i = 1; i < numAABBs; ++i){
-		pairs.push_back({aabbs[i], seaAAABB}); // just check everyone for collision with sea
+	pairs.push_back({AABBPair::BOTH, stage.aabbs[0], seaAAABB}); // just check everyone for collision with sea
+	for (int i = 1; i < stage.aabbs.size(); ++i){
+		pairs.push_back({AABBPair::BOTH, stage.aabbs[i], seaAAABB}); // just check everyone for collision with sea
 		for (int j = i-1; j >= 0; --j) {
-			if (aabbs[j].upper.x > aabbs[i].lower.x) {
+			if (stage.aabbs[j].upper.x > stage.aabbs[i].lower.x) {
 				// OPTMZ: sweep y-axis too
-				pairs.push_back({aabbs[i], aabbs[j]});
+				pairs.push_back({AABBPair::BOTH, stage.aabbs[i], stage.aabbs[j]});
 			}
 			// if the current collider is right of the right most point of our
 			// biggest-so-far box then we don't need to keep looking back
-			if (aabbs[i].lower.x > max) break;
+			if (stage.aabbs[i].lower.x > max) break;
 		}
 		// if this box's AABB is the biggest we've seen so far then remember it
-		max = (aabbs[i].upper.x > max) ? aabbs[i].upper.x : max;
+		max = (stage.aabbs[i].upper.x > max) ? stage.aabbs[i].upper.x : max;
 	}
 	for (int i = 0; i < pairs.size(); ++i) {
 		dispatchPotentialCollision(stage, pairs[i]);
@@ -79,15 +60,15 @@ void dispatchPotentialCollision(Stage& stage, const AABBPair& pair) {
 	Platform* aPlatform = nullptr;
 	// Platform* aPlatform = nullptr;
 	switch(pair.a.type) {
-		case ROCK:	aRock = &findRock(stage, pair.a.id); break;
-		case PLATFORM:	aPlatform = &findPlatform(stage, pair.a.id); break;
+		case ROCK:	aRock = &*findRock(stage, pair.a.id); break;
+		case PLATFORM:	aPlatform = &*findPlatform(stage, pair.a.id); break;
 		default: break;
 	}
 	Rock* bRock = nullptr;
 	Platform* bPlatform= nullptr;
 	switch(pair.b.type) {
-		case ROCK:	bRock = &findRock(stage, pair.b.id); break;
-		case PLATFORM:	bPlatform = &findPlatform(stage, pair.b.id); break;
+		case ROCK:	bRock = &*findRock(stage, pair.b.id); break;
+		case PLATFORM:	bPlatform = &*findPlatform(stage, pair.b.id); break;
 		default: break;
 	}
 	switch(pair.a.type | pair.b.type){
@@ -157,13 +138,13 @@ inline void collideGreen(Rock& rock, Sea& sea) {
 	if(rock.state.type != RockState::FLOATING) {
 		rock.state = {RockState::FLOATING, {0.f}};
 	}
-	if (sea.numWaves < 0) { return; } // nothing to do for no waves
-	int closestWaveIndex = findWaveAtX(sea, rock.shape.position.x);
-	if (closestWaveIndex < 0) {
-		if (sea.numWaves > 0) assert(false);
+	if (sea.waves.size() < 0) { return; } // nothing to do for no waves
+	WaveIt closestWaveIt = findWaveAtPosition(sea, rock.shape.position);
+	if (closestWaveIt == sea.waves.end()) {
+		if (sea.waves.size() > 0) assert(false);
 		return;
 	} // if there are no waves then do nothing
-	const Wave& wave = sea.waves[closestWaveIndex];
+	const Wave& wave = *closestWaveIt;
 	float distFromWave = std::abs(rock.shape.position.x - wave.position.x);
 	if (distFromWave < 0.1) {
 		rock.state = {};
@@ -227,7 +208,7 @@ void collide(Rock& rock, Rock& other_rock) {
 void collide(Rock& rock, Ship& ship) {
 }
 
-void collide(Ship& ship, const Sea& sea) {
+void collide(Ship& ship, Sea& sea) {
 	float seaHeight = heightAtX(sea, ship.shape.position.x);
 	Vector2 lower, upper;
 	boundingPoints(ship.shape, lower, upper);
@@ -244,13 +225,13 @@ void collide(Ship& ship, const Sea& sea) {
 	auto drag = dragForce(ship.velocity, 600.f, mass(ship) * SHIP_AREA_MASS_RATIO);
 	ship.velocity += drag * FIXED_TIMESTEP;
 
-	if (sea.numWaves < 0) { return; } // nothing to do for no waves
-	int closestWaveIndex = findWaveAtX(sea, ship.shape.position.x);
-	if (closestWaveIndex < 0) {
-		if (sea.numWaves > 0) assert(false);
+	if (sea.waves.size() < 0) { return; } // nothing to do for no waves
+	WaveIt closestWaveIt = findWaveAtPosition(sea, ship.shape.position);
+	if (closestWaveIt == sea.waves.end()) {
+		if (sea.waves.size() > 0) assert(false);
 		return;
 	} // if there are no waves then do nothing
-	const Wave& wave = sea.waves[closestWaveIndex];
+	const Wave& wave = *closestWaveIt;
 	float distFromWave = std::abs(ship.shape.position.x - wave.position.x);
 	if (distFromWave < 0.1) {
 		ship.state = {};

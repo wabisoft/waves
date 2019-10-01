@@ -4,6 +4,25 @@
 #include "maths.hpp"
 #include "printing.hpp"
 #include "stage.hpp"
+#include "util.hpp"
+
+void updateAABBS(Stage& stage) {
+	for(AABB& aabb : stage.aabbs) {
+		switch (aabb.type) {
+			case ROCK:
+				aabb = AABB(*findRock(stage, aabb.id));
+				break;
+			case SHIP:
+				aabb = AABB(stage.ship);
+				break;
+			case PLATFORM:
+				aabb = AABB(*findPlatform(stage, aabb.id));
+				break;
+			default:
+				break;
+		}
+	}
+}
 
 AABB::AABB(const Platform& platform) {
 	boundingPoints(platform.shape, lower, upper);
@@ -32,8 +51,8 @@ AABB::AABB(const Ship& ship) {
 
 AABB::AABB(const Sea& sea) {
 	float maxHeight = sea.level;
-	for(short i = 0; i < sea.numWaves; ++i) {
-		maxHeight = std::max(maxHeight, heightAtX(sea.waves[i], sea.waves[i].position.x));
+	for (const Wave& wave : sea.waves) {
+		maxHeight = std::max(maxHeight, wave.heightAtX(wave.position.x));
 	}
 	lower = {0.f, 0.f};
 	upper = {STAGE_WIDTH, maxHeight};
@@ -42,25 +61,20 @@ AABB::AABB(const Sea& sea) {
 }
 
 uint8_t createAABB(Stage& stage, AABB aabb) {
-	sorted_insert(aabb, stage.aabbs, stage.numAABBS, [](AABB& a, AABB&b) { return a.lower.x < b.lower.x; });
+	sorted_insert<AABB, AABBIt>(stage.aabbs, aabb, [](AABB a, AABB b) { return a.lower.x < b.lower.x; });
 	return aabb.id;
 }
 
-int deleteAABBByIdx(Stage& stage, int aabb_idx) {
-	stage.aabbs[aabb_idx] = AABB();
-	for(short j = aabb_idx; j < stage.numAABBS-1; ++j) {
-		stage.aabbs[j] = stage.aabbs[j+1];
-		stage.aabbs[j+1] = AABB();
-	}
-	return --stage.numAABBS;
+AABBIt findAABB(Stage& stage, uint8 aabbId) {
+	AABBIt search = std::find_if(stage.aabbs.begin(), stage.aabbs.end(), [aabbId](AABB& aabb) -> bool { return aabb.id == aabbId; });
+	assert(search != stage.aabbs.end()); // don't look for unicorns!
+	return search;
 }
 
-int deleteAABBById(Stage& stage, uint8_t aabb_id) {
-	for(short i = 0; i < stage.numAABBS; ++i) {
-		if(stage.aabbs[i].id == aabb_id) {
-			return deleteAABBByIdx(stage, i);
-		}
-	}
-	assert(false);
-	return -1;
+AABBIt deleteAABB(Stage& stage, AABBIt aabbIt) {
+	return stage.aabbs.erase(aabbIt);
+}
+
+AABBIt deleteAABB(Stage& stage, uint8 aabbId) {
+	return stage.aabbs.erase(findAABB(stage, aabbId));
 }

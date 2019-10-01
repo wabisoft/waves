@@ -9,9 +9,10 @@
 #include "rock.hpp"
 #include "sea.hpp"
 #include "ship.hpp"
+#include "typedefs.hpp"
 
 struct Selection {
-	enum State : uint8_t {
+	enum State : uint8 {
 		SELECT		= 1 << 0,
 		PULL 		= 1 << 2,
 	};
@@ -32,7 +33,7 @@ struct StageState {
 	struct Finished {
 		bool win = false;
 	};
-	enum StateType : uint8_t {
+	enum StateType : uint8 {
 		PAUSED = 1 << 0,
 		RUNNING = 1 << 1,
 		FINISHED = 1 << 2,
@@ -52,17 +53,14 @@ struct Win {
 struct Stage{
 	Sea sea;
 	Ship ship;
-	Rock rocks[MAX_ROCKS];
-	Platform platforms[MAX_PLATFORMS];
-	AABB aabbs[MAX_AABBS];
+	std::vector<Rock> rocks;
+	std::vector<Platform> platforms;
+	std::vector<AABB> aabbs;	
 	Vector2 rockSpawn;
 	Selection selection;
 	Win win;
 	StageState state;
-	uint8_t id_src = 0;
-	int numRocks = 0;
-	int numPlatforms = 0;
-	int numAABBS = 0;
+	uint8 id_src = 0;
 	RockType rockType = {RockType::RED};
 };
 

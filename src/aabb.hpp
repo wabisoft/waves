@@ -4,6 +4,7 @@
 #include "entity.hpp"
 #include "prelude.hpp"
 #include "maths.hpp"
+#include "typedefs.hpp"
 
 
 struct AABB{
@@ -18,9 +19,13 @@ struct AABB{
 	uint8_t id = 0;
 };
 
+typedef std::vector<AABB>::iterator AABBIt;
+
+void updateAABBS(Stage& stage);
 uint8_t createAABB(Stage& stage, AABB aabb);
-int deleteAABBByIdx(Stage& stage, int aabb_idx);
-int deleteAABBById(Stage& stage, uint8_t aabb_id);
+AABBIt findAABB(Stage& stage, uint8 aabbId);
+AABBIt deleteAABB(Stage& stage, AABBIt aabbIt);
+AABBIt deleteAABB(Stage& stage, uint8 aabbId);
 
 inline float area(const AABB aabb) {
 	return (aabb.upper.x - aabb.lower.x) * (aabb.upper.y - aabb.lower.y);
@@ -31,9 +36,28 @@ inline bool operator==(const AABB& a, const AABB& b) {
 }
 
 struct AABBPair{
+	enum Axis : uint8 {
+		NONE = 0,
+		X_AXIS = 1 << 0,
+		Y_AXIS = 1 << 1,
+		BOTH = 3
+	};
+
+	Axis overlap = NONE;
 	AABB a;
 	AABB b;
+
+	void setAxis(Axis axis) {
+		overlap = (Axis)(overlap | axis);
+	}
+	void unsetAxis(Axis axis) {
+		overlap = (Axis)(overlap & ~axis);
+	}
 };
+
+inline bool collides(AABBPair pair) {
+	return pair.overlap == (AABBPair::X_AXIS | AABBPair::Y_AXIS);
+}
 
 inline bool operator==(const AABBPair& a, const AABBPair& b){
 	return a.a == b.a && a.b == b.b;

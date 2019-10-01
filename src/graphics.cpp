@@ -34,7 +34,7 @@ void drawStage(sf::RenderTarget& target, Stage& stage,  bool showGrid) {
 	drawPlatforms(target, stage);
 	drawSea(target, stage.sea);
 	if(stage.selection.active && stage.selection.state == Selection::PULL && stage.selection.pullPosition != VECTOR2_ZERO) {
-		Rock& rock = findRock(stage, stage.selection.entity.id);
+		Rock& rock = *findRock(stage, stage.selection.entity.id);
 		drawLine(target, rock.shape.position, stage.selection.pullPosition, sf::Color::Blue);
 	}
 	drawRocks(target, stage);
@@ -55,11 +55,7 @@ inline void drawSea(sf::RenderTarget& target, const Sea& sea) {
 	float step = 1 / pixelsPerUnit(target).x;
 	for (float i = 0; i < STAGE_WIDTH; i += step)
 	{
-		// this draw pattern causes the gpu hardware to interpolate the color alpha
-		// from 1 to 0 (found this by accident but I like it)
 		vertices.push_back(sf::Vertex(game2ScreenPos(target, {i, heightAtX(sea, i)}), SEA_COLOR));
-		// vertices.push_back(sf::Vertex(game2ScreenPos(target, {i+step, heightAtX(sea, i+step)}), SEA_COLOR));
-		// vertices.push_back(sf::Vertex(game2ScreenPos(target, {i, 0}), SEA_COLOR));
 	}
 	target.draw(&vertices[0], vertices.size(), sf::LineStrip);
 }
@@ -70,29 +66,22 @@ inline void drawShip(sf::RenderTarget& target, const Ship& ship) {
 }
 
 inline void drawRocks(sf::RenderTarget& target, const Stage& stage) {
-	for (int i = 0; i < stage.numRocks; ++i){
+	for(const Rock& rock : stage.rocks) {
 		sf::Color c;
-		// if (stage.selection.active && stage.rocks[i].id == stage.selection.entity.id) {
-		// 	c = sf::Color::Cyan;
-		// } else if (stage.rocks[i].sized) {
-		// 	c = sf::Color::Red;
-		// } else {
-		// 	c = sf::Color::Green;
-		// }
-		switch(stage.rocks[i].type.type) {
+		switch(rock.type.type) {
 			case RockType::RED: c = sf::Color::Red; break;
 			case RockType::GREEN: c = sf::Color::Green; break;
 			case RockType::BLUE: c = sf::Color::Blue; break;
 		}
-		drawCircle(target, stage.rocks[i].shape, c);
-		drawId(target, stage.rocks[i].id, stage.rocks[i].shape.position);
+		drawCircle(target, rock.shape, c);
+		drawId(target, rock.id, rock.shape.position);
 	}
 }
 
 inline void drawPlatforms(sf::RenderTarget& target, const Stage& stage) {
-	for (int i = 0; i < stage.numPlatforms; ++i){
-		drawPolygon(target, stage.platforms[i].shape, sf::Color::Magenta);
-		drawId(target, stage.platforms[i].id, stage.platforms[i].shape.position);
+	for (const Platform& platform : stage.platforms) {
+		drawPolygon(target, platform.shape, sf::Color::Magenta);
+		drawId(target, platform.id, platform.shape.position);
 	}
 }
 
@@ -142,14 +131,15 @@ void drawInfoText(sf::RenderTarget& target, const Stage& stage, float drawDelta,
 		infostream << "Paused Time: 			" << stage.state.paused.time <<std::endl;
 	}
 	infostream << std::endl;
-	infostream << "#Rocks: 					" << stage.numRocks << std::endl;
-	infostream << "#Waves: 					" << stage.sea.numWaves << std::endl;
-	infostream << "#AABBs: 					" << stage.numAABBS << std::endl;
-	if(stage.numRocks > 0 ) {
+	infostream << "#Rocks: 					" << stage.rocks.size() << std::endl;
+	infostream << "#Waves: 					" << stage.sea.waves.size()<< std::endl;
+	infostream << "#AABBs: 					" << stage.aabbs.size() << std::endl;
+	if(stage.rocks.size() > 0 ) {
 		infostream << "P:						" << stage.rocks[0].shape.position<< std::endl;
 		infostream << "V:						" << stage.rocks[0].velocity << std::endl;
 	}
-	infostream << "RockState:				" << (int)stage.rocks[0].state.type << std::endl;
+	if (!stage.rocks.empty())
+		infostream << "RockState:				" << (int)stage.rocks[0].state.type << std::endl;
 	infostream << "ShipState:				" << (int)stage.ship.state.type << std::endl;
 	drawText(target, infostream.str(), {3, 3}, 13);
 }
@@ -158,7 +148,6 @@ inline void drawText(sf::RenderTarget& target, std::string text, sf::Vector2f po
 	sf::Text sfText((sf::String)text, font, size);
 	sfText.setFillColor(sf::Color::White);
 	sfText.setPosition(position);
-	auto blah = sfText.getLocalBounds();
 	if(centered) {
 		sf::FloatRect bounds = sfText.getGlobalBounds();
 		sfText.setOrigin(bounds.width/2, bounds.height/2);

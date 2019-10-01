@@ -9,7 +9,7 @@ string serialize(const Stage& stage) {
 	stringstream stream;
 	stream << "{" <<
 		"\"sea_level\"" << ":" << stage.sea.level << "," <<
-		"\"platforms\"" << ":" << serialize(stage.platforms, stage.numPlatforms) << "," <<
+		"\"platforms\"" << ":" << serialize(stage.platforms) << "," <<
 		"\"ship\"" 		<< ":" << serialize(stage.ship.shape) << "," <<
 		"\"rock_spawn\""<< ":" << serialize(stage.rockSpawn) << "," <<
 		"\"win\""		<< ":" << serialize(stage.win) <<
@@ -17,12 +17,12 @@ string serialize(const Stage& stage) {
 	return stream.str();
 }
 
-std::string serialize(const Platform * platforms, const int numPlatforms) {
+std::string serialize(const std::vector<Platform> platforms) {
 	stringstream stream;
 	stream << "[";
-	for (int i = 0 ; i < numPlatforms; ++i) {
+	for (int i = 0 ; i < platforms.size(); ++i) {
 		stream << serialize(platforms[i].shape);
-		if ( i < numPlatforms - 1) { stream << ","; }
+		if ( i < platforms.size() - 1) { stream << ","; }
 	}
 	stream << "]";
 	return stream.str();
