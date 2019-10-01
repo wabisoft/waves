@@ -16,21 +16,46 @@ struct RockState {
 		Vector2 surfaceStart;
 		Vector2 surfaceEnd;
 	};
+	struct FloatingState {
+		float timeFloating = 0.f;
+	};
+
 	enum StateType : uint8_t {
 		FALLING = 1 << 0,
 		STANDING = 1 << 1,
+		FLOATING = 1 << 2,
 	};
 	StateType type;
 	union {
 		StandingState standing;
 		FallingState falling;
+		FloatingState floating;
 	};
 };
+
+struct RockType {
+	struct RedType {};
+	struct GreenType {};
+	struct BlueType {};
+	enum TypeType{
+		RED,
+		GREEN,
+		BLUE
+	};
+	TypeType type;
+	union {
+		RedType red;
+		GreenType green;
+		BlueType blue;
+	};
+};
+
 
 struct Rock {
 	Circle shape = {{0.f, 0.f}, 0.f};
 	Vector2 velocity = {0.f, 0.f};
 	RockState state { RockState::FALLING, {} };
+	RockType type;
 	bool active = false;
 	bool sized = false;
 	uint8_t id = 0;
@@ -40,8 +65,9 @@ inline float mass(Rock& rock) {
 	return rock.shape.radius * ROCK_RADIUS_MASS_RATIO;
 }
 
-void updateRocks(Stage& stage);
-uint8_t createRock(Stage& stage, Vector2 position, float radius);
+float getTimeDeltaForRock(Rock& rock, float deltaTime);
+void updateRocks(Stage& stage, float deltaTime);
+uint8_t createRock(Stage& stage, Vector2 position, float radius, RockType type);
 int deleteRockByIdx(Stage& stage, int rock_idx);
 int deleteRockById(Stage& stage, uint8_t rock_id);
 Rock& findRock(Stage& stage, uint8_t rock_id);

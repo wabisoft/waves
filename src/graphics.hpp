@@ -18,14 +18,14 @@
 
 extern sf::Font font;
 void initGraphics();
-void drawStage(sf::RenderTarget&, Stage&);
+void drawStage(sf::RenderTarget&, Stage&, bool=false);
 inline void drawSea(sf::RenderTarget&, const Sea&);
 inline void drawShip(sf::RenderTarget&, const Ship&);
 inline void drawRocks(sf::RenderTarget&, const Stage&);
 inline void drawPlatforms(sf::RenderTarget&, const Stage&);
 inline void drawPullParabola(sf::RenderTarget&, Stage&);
 inline void drawGrid(sf::RenderTarget&);
-inline void drawInfoText(sf::RenderTarget& graphics, const Stage& stage);
+void drawInfoText(sf::RenderTarget&, const Stage& , float, float, int);
 
 template <int N>
 inline void drawPolygon(sf::RenderTarget&, const Polygon<N>&, sf::Color);
@@ -35,8 +35,8 @@ inline void drawId(sf::RenderTarget&, int, Vector2);
 inline void drawCircle(sf::RenderTarget&, const Circle&, sf::Color, bool=false);
 inline void drawLine(sf::RenderTarget&, Vector2, Vector2, sf::Color);
 
-inline sf::Vector2f game2ScreenPos(const sf::RenderTarget&, const Vector2 &);
-inline Vector2 screen2GamePos(const sf::RenderTarget&, const sf::Vector2i &);
+inline sf::Vector2f game2ScreenPos(const sf::RenderTarget&, Vector2);
+inline Vector2 screen2GamePos(const sf::RenderTarget&, sf::Vector2i);
 float ppu(sf::RenderTarget&);
 
 template <int N>
@@ -49,21 +49,21 @@ void drawPolygon(sf::RenderTarget& target, const Polygon<N>& polygon, sf::Color 
 	target.draw(sfVertices);
 }
 
-inline float pixelsPerUnit(const sf::RenderTarget& target) {
-	sf::Vector2u targetSize = target.getSize();
-	return (float)targetSize.x / STAGE_WIDTH;
+inline Vector2 pixelsPerUnit(const sf::RenderTarget& target) {
+	sf::Vector2f targetSize = target.getView().getSize();
+	return {(float)targetSize.x / STAGE_WIDTH, (float) targetSize.y / STAGE_HEIGHT};
 }
 
-inline sf::Vector2f game2ScreenPos(const sf::RenderTarget& target, const Vector2 &v) {
-	sf::Vector2u targetSize = target.getSize();
-	float ppu = pixelsPerUnit(target);
-	return sf::Vector2f(v[0] * ppu, targetSize.y - (v[1] * ppu));
+inline sf::Vector2f game2ScreenPos(const sf::RenderTarget& target, Vector2 v) {
+	sf::Vector2f targetSize = target.getView().getSize();
+	Vector2 ppu = pixelsPerUnit(target);
+	return sf::Vector2f(v[0] * ppu.x, targetSize.y - (v[1] * ppu.y));
 }
 
-inline Vector2 screen2GamePos(const sf::RenderTarget& target, const sf::Vector2i &v) {
-	sf::Vector2u targetSize = target.getSize();
-	float ppu = pixelsPerUnit(target);
-	return Vector2{(float)v.x, std::fabs((float)targetSize.y - (float)v.y)} / ppu;
+inline Vector2 screen2GamePos(const sf::RenderTarget& target, sf::Vector2i v) {
+	sf::Vector2f targetSize = target.getView().getSize();
+	Vector2 ppu = pixelsPerUnit(target);
+	return Vector2{(float)v.x / ppu.x, std::fabs((float)targetSize.y - (float)v.y) / ppu.y};
 }
 
 

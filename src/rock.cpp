@@ -9,24 +9,24 @@
 #include "stage.hpp"
 #include "util.hpp"
 
-inline void updateFallingRock(Stage& stage, Rock& rock, int rock_idx) {
+inline void updateFallingRock(Stage& stage, Rock& rock, int rock_idx, float deltaTime) {
 	assert(rock.state.type == RockState::FALLING);
-	rock.velocity += GRAVITY * FIXED_TIMESTEP;
+	rock.velocity += GRAVITY * deltaTime;
 	auto drag = dragForce(rock.velocity, 1.225f, rock.shape.radius * ROCK_RADIUS_MASS_RATIO);
-	rock.velocity += drag * FIXED_TIMESTEP;
+	rock.velocity += drag * deltaTime;
 	if(squaredMagnitude(rock.velocity) > SQUARED_TERMINAL_VELOCITY) {
 		rock.velocity = normalized(rock.velocity) * TERMINAL_VELOCITY;
 	}
 	rock.shape.position += rock.velocity;
 }
 
-inline void updateStandingRock(Stage& stage, Rock& rock, int rock_idx) {
+inline void updateStandingRock(Stage& stage, Rock& rock, int rock_idx, float deltaTime) {
 	// TODO: this function does a lot of useless caching for debugging purposes,
 	// clean that up eventually
 	assert(rock.state.type == RockState::STANDING);
 	// Do the actual update
 	rock.velocity *= 0.75; // shitty friction
-	rock.velocity += GRAVITY * FIXED_TIMESTEP;
+	rock.velocity += GRAVITY * deltaTime;
 	rock.shape.position += rock.velocity;
 
 	// Calculate if we should not be standing anymore
@@ -49,7 +49,25 @@ inline void updateStandingRock(Stage& stage, Rock& rock, int rock_idx) {
 	}
 }
 
-void updateRocks(Stage& stage) {
+inline void updateFloatingRock(Stage& stage, Rock& rock, int rock_idx, float deltaTime) {
+	assert(rock.state.type == RockState::FLOATING);
+	rock.state.floating.timeFloating += deltaTime;
+	if(rock.state.floating.timeFloating > ROCK_MAX_FLOAT_TIME) {
+		createWave(stage.sea, rock.shape.position, 2* rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x), 1);
+		if (stage.selection.entity.id == rock.id) {
+			// if this rock is selected we need to clear it
+			clearSelection(stage);
+		}
+		deleteRockByIdx(stage, rock_idx);
+	}
+	rock.velocity += GRAVITY * deltaTime;
+	auto drag = dragForce(rock.velocity, 1.225f, rock.shape.radius * ROCK_RADIUS_MASS_RATIO);
+	rock.velocity += drag * deltaTime;
+	rock.shape.position += rock.velocity;
+
+}
+
+void updateRocks(Stage& stage, float deltaTime) {
 	Rock* rocks = stage.rocks;
 	for (int i = 0; i < stage.numRocks; ++i) {
 		clamp(rocks[i].velocity, ROCK_MAX_SPEED); // clamp the rock speed
@@ -62,13 +80,14 @@ void updateRocks(Stage& stage) {
 			deleteRockByIdx(stage, i);
 		}
 		switch (rocks[i].state.type) {
-			case RockState::FALLING: updateFallingRock(stage, rocks[i], i); break;
-			case RockState::STANDING: updateStandingRock(stage, rocks[i], i); break;
+			case RockState::FALLING: updateFallingRock(stage, rocks[i], i,  deltaTime); break;
+			case RockState::STANDING: updateStandingRock(stage, rocks[i], i, deltaTime); break;
+			case RockState::FLOATING: updateFloatingRock(stage, rocks[i], i, deltaTime); break;
 		}
 	}
 }
 
-uint8_t createRock(Stage& stage, Vector2 position, float radius){
+uint8_t createRock(Stage& stage, Vector2 position, float radius, RockType type){
 	// NOTE (!!!): The implementation of the routine must keep rocks in order of id so that the array can be
 	// binary searched in findRock
 	if (stage.numRocks >= MAX_ROCKS){
@@ -83,6 +102,7 @@ uint8_t createRock(Stage& stage, Vector2 position, float radius){
 	new_rock.id = ++stage.id_src;
 	new_rock.shape.position = position;
 	new_rock.shape.radius = radius;
+	new_rock.type = type;
 	stage.numRocks++;
 	// stage.usedRocks++;
 	createAABB(stage, AABB(new_rock));

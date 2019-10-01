@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include "prelude.hpp"
+#include <SFML/Graphics.hpp>
 
 
 template <typename Container>
@@ -22,7 +23,10 @@ void print_array(T*t, size_t count) {
 }
 
 
-std::ostream& operator<<(std::ostream& os, const Vector2& v);
-std::ostream& operator<<(std::ostream& os, const AABB& aabb);
+std::ostream& operator<<(std::ostream& os, Vector2 v);
+std::ostream& operator<<(std::ostream& os, AABB aabb);
+
+std::ostream& operator<<(std::ostream& os, sf::Vector2f v);
+
 
 

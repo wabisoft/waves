@@ -13,6 +13,7 @@ struct Game {
 	Clock updateClock;
 	float timeScale = 1.f;
 	int loopsPerUpdate = 0;
+	float updateDelta = 0.f;
 	bool end = false; // stop the game
 };
 

@@ -41,6 +41,7 @@ const float ROCK_MAX_RADIUS_SQUARED = ROCK_MAX_RADIUS * ROCK_MAX_RADIUS;
 const float ROCK_START_RADIUS = ROCK_MIN_RADIUS;
 const float ROCK_MAX_SPEED = 1.75f; // meters/second (remember to multiply by timestep)
 const float ROCK_RESTITUTION = 0.00001f; // FIXME: these numbers don't make sense but they look/feel right, diagnse
+const float ROCK_MAX_FLOAT_TIME = 2.f;
 
 // Magic Platforms
 const float PLATFORM_AREA_MASS_RATIO = 2.f/3.f;

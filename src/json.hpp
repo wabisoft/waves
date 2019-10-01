@@ -144,7 +144,7 @@ inline string_it getNextBalanced(string_it start, string_it end, char open, char
 }
 
 inline string_it getMatch(string_it start, string_it end, std::string cmp, JSONError& e) {
-	int cmplen = cmp.length();
+	int cmplen = (int)cmp.length();
 	auto fail = [&] () -> string_it {
 		e.no = JSONError::INCORRECT;
 		e.what = "Expected '" + cmp + "'";

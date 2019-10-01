@@ -1,6 +1,7 @@
 ## TODO
-- [ ] Make a stage editor
+- [ ] Make a stage editor (marry the game and editor and maybe make editor mode a build option)
 - [ ] Remove the notion of a "sea" and hold all the waves in the stage struct
+- [ ] Add orthoginality to the rock/wave relationship
 
 ## DONE
 - [x] Get platforms

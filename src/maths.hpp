@@ -93,7 +93,7 @@ struct Rectangle : Polygon<4>{
 	float height = 0.f;
 };
 
-inline float area(Circle & circle);
+inline float area(const Circle & circle);
 inline float area(Rectangle& rectangle);
 template <int N>
 inline void updateVertices(Polygon<N>& polygon);

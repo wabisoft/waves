@@ -1,4 +1,5 @@
 #include "constants.hpp"
+#include "maths.hpp"
 #include "physics.hpp"
 #include "sea.hpp"
 #include "ship.hpp"
@@ -48,7 +49,7 @@ void updateWaves(Stage& stage){
 float heightAtX(const Wave& wave, float x){
 	// get the height of the wave at x
 	// Cool gaussian
-	return wave.amplitude * wave.decay * pow(E, -pow(WAVE_WIDTH_MULTIPLIER * (x - wave.position.x), 2));
+	return sign(wave.sign) * wave.amplitude * wave.decay * pow(E, -pow(WAVE_WIDTH_MULTIPLIER * (x - wave.position.x), 2));
 }
 
 Vector2 velocityAtX(const Wave& wave, float x) {
@@ -80,7 +81,7 @@ float maximumX(const Wave& wave) {
 	return wave.position.x + 2.5f * (1 / WAVE_WIDTH_MULTIPLIER);
 }
 
-int createWave(Sea& sea, Vector2 position, float amplitude, short direction){
+int createWave(Sea& sea, Vector2 position, float amplitude, short direction, short sign){
 	if(sea.numWaves >= MAX_WAVES) {
 		return -1;
 	}
@@ -92,6 +93,8 @@ int createWave(Sea& sea, Vector2 position, float amplitude, short direction){
 	new_wave.active = true;
 	assert(direction == -1 || direction == 1);
 	new_wave.direction = direction;
+	assert(sign == -1 || sign == 1);
+	new_wave.sign = sign;
 	new_wave.id = ++sea.id_src;
 	return sea.numWaves++;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 #include "constants.hpp"
 #include "entity.hpp"
@@ -12,7 +13,6 @@
 struct Selection {
 	enum State : uint8_t {
 		SELECT		= 1 << 0,
-		RESIZE 		= 1 << 1,
 		PULL 		= 1 << 2,
 	};
 	State state = SELECT;
@@ -37,7 +37,7 @@ struct StageState {
 		RUNNING = 1 << 1,
 		FINISHED = 1 << 2,
 	};
-	StateType type = PAUSED;
+	StateType type = RUNNING;
 	Paused paused;
 	Running running;
 	Finished finished;
@@ -63,10 +63,7 @@ struct Stage{
 	int numRocks = 0;
 	int numPlatforms = 0;
 	int numAABBS = 0;
-	// int rockLimit = 0;
-	// int usedRocks = 0;
-	// bool paused = false;
-	// bool failed = false;
+	RockType rockType = {RockType::RED};
 };
 
 void update(Stage& stage, float deltaTime);
@@ -82,3 +79,5 @@ inline bool validateAndSetPullPosition(Stage& stage, Vector2 position);
 inline bool outOfBounds(Vector2 position) {
 	return (position.x<0 ||position.x > STAGE_WIDTH || position.y < 0);
 }
+
+

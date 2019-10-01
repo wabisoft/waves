@@ -11,10 +11,16 @@ cmake-release:
 clean:
 	rm -rf build
 
-debug: cmake-debug
-	cd build && make
-	cp build/waves ./
-	./waves
+game: cmake-debug
+	cd build && make game
+	cp build/game ./
+	./game
+
+game-release: cmake-release
+	cd build && make game
+	cp build/game ./
+	./game
+
 
 release: cmake-release
 	cd build && make
