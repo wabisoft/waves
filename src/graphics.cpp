@@ -60,11 +60,7 @@ inline void drawSea(sf::RenderTarget& target, const Sea& sea) {
 	float step = 1 / pixelsPerUnit(target).x;
 	for (float i = 0; i < STAGE_WIDTH; i += step)
 	{
-		// this draw pattern causes the gpu hardware to interpolate the color alpha
-		// from 1 to 0 (found this by accident but I like it)
 		vertices.push_back(sf::Vertex(game2ScreenPos(target, {i, heightAtX(sea, i)}), SEA_COLOR));
-		// vertices.push_back(sf::Vertex(game2ScreenPos(target, {i+step, heightAtX(sea, i+step)}), SEA_COLOR));
-		// vertices.push_back(sf::Vertex(game2ScreenPos(target, {i, 0}), SEA_COLOR));
 	}
 	target.draw(&vertices[0], vertices.size(), sf::LineStrip);
 }
@@ -141,7 +137,7 @@ void drawInfoText(sf::RenderTarget& target, const Stage& stage, float drawDelta,
 	}
 	infostream << std::endl;
 	infostream << "#Rocks: 					" << stage.rocks.size() << std::endl;
-	infostream << "#Waves: 					" << stage.sea.numWaves << std::endl;
+	infostream << "#Waves: 					" << stage.sea.waves.size()<< std::endl;
 	infostream << "#AABBs: 					" << stage.aabbs.size() << std::endl;
 	if(stage.rocks.size() > 0 ) {
 		infostream << "P:						" << stage.rocks[0].shape.position<< std::endl;
@@ -157,7 +153,6 @@ inline void drawText(sf::RenderTarget& target, std::string text, sf::Vector2f po
 	sf::Text sfText((sf::String)text, font, size);
 	sfText.setFillColor(sf::Color::White);
 	sfText.setPosition(position);
-	auto blah = sfText.getLocalBounds();
 	if(centered) {
 		sf::FloatRect bounds = sfText.getGlobalBounds();
 		sfText.setOrigin(bounds.width/2, bounds.height/2);

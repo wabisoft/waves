@@ -1,36 +1,35 @@
+#include <algorithm>
+
 #include "constants.hpp"
 #include "maths.hpp"
 #include "physics.hpp"
 #include "sea.hpp"
 #include "ship.hpp"
 #include "stage.hpp"
+#include "typedefs.hpp"
 #include "wave.hpp"
+
 
 void updateWaves(Stage& stage){
 	//Update the wave for this time step
 	Sea& sea = stage.sea;
-	Wave* waves = sea.waves;
-	for(short i = 0; i < sea.numWaves; i++){
-		Wave& wave = waves[i];
+	for(WaveIt waveIt = sea.waves.begin(); waveIt != sea.waves.end(); ++waveIt) {
+		Wave& wave = *waveIt;
 		wave.time += FIXED_TIMESTEP;
 		if (wave.decay >= 1.f)
 		{
 			// wave.sign = -1.f;
 			wave.grow = false;
 		}
-		else if ((wave.decay <= 0.f && !wave.grow) || minimumX(wave) > STAGE_WIDTH)
+		else if ((wave.decay <= 0.f && !wave.grow) || wave.minimumX() > STAGE_WIDTH)
 		{
 			// delete this wave
 			if (stage.ship.state.type == ShipState::SURFING && stage.ship.state.surfing.wave_id == wave.id) {
 				stage.ship.state = {ShipState::FALLING, {}};
 				stage.ship.velocity = wave.velocity;
 			}
-			wave = Wave();
-			for(short j = i; j < sea.numWaves-1; ++j) {
-				waves[j] = waves[j+1];
-				waves[j+1] = Wave();
-			}
-			--sea.numWaves;
+			waveIt = deleteWave(sea, waveIt);
+			if(waveIt == sea.waves.end()) break; // don't advance past the end
 		}
 		if (wave.decay <= 1 && wave.grow){
 			wave.decay += FIXED_TIMESTEP * WAVE_POSITIVE_DECAY_MULTIPLIER;
@@ -46,48 +45,8 @@ void updateWaves(Stage& stage){
 }
 
 
-float heightAtX(const Wave& wave, float x){
-	// get the height of the wave at x
-	// Cool gaussian
-	return sign(wave.sign) * wave.amplitude * wave.decay * pow(E, -pow(WAVE_WIDTH_MULTIPLIER * (x - wave.position.x), 2));
-}
-
-Vector2 velocityAtX(const Wave& wave, float x) {
-	float distFromMid = x - wave.position.x;
-	if(distFromMid < 0) {
-		return VECTOR2_ZERO; // Don't do anything on the back of a wave
-	} else if (distFromMid == 0) {
-		return wave.velocity; // if you're at the middle of the wave get the full velocity
-	} else { // else get the velocity as a ratio of your distance the center
-		float max = maximumX(wave);
-		if (max < x) { return VECTOR2_ZERO; }
-		float min = minimumX(wave);
-		float halfLength = (max - min)/2.f;
-		return ((halfLength - distFromMid)/halfLength) * wave.velocity;
-	}
-}
-
-float slopeAtX(const Wave & wave, float x)
-{
-	// derivative of height
-	return heightAtX(wave, x) * (-2 * WAVE_WIDTH_MULTIPLIER * (x - wave.position.x) * WAVE_WIDTH_MULTIPLIER);
-}
-
-float minimumX(const Wave& wave) {
-	return wave.position.x - 2.5f * (1 / WAVE_WIDTH_MULTIPLIER); // solve for heightAtX == 0
-}
-
-float maximumX(const Wave& wave) {
-	return wave.position.x + 2.5f * (1 / WAVE_WIDTH_MULTIPLIER);
-}
-
-int createWave(Sea& sea, Vector2 position, float amplitude, short direction, short sign){
-	if(sea.numWaves >= MAX_WAVES) {
-		return -1;
-	}
-	short new_wave_idx = sea.numWaves;
-	Wave& new_wave = *(sea.waves + new_wave_idx);
-	new_wave = Wave();
+uint8 createWave(Sea& sea, Vector2 position, float amplitude, int direction, int sign){
+	Wave new_wave;
 	new_wave.position = position;
 	new_wave.amplitude = amplitude;
 	new_wave.active = true;
@@ -96,25 +55,34 @@ int createWave(Sea& sea, Vector2 position, float amplitude, short direction, sho
 	assert(sign == -1 || sign == 1);
 	new_wave.sign = sign;
 	new_wave.id = ++sea.id_src;
-	return sea.numWaves++;
+	sea.waves.push_back(new_wave);
+	return new_wave.id;
 }
 
+WaveIt deleteWave(Sea& sea, WaveIt waveIt) {
+	return sea.waves.erase(waveIt);
+}
 
-int findWaveAtX(const Sea& sea, float x) { // returns the index of the closest wave
+WaveIt deleteWave(Sea& sea, uint8 waveId) {
+	return deleteWave(sea, findWave(sea, waveId));
+}
+
+WaveIt findWave(Sea& sea, uint8 waveId) {
+	// waves should be in the waves array in order of their id
+	WaveIt waveIt = std::lower_bound(sea.waves.begin(), sea.waves.end(), waveId, [](const Wave& w, uint8 id) -> bool { return w.id < id; });
+	assert(waveIt != sea.waves.end());
+	return waveIt;
+}
+
+WaveIt findWaveAtPosition(Sea& sea, Vector2 position) { // returns the index of the closest wave
 	float min = INF;
-	int idx = -1;
-	for (int i = 0 ; i < sea.numWaves; ++i) {
-		float diff = std::abs(x - sea.waves[i].position.x);
+	WaveIt retIt = sea.waves.end();
+	for(WaveIt waveIt = sea.waves.begin(); waveIt != sea.waves.end(); ++waveIt) {
+		float diff = std::abs(position.x - waveIt->position.x);
 		if ( diff < min) {
-			min = diff; idx = i;
+			min = diff; retIt = waveIt;
 		}
 	}
-	return idx;
+	return retIt;
 }
 
-Wave& findWave(Sea& sea, uint8_t wave_id) {
-	// waves should be in the waves array in order of their id
-	int wave_idx = binary_find_where(wave_id, sea.waves, sea.numWaves, [](const Wave& wave){return wave.id;});
-	assert(wave_idx > -1); // see binary find where
-	return sea.waves[wave_idx];
-}

@@ -23,8 +23,8 @@ void collide(Rock& rock, Rock& other_rock);
 //  - Seas
 //  - Platforms
 //  - Rocks
-void collide(Ship& ship, const Sea& sea); // a ship probably shouldn't alter a sea
-void collide(Ship& ship, const Platform& platform); // a ship shouldn't alter a platform either
+void collide(Ship& ship, Sea& sea);
+void collide(Ship& ship, const Platform& platform); // a ship shouldn't alter a platform
 void collide(Ship& ship, Rock& rock);
 
 struct Collision {

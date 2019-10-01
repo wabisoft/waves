@@ -4,6 +4,8 @@
 #include "maths.hpp"
 #include "printing.hpp"
 #include "stage.hpp"
+#include "util.hpp"
+
 void updateAABBS(Stage& stage) {
 	for(AABB& aabb : stage.aabbs) {
 		switch (aabb.type) {
@@ -52,8 +54,8 @@ AABB::AABB(const Ship& ship) {
 
 AABB::AABB(const Sea& sea) {
 	float maxHeight = sea.level;
-	for(short i = 0; i < sea.numWaves; ++i) {
-		maxHeight = std::max(maxHeight, sea.level + heightAtX(sea.waves[i], sea.waves[i].position.x));
+	for (const Wave& wave : sea.waves) {
+		maxHeight = std::max(maxHeight, sea.level + wave.heightAtX(wave.position.x));
 	}
 	lower = {0.f, 0.f};
 	upper = {STAGE_WIDTH, maxHeight};
