@@ -1,35 +1,42 @@
 #pragma once
 
 #include <cstdint>
+#include <vector>
+
 #include "aabb.hpp"
 #include "constants.hpp"
 #include "prelude.hpp"
 #include "maths.hpp"
+#include "typedefs.hpp"
 #include "util.hpp"
 
 
 struct Wave {
-	inline Wave() {}
 	Vector2 position = {0.f, 0.f};
 	Vector2 velocity = {0.f, 0.f};
 	float amplitude = 0.f;
 	float decay = 0.f;
 	float time = 0.f;
-	short direction = 1;
-	short sign = 1;
+	int8 direction = 1;
+	int8 sign = 1;
 	bool active = false;
 	bool grow = true;
-	uint8_t id = 0;
+	uint8 id = 0;
+
+	inline float heightAtX(float x) const;
+	inline Vector2 velocityAtX(float x) const;
+	inline float slopeAtX(float x) const; // derivative of height
+	inline float minimumX() const;
+	inline float maximumX() const;
 };
 
-float heightAtX(const Wave& wave, float x);
-Vector2 velocityAtX(const Wave& wave, float x);
-float slopeAtX(const Wave & wave, float x); // derivative of height
-float minimumX(const Wave& wave);
-float maximumX(const Wave& wave);
+#include "wave.inl"
+
+typedef std::vector<Wave>::iterator WaveIt;
 
 void updateWaves(Stage& stage);
-int createWave(Sea& sea, Vector2 position, float amplitude, short direction, short sign);
-
-int findWaveAtX(const Sea& sea, float x);
-Wave& findWave(Sea& sea, uint8_t wave_id);
+uint8 createWave(Sea& sea, Vector2 position, float amplitude, int direction, int sign);
+WaveIt deleteWave(Sea& sea, WaveIt waveIt);
+WaveIt deleteWave(Sea& sea, uint8 waveId);
+WaveIt findWave(Sea& sea, uint8 waveId);
+WaveIt findWaveAtPosition(Sea& sea, Vector2 position);

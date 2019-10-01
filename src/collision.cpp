@@ -138,13 +138,13 @@ inline void collideGreen(Rock& rock, Sea& sea) {
 	if(rock.state.type != RockState::FLOATING) {
 		rock.state = {RockState::FLOATING, {0.f}};
 	}
-	if (sea.numWaves < 0) { return; } // nothing to do for no waves
-	int closestWaveIndex = findWaveAtX(sea, rock.shape.position.x);
-	if (closestWaveIndex < 0) {
-		if (sea.numWaves > 0) assert(false);
+	if (sea.waves.size() < 0) { return; } // nothing to do for no waves
+	WaveIt closestWaveIt = findWaveAtPosition(sea, rock.shape.position);
+	if (closestWaveIt == sea.waves.end()) {
+		if (sea.waves.size() > 0) assert(false);
 		return;
 	} // if there are no waves then do nothing
-	const Wave& wave = sea.waves[closestWaveIndex];
+	const Wave& wave = *closestWaveIt;
 	float distFromWave = std::abs(rock.shape.position.x - wave.position.x);
 	if (distFromWave < 0.1) {
 		rock.state = {};
@@ -208,7 +208,7 @@ void collide(Rock& rock, Rock& other_rock) {
 void collide(Rock& rock, Ship& ship) {
 }
 
-void collide(Ship& ship, const Sea& sea) {
+void collide(Ship& ship, Sea& sea) {
 	float seaHeight = heightAtX(sea, ship.shape.position.x);
 	Vector2 lower, upper;
 	boundingPoints(ship.shape, lower, upper);
@@ -225,13 +225,13 @@ void collide(Ship& ship, const Sea& sea) {
 	auto drag = dragForce(ship.velocity, 600.f, mass(ship) * SHIP_AREA_MASS_RATIO);
 	ship.velocity += drag * FIXED_TIMESTEP;
 
-	if (sea.numWaves < 0) { return; } // nothing to do for no waves
-	int closestWaveIndex = findWaveAtX(sea, ship.shape.position.x);
-	if (closestWaveIndex < 0) {
-		if (sea.numWaves > 0) assert(false);
+	if (sea.waves.size() < 0) { return; } // nothing to do for no waves
+	WaveIt closestWaveIt = findWaveAtPosition(sea, ship.shape.position);
+	if (closestWaveIt == sea.waves.end()) {
+		if (sea.waves.size() > 0) assert(false);
 		return;
 	} // if there are no waves then do nothing
-	const Wave& wave = sea.waves[closestWaveIndex];
+	const Wave& wave = *closestWaveIt;
 	float distFromWave = std::abs(ship.shape.position.x - wave.position.x);
 	if (distFromWave < 0.1) {
 		ship.state = {};

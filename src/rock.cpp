@@ -120,12 +120,12 @@ RockIt deleteRock(Stage& stage, uint8 rockId) {
 
 RockIt findRock(Stage& stage, uint8 rockId) {
 	RockIt rockIt = std::lower_bound(stage.rocks.begin(), stage.rocks.end(), rockId, [](const Rock& r, uint8 id) -> bool { return r.id < id; });
-	assert(rockIt != stage.rocks.end()); 
+	assert(rockIt != stage.rocks.end());
 	return rockIt;
 }
 
 RockIt findRockAtPosition(Stage& stage, Vector2 position) {
-	for(RockIt rockIt = stage.rocks.begin(); rockIt != stage.rocks.end(); ++rockIt){ 
+	for(RockIt rockIt = stage.rocks.begin(); rockIt != stage.rocks.end(); ++rockIt){
 		float dist = magnitude(position - rockIt->shape.position);
 		if (dist <= rockIt->shape.radius) {
 			return rockIt;

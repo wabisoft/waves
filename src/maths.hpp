@@ -13,6 +13,12 @@ T sign(T t) {
 	return (t == (T)0) ? (T)0 : t / abs(t);
 }
 
+template <typename T>
+T signOf(T t) {
+	return sign<T>(t);
+}
+
+
 /***********
  * Vectors *
  ***********/
