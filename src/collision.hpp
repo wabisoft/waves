@@ -1,16 +1,15 @@
 #pragma once
+#include <vector>
 
 #include "aabb.hpp"
 #include "prelude.hpp"
-// #include "stage.hpp"
 #include "util.hpp"
-
 
 void resolveCollisions(Stage& stage);
 void dispatchPotentialCollision(Stage& stage, const AABBPair& pair);
 
 // Rocks Collide with things:
-//  - Sea
+//  - Seas
 //  - Platforms
 //  - Ships
 //  - Rocks
@@ -21,7 +20,7 @@ void collide(Rock& rock, Ship& ship);
 void collide(Rock& rock, Rock& other_rock);
 
 // Ships collide with things:
-//  - Sea
+//  - Seas
 //  - Platforms
 //  - Rocks
 void collide(Ship& ship, Sea& sea);

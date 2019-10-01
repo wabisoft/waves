@@ -47,6 +47,11 @@ void drawStage(sf::RenderTarget& target, Stage& stage,  bool showGrid) {
 	}
 	drawPolygon(target, stage.win.region, sf::Color(0, 204, 102));
 	drawPullParabola(target, stage);
+	for (AABB aabb : stage.aabbs) {
+		Vector2 diff = aabb.upper - aabb.lower;
+		Vector2 pos = { aabb.lower.x + 0.5 * diff.x, aabb.lower.y + 0.5 * diff.y };
+		drawPolygon(target, makeRectangle(pos, diff.x, diff.y), sf::Color::Yellow);
+	}
 }
 
 
