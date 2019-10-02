@@ -53,12 +53,13 @@ AABB::AABB(const Ship& ship) {
 }
 
 AABB::AABB(const Sea& sea) {
-	float maxHeight = sea.shape.height;
-	for (const Wave& wave : sea.waves) {
-		maxHeight = std::max(maxHeight, sea.shape.height + wave.heightAtX(wave.position.x));
-	}
 	lower = lowerBound(sea.shape);
-	upper = {upperBound(sea.shape).x, maxHeight};
+	upper = upperBound(sea.shape);
+	float maxHeight = upper.y;
+	for (const Wave& wave : sea.waves) {
+		maxHeight = std::max(maxHeight, upper.y + wave.heightAtX(wave.position.x));
+	}
+	upper.y = maxHeight;
 	type = SEA;
 	id = sea.id;
 }
