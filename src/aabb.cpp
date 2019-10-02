@@ -16,7 +16,7 @@ void updateAABBS(Stage& stage) {
 				aabb = AABB(stage.ship);
 				break;
 			case SEA:
-				aabb = AABB(stage.sea);
+				aabb = AABB(*findSea(stage, aabb.id));
 				break;
 			case PLATFORM:
 				aabb = AABB(*findPlatform(stage, aabb.id));
@@ -53,12 +53,12 @@ AABB::AABB(const Ship& ship) {
 }
 
 AABB::AABB(const Sea& sea) {
-	float maxHeight = sea.level;
+	float maxHeight = sea.shape.height;
 	for (const Wave& wave : sea.waves) {
-		maxHeight = std::max(maxHeight, sea.level + wave.heightAtX(wave.position.x));
+		maxHeight = std::max(maxHeight, sea.shape.height + wave.heightAtX(wave.position.x));
 	}
-	lower = {0.f, 0.f};
-	upper = {STAGE_WIDTH, maxHeight};
+	lower = lowerBound(sea.shape);
+	upper = {upperBound(sea.shape).x, maxHeight};
 	type = SEA;
 	id = sea.id;
 }

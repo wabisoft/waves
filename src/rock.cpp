@@ -59,7 +59,8 @@ inline RockIt updateFloatingRock(Stage& stage, RockIt rockIt, float deltaTime) {
 	assert(rock.state.type == RockState::FLOATING);
 	rock.state.floating.timeFloating += deltaTime;
 	if(rock.state.floating.timeFloating > ROCK_MAX_FLOAT_TIME) {
-		createWave(stage.sea, rock.shape.position, 2* rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x), 1);
+		Sea& sea = *findSea(stage, rock.state.floating.seaId);
+		createWave(sea, rock.shape.position, 2* rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x), 1);
 		if (stage.selection.entity.id == rock.id) {
 			// if this rock is selected we need to clear it
 			clearSelection(stage);

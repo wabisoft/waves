@@ -30,7 +30,7 @@ void update(Stage& stage, float deltaTime){
 	}
 	resolveCollisions(stage);
 	updateRocks(stage, deltaTime);
-	updateWaves(stage);
+	updateSeas(stage);
 	updateShip(stage, deltaTime);
 	if(stage.win.timeInArea >= stage.win.timeToWin) {
 		stage.state.type = StageState::FINISHED;

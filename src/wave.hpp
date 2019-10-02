@@ -34,7 +34,7 @@ struct Wave {
 
 typedef std::vector<Wave>::iterator WaveIt;
 
-void updateWaves(Stage& stage);
+void updateWaves(Stage& stage, Sea& sea);
 uint8 createWave(Sea& sea, Vector2 position, float amplitude, int direction, int sign);
 WaveIt deleteWave(Sea& sea, WaveIt waveIt);
 WaveIt deleteWave(Sea& sea, uint8 waveId);

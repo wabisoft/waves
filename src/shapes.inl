@@ -48,6 +48,11 @@ inline Vector2 lower(const Polygon<N>& polygon) {
 	return {minX, minY};
 }
 
+template<int N>
+inline Vector2 lowerBound(const Polygon<N>& polygon) {
+	return lower<N>(polygon);
+}
+
 template <int N>
 inline Vector2 upper(const Polygon<N>& polygon) {
 	float maxX = -INF;
@@ -57,6 +62,11 @@ inline Vector2 upper(const Polygon<N>& polygon) {
 		maxY = std::fmax(polygon.vertices[i].y, maxY);
 	}
 	return {maxX, maxY};
+}
+
+template<int N>
+inline Vector2 upperBound(const Polygon<N>& polygon) {
+	return upper<N>(polygon);
 }
 
 template <int N>

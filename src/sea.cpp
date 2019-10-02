@@ -1,25 +1,46 @@
+#include "maths.hpp"
 #include "sea.hpp"
 #include "stage.hpp"
 #include "wave.hpp"
 
 uint8_t Sea::id_src = 0;
 
-float heightAtX(const Sea& sea, float x) {
-	float height = sea.level;
-	for (const Wave& wave : sea.waves) {
-		height += wave.heightAtX(x);
+void updateSeas(Stage& stage) {
+	for(Sea& sea : stage.seas) {
+		updateWaves(stage, sea);
 	}
-	return height;
 }
 
-Vector2 velocityAtX(const Sea& sea, float x) {
-	Vector2 velocity = VECTOR2_ZERO;
-	for (const Wave& wave : sea.waves) {
-		velocity += wave.velocityAtX(x);
-	}
-	return velocity;
+uint8 createSea(Stage& stage, Vector2 position, float width, float height) {
+	Sea new_sea;
+	new_sea.shape = makeRectangle(position, width, height);
+	new_sea.id = ++stage.id_src;
+	stage.seas.push_back(new_sea);
+	createAABB(stage, AABB(new_sea));
+	return new_sea.id;
 }
 
-void fixedUpdate(Sea& sea) {}
+uint8 createSea(Stage& stage, Rectangle rect) {
+	Sea new_sea;
+	new_sea.shape = rect;
+	new_sea.id = ++stage.id_src;
+	stage.seas.push_back(new_sea);
+	createAABB(stage, AABB(new_sea));
+	return new_sea.id;
+}
 
+SeaIt deleteSea(Stage& stage, SeaIt seaIt) {
+	deleteAABB(stage, seaIt->id);
+	return stage.seas.erase(seaIt);
+}
+
+SeaIt deleteSea(Stage& stage, uint8 seaId) {
+	return deleteSea(stage, findSea(stage, seaId));
+}
+
+SeaIt findSea(Stage& stage, uint8 seaId) {
+	SeaIt seaIt = std::lower_bound(stage.seas.begin(), stage.seas.end(), seaId, [](const Sea& s, uint8 id) -> bool { return s.id < id; });
+	assert(seaIt != stage.seas.end());
+	return seaIt;
+}
 

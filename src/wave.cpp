@@ -10,9 +10,8 @@
 #include "wave.hpp"
 
 
-void updateWaves(Stage& stage){
+void updateWaves(Stage& stage, Sea& sea){
 	//Update the wave for this time step
-	Sea& sea = stage.sea;
 	for(WaveIt waveIt = sea.waves.begin(); waveIt != sea.waves.end(); ++waveIt) {
 		Wave& wave = *waveIt;
 		wave.time += FIXED_TIMESTEP;
@@ -24,7 +23,7 @@ void updateWaves(Stage& stage){
 		else if ((wave.decay <= 0.f && !wave.grow) || wave.minimumX() > STAGE_WIDTH)
 		{
 			// delete this wave
-			if (stage.ship.state.type == ShipState::SURFING && stage.ship.state.surfing.wave_id == wave.id) {
+			if (stage.ship.state.type == ShipState::SURFING && stage.ship.state.surfing.waveId == wave.id) {
 				stage.ship.state = {ShipState::FALLING, {}};
 				stage.ship.velocity = wave.velocity;
 			}

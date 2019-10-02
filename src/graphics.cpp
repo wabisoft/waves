@@ -32,7 +32,7 @@ void drawStage(sf::RenderTarget& target, Stage& stage,  bool showGrid) {
 		drawGrid(target);
 	}
 	drawPlatforms(target, stage);
-	drawSea(target, stage.sea);
+	drawSeas(target, stage);
 	if(stage.selection.active && stage.selection.state == Selection::PULL && stage.selection.pullPosition != VECTOR2_ZERO) {
 		Rock& rock = *findRock(stage, stage.selection.entity.id);
 		drawLine(target, rock.shape.position, stage.selection.pullPosition, sf::Color::Blue);
@@ -49,20 +49,24 @@ void drawStage(sf::RenderTarget& target, Stage& stage,  bool showGrid) {
 	drawPullParabola(target, stage);
 	for (AABB aabb : stage.aabbs) {
 		Vector2 diff = aabb.upper - aabb.lower;
-		Vector2 pos = { aabb.lower.x + 0.5 * diff.x, aabb.lower.y + 0.5 * diff.y };
+		Vector2 pos = { aabb.lower.x + 0.5f * diff.x, aabb.lower.y + 0.5f * diff.y };
 		drawPolygon(target, makeRectangle(pos, diff.x, diff.y), sf::Color::Yellow);
 	}
 }
 
 
-inline void drawSea(sf::RenderTarget& target, const Sea& sea) {
-	std::vector<sf::Vertex> vertices;
-	float step = 1 / pixelsPerUnit(target).x;
-	for (float i = 0; i < STAGE_WIDTH; i += step)
-	{
-		vertices.push_back(sf::Vertex(game2ScreenPos(target, {i, heightAtX(sea, i)}), SEA_COLOR));
+inline void drawSeas(sf::RenderTarget& target, const Stage& stage) {
+	for (const Sea& sea: stage.seas) {
+		std::vector<sf::Vertex> vertices;
+		float step = 1 / pixelsPerUnit(target).x;
+		Vector2 lower = lowerBound(sea.shape);
+		Vector2 upper = upperBound(sea.shape);
+		for (float i = lower.x; i < upper.x; i += step)
+		{
+			vertices.push_back(sf::Vertex(game2ScreenPos(target, {i, sea.heightAtX(i)}), SEA_COLOR));
+		}
+		target.draw(&vertices[0], vertices.size(), sf::LineStrip);
 	}
-	target.draw(&vertices[0], vertices.size(), sf::LineStrip);
 }
 
 inline void drawShip(sf::RenderTarget& target, const Ship& ship) {
@@ -137,7 +141,7 @@ void drawInfoText(sf::RenderTarget& target, const Stage& stage, float drawDelta,
 	}
 	infostream << std::endl;
 	infostream << "#Rocks: 					" << stage.rocks.size() << std::endl;
-	infostream << "#Waves: 					" << stage.sea.waves.size()<< std::endl;
+	// infostream << "#Waves: 					" << stage.sea.waves.size()<< std::endl;
 	infostream << "#AABBs: 					" << stage.aabbs.size() << std::endl;
 	if(stage.rocks.size() > 0 ) {
 		infostream << "P:						" << stage.rocks[0].shape.position<< std::endl;

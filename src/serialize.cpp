@@ -5,15 +5,37 @@
 
 using namespace std;
 
+// TODO: serialize a more complete game state (i.e. every piece of state)
 string serialize(const Stage& stage) {
 	stringstream stream;
 	stream << "{" <<
-		"\"sea_level\"" << ":" << stage.sea.level << "," <<
+		"\"seas\"" << ":" << serialize(stage.seas) << "," <<
 		"\"platforms\"" << ":" << serialize(stage.platforms) << "," <<
 		"\"ship\"" 		<< ":" << serialize(stage.ship.shape) << "," <<
 		"\"rock_spawn\""<< ":" << serialize(stage.rockSpawn) << "," <<
 		"\"win\""		<< ":" << serialize(stage.win) <<
 	"}";
+	return stream.str();
+}
+
+std::string serialize(const std::vector<Sea> seas) {
+	stringstream stream;
+	stream << "[";
+	for (int i = 0 ; i < seas.size(); ++i) {
+		// TODO: serialize more stuff
+		stream << serialize(seas[i].shape);
+		if ( i < seas.size() - 1) { stream << ","; }
+	}
+	return stream.str();
+}
+std::string serialize(const std::vector<Wave> waves) {
+	stringstream stream;
+	stream << "[";
+	for(int i = 0; i < waves.size(); ++i) {
+		stream << "{" <<
+		"}";
+		if ( i < waves.size() - 1) { stream << ","; }
+	}
 	return stream.str();
 }
 
@@ -87,7 +109,6 @@ inline Rectangle extractRectangle(JSON j, JSONError& e) {
 	return makeRectangle(r.position, r.width, r.height, r.rotation);
 }
 
-
 bool loadStageFromString(std::string data, Stage& stage, SerializeError& err) {
 	JSONError e;
 	string_it litStart = data.begin();
@@ -100,7 +121,11 @@ bool loadStageFromString(std::string data, Stage& stage, SerializeError& err) {
 	}
 	JSONObject object = getObject(json, e);
 	if(e.no) {err.what = e.what; return false;}
-	stage.sea.level = getNumber(getValue(object, "sea_level"), e);
+	auto seaRectangles = extractArray(getValue(object, "seas"), e, &extractRectangle);
+	if (e.no) {err.what = e.what; return false;}
+	for(Rectangle& r : seaRectangles) {
+		createSea(stage, r);
+	}
 	if(e.no) {err.what = e.what; return false;}
 	auto platformRectangles = extractArray(getValue(object, "platforms"), e, &extractRectangle);
 	if(e.no) {err.what = e.what; return false;}
