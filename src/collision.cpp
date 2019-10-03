@@ -11,8 +11,11 @@
 #include "platform.hpp"
 #include "printing.hpp"
 #include "rock.hpp"
+#include "shapes.hpp"
 #include "stage.hpp"
 #include "util.hpp"
+
+using namespace wabi;
 
 void resolveCollisions(Stage& stage) {
 	// NOTE (owen): if it starts to get slow this is definately a place we can optimize
@@ -186,7 +189,7 @@ inline void collideGreen(Rock& rock, Sea& sea) {
 	rock.velocity += drag * FIXED_TIMESTEP;
 
 	if(rock.state.type != RockState::FLOATING) {
-		rock.state = {RockState::FLOATING, {0.f}};
+		rock.state = {RockState::FLOATING, {{0.f}}};
 	}
 	if (sea.waves.size() < 0) { return; } // nothing to do for no waves
 	WaveIt closestWaveIt = findWaveAtPosition(sea, rock.shape.position);

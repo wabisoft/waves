@@ -19,6 +19,8 @@
 
 sf::Font font;
 
+using namespace wabi;
+
 void initGraphics() {
 	if (!font.loadFromFile("assets/fonts/IBMPlexMono-Regular.ttf")){
 	 	std::cout << "Couldn't load font" << std::endl;
@@ -49,7 +51,7 @@ void drawStage(sf::RenderTarget& target, Stage& stage,  bool showGrid) {
 	drawPullParabola(target, stage);
 	for (AABB aabb : stage.aabbs) {
 		Vector2 diff = aabb.upper - aabb.lower;
-		Vector2 pos = { aabb.lower.x + 0.5 * diff.x, aabb.lower.y + 0.5 * diff.y };
+		Vector2 pos = { aabb.lower.x + 0.5f * diff.x, aabb.lower.y + 0.5f * diff.y };
 		drawPolygon(target, makeRectangle(pos, diff.x, diff.y), sf::Color::Yellow);
 	}
 }

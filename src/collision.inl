@@ -4,7 +4,7 @@
 // NOTE: this only determines if poly1 is specifically overlaping poly2
 // Also NOTE: poly1 and poly2 must be CONVEX
 template <int N, int M>
-Collision collision(const Polygon<N>& poly1, const Polygon<M>& poly2) {
+Collision collision(const wabi::Polygon<N>& poly1, const wabi::Polygon<M>& poly2) {
 	// check the diagonals of one polygon ...
 	std::vector<Collision> collisions;
 	for (int i = 0; i < poly1.size; ++i) {
@@ -42,7 +42,7 @@ Collision collision(const Polygon<N>& poly1, const Polygon<M>& poly2) {
 }
 
 template <int N>
-Collision collision(const Circle& circle, const Polygon<N>& polygon) {
+Collision collision(const wabi::Circle& circle, const wabi::Polygon<N>& polygon) {
 	std::vector<Collision> collisions;
 	// Start with the circle position
 	Vector2 c = circle.position;
