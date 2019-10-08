@@ -2,6 +2,7 @@
 
 #include "prelude.hpp"
 #include "maths.hpp"
+#include "shapes.hpp"
 
 struct ShipState {
 	struct FallingState { };
@@ -28,7 +29,7 @@ struct ShipState {
 };
 
 struct Ship {
-	Rectangle shape;
+	wabi::Rectangle shape;
 	Vector2 velocity;
 	ShipState state = {ShipState::FALLING, {}};
 	uint8_t id = 0;
@@ -41,6 +42,6 @@ inline float mass(const Ship& ship) {
 
 void updateShip(Stage& stage, float deltaTime);
 uint8_t createShip(Stage& stage, Vector2 position, float width, float height);
-uint8_t createShip(Stage& stage, Rectangle rect);
+uint8_t createShip(Stage& stage, wabi::Rectangle rect);
 
 

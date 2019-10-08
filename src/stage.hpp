@@ -8,6 +8,7 @@
 #include "platform.hpp"
 #include "rock.hpp"
 #include "sea.hpp"
+#include "shapes.hpp"
 #include "ship.hpp"
 #include "typedefs.hpp"
 
@@ -47,7 +48,7 @@ struct StageState {
 struct Win {
 	float timeInArea = 0;
 	float timeToWin = 0.25;
-	Rectangle region;
+	wabi::Rectangle region;
 };
 
 struct Stage{
@@ -57,7 +58,7 @@ struct Stage{
 	std::vector<Platform> platforms;
 
 	// TODO: move this ship to a struct just for collision stuff maybe? gonna make addressing it longer though
-	std::vector<AABB> aabbs;	
+	std::vector<AABB> aabbs;
 	std::vector<uint8> xAxisOrder;
 	std::vector<uint8> yAxisOrder;
 

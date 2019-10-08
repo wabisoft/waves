@@ -4,6 +4,7 @@
 #include "json.hpp"
 
 using namespace std;
+using namespace wabi;
 
 string serialize(const Stage& stage) {
 	stringstream stream;

@@ -7,6 +7,7 @@
 #include "constants.hpp"
 #include "maths.hpp"
 #include "prelude.hpp"
+#include "shapes.hpp"
 #include "typedefs.hpp"
 #include "util.hpp"
 
@@ -53,7 +54,7 @@ struct RockType {
 
 
 struct Rock {
-	Circle shape = {{0.f, 0.f}, 0.f};
+	wabi::Circle shape = {{0.f, 0.f}, 0.f};
 	Vector2 velocity = {0.f, 0.f};
 	RockState state { RockState::FALLING, {} };
 	RockType type;
