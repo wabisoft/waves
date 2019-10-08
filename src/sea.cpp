@@ -1,7 +1,10 @@
 #include "maths.hpp"
 #include "sea.hpp"
+#include "shapes.hpp"
 #include "stage.hpp"
 #include "wave.hpp"
+
+using namespace wabi;
 
 uint8_t Sea::id_src = 0;
 

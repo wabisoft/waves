@@ -29,4 +29,3 @@ std::ostream& operator<<(std::ostream& os, AABB aabb);
 std::ostream& operator<<(std::ostream& os, sf::Vector2f v);
 
 
-

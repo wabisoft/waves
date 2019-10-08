@@ -4,6 +4,7 @@
 #include "json.hpp"
 
 using namespace std;
+using namespace wabi;
 
 // TODO: serialize a more complete game state (i.e. every piece of state)
 string serialize(const Stage& stage) {

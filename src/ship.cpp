@@ -5,6 +5,8 @@
 #include "ship.hpp"
 #include "stage.hpp"
 
+using namespace wabi;
+
 inline void updateFallingShip(Ship& ship) {
 	ship.velocity += GRAVITY * FIXED_TIMESTEP;
 	auto drag = dragForce(ship.velocity, 1.225f, mass(ship) * SHIP_AREA_MASS_RATIO);

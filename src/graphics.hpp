@@ -7,6 +7,7 @@
 #include "clock.hpp"
 #include "maths.hpp"
 #include "rock.hpp"
+#include "shapes.hpp"
 #include "sea.hpp"
 
 #define SEA_COLOR sf::Color::Cyan
@@ -28,11 +29,11 @@ inline void drawGrid(sf::RenderTarget&);
 void drawInfoText(sf::RenderTarget&, const Stage& , float, float, int);
 
 template <int N>
-inline void drawPolygon(sf::RenderTarget&, const Polygon<N>&, sf::Color);
+inline void drawPolygon(sf::RenderTarget&, const wabi::Polygon<N>&, sf::Color);
 inline void drawText(sf::RenderTarget&, std::string, sf::Vector2f, int=15, bool=false);
 inline void drawId(sf::RenderTarget&, int, sf::Vector2f);
 inline void drawId(sf::RenderTarget&, int, Vector2);
-inline void drawCircle(sf::RenderTarget&, const Circle&, sf::Color, bool fill=false);
+inline void drawCircle(sf::RenderTarget&, const wabi::Circle&, sf::Color, bool fill=false);
 inline void drawLine(sf::RenderTarget&, Vector2, Vector2, sf::Color);
 
 inline sf::Vector2f game2ScreenPos(const sf::RenderTarget&, Vector2);
@@ -40,7 +41,7 @@ inline Vector2 screen2GamePos(const sf::RenderTarget&, sf::Vector2i);
 float ppu(sf::RenderTarget&);
 
 template <int N>
-void drawPolygon(sf::RenderTarget& target, const Polygon<N>& polygon, sf::Color c) {
+void drawPolygon(sf::RenderTarget& target, const wabi::Polygon<N>& polygon, sf::Color c) {
 	sf::VertexArray sfVertices(sf::LineStrip, N+1);
 	for (int i = 0; i < N; ++i) {
 		sfVertices[i] = sf::Vertex(game2ScreenPos(target, polygon.vertices[i]), c);

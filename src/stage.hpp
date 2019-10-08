@@ -8,6 +8,7 @@
 #include "platform.hpp"
 #include "rock.hpp"
 #include "sea.hpp"
+#include "shapes.hpp"
 #include "ship.hpp"
 #include "typedefs.hpp"
 
@@ -47,7 +48,7 @@ struct StageState {
 struct Win {
 	float timeInArea = 0;
 	float timeToWin = 0.25;
-	Rectangle region;
+	wabi::Rectangle region;
 };
 
 struct Stage{

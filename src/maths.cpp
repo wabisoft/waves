@@ -1,29 +1,5 @@
 #include "maths.hpp"
 
-/***************
- * Shape Stuff *
- ***************/
-
-Rectangle makeRectangle(Vector2 p, float w, float h, float rotation) {
-	Rectangle r;
-	r.width = w;
-	r.height = h;
-	r.position = p;
-	r.rotation = rotation;
-	float halfWidth = w/2.f;
-	float halfHeight = h/2.f;
-	r.model[0] = {-halfWidth, halfHeight}; // top left
-	r.model[1] = {halfWidth, halfHeight}; // top right
-	r.model[2] = {halfWidth, -halfHeight}; // bottom right
-	r.model[3] = {-halfWidth, -halfHeight}; // bottom left
-	r.vertices[0] = r.position + r.model[0];
-	r.vertices[1] = r.position + r.model[1];
-	r.vertices[2] = r.position + r.model[2];
-	r.vertices[3] = r.position + r.model[3];
-	return r;
-}
-
-
 /******************
  * Geometry Stuff *
  ******************/

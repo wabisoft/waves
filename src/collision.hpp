@@ -3,6 +3,7 @@
 
 #include "aabb.hpp"
 #include "prelude.hpp"
+#include "shapes.hpp"
 #include "util.hpp"
 
 void resolveCollisions(Stage& stage);
@@ -37,9 +38,9 @@ struct Collision {
 };
 
 template <int N, int M>
-Collision collision(const Polygon<N>& poly1, const Polygon<M>& poly2);
+Collision collision(const wabi::Polygon<N>& poly1, const wabi::Polygon<M>& poly2);
 template <int N>
-Collision collision(const Circle& circle, const Polygon<N>& polygon);
-Collision collision(const Circle& c1, const Circle& c2);
+Collision collision(const wabi::Circle& circle, const wabi::Polygon<N>& polygon);
+Collision collision(const wabi::Circle& c1, const wabi::Circle& c2);
 
 #include "collision.inl"

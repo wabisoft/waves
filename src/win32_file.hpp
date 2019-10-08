@@ -1,6 +1,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <commdlg.h>
+#include <direct.h>
 #include <string>
 #include <SFML/Graphics.hpp>
 
@@ -11,6 +12,12 @@ std::string ExePath() {
     return std::string( buffer ).substr( 0, pos);
 }
 
+std::string CurrentWorkingDir() {
+	char buff[FILENAME_MAX];
+  	_getcwd( buff, FILENAME_MAX );
+  	std::string currentWorkingDir(buff);
+	return currentWorkingDir;
+}
 
 
 inline bool selectAFileForOpen(sf::RenderWindow& window, std::string& filename, const char* PopupTitle, const char* filter = "Any File\0*.*\0\0") {

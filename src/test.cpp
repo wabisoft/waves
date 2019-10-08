@@ -15,15 +15,16 @@
 #include "maths.hpp"
 #include "printing.hpp"
 #include "serialize.hpp"
+#include "shapes.hpp"
 #include "stage.hpp"
 #include "test.hpp"
 #include "util.hpp"
 
-
+using namespace wabi;
 void test_shapes_and_shit(sf::RenderWindow& window) {
 	// Testing shapes and shit
-	Rectangle rectangle = makeRectangle({STAGE_WIDTH/2, STAGE_HEIGHT/2}, 30, 5);
-	Circle circle = {{STAGE_WIDTH/2-14, STAGE_HEIGHT/2 + 5}, 3.f};
+	wabi::Rectangle rectangle = wabi::makeRectangle({STAGE_WIDTH/2, STAGE_HEIGHT/2}, 30, 5);
+	wabi::Circle circle = {{STAGE_WIDTH/2-14, STAGE_HEIGHT/2 + 5}, 3.f};
 	Vector2 p1 = rectangle.position;
 	Vector2 p2 = rectangle.position - Vector2{rectangle.width, 0.f};
 	Vector2 p3 = rectangle.position - Vector2{rectangle.width/2.f, 0.f};

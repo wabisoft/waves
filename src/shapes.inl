@@ -1,7 +1,7 @@
-// maths.hpp
+// shapes.hpp
 
 #include "constants.hpp"
-
+namespace wabi {
 inline float area(const Circle& circle) {
 	return circle.radius * circle.radius * PI;
 }
@@ -84,3 +84,5 @@ inline void boundingPoints(const Polygon<N>& polygon, Vector2& lower, Vector2& u
 	lower = {minX, minY};
 	upper = {maxX, maxY};
 }
+
+} // namespace wabi

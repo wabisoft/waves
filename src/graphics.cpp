@@ -19,6 +19,8 @@
 
 sf::Font font;
 
+using namespace wabi;
+
 void initGraphics() {
 	if (!font.loadFromFile("assets/fonts/IBMPlexMono-Regular.ttf")){
 	 	std::cout << "Couldn't load font" << std::endl;

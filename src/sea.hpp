@@ -5,6 +5,7 @@
 #include "aabb.hpp"
 #include "constants.hpp"
 #include "maths.hpp"
+#include "shapes.hpp"
 #include "typedefs.hpp"
 #include "wave.hpp"
 
@@ -12,7 +13,7 @@
 struct Sea{
 	// Wave waves[MAX_WAVES];
 	// short numWaves = 0;
-	Rectangle shape;
+	wabi::Rectangle shape;
 	std::vector<Wave> waves;
 	// float level = 0;
 	uint8 id = 0;
@@ -29,7 +30,7 @@ typedef std::vector<Sea>::iterator SeaIt;
 
 void updateSeas(Stage& stage);
 uint8 createSea(Stage& stage, Vector2 position, float width, float height);
-uint8 createSea(Stage& stage, Rectangle rectangle);
+uint8 createSea(Stage& stage, wabi::Rectangle rectangle);
 SeaIt deleteSea(Stage& stage, SeaIt seaIt);
 SeaIt deleteSea(Stage& stage, uint8 seaId);
 SeaIt findSea(Stage& stage, uint8 seaId);
