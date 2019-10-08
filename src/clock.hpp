@@ -1,4 +1,5 @@
 #pragma once
+
 // TODO: maybe if we use opengl we need to implement our own clock. sfml's impl is
 // reasonable, so we can pretty much copy it when/if the time comes
 
