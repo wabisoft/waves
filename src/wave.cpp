@@ -30,16 +30,19 @@ void updateWaves(Stage& stage, Sea& sea){
 			waveIt = deleteWave(sea, waveIt);
 			if(waveIt == sea.waves.end()) break; // don't advance past the end
 		}
+		if(wave.position.x >= upperBound(sea.shape).x || wave.position.x <= lowerBound(sea.shape).x) {
+			wave.direction = -wave.direction;
+		}
 		if (wave.decay <= 1 && wave.grow){
 			wave.decay += FIXED_TIMESTEP * WAVE_POSITIVE_DECAY_MULTIPLIER;
 		} else {
 			wave.decay += FIXED_TIMESTEP * WAVE_NEGATIVE_DECAY_MULTIPLIER;
 		}
 		// Update velocity with timestep
-		wave.velocity[0] += FIXED_TIMESTEP * 0.05f * wave.amplitude * wave.direction;
+		wave.velocity[0] += FIXED_TIMESTEP * 0.05f * wave.amplitude;
 		wave.velocity += dragForce(wave.velocity, 1.225f, .4f);
 		// Update position with velocity;
-		wave.position += wave.velocity;
+		wave.position += wave.velocity * wave.direction;
 	}
 }
 
