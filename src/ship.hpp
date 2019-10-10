@@ -14,6 +14,7 @@ struct ShipState {
 	struct SurfingState {
 		uint8 waveId;
 		uint8 seaId;
+		int waveDirection = 0;
 	};
 
 	enum StateType : uint8_t {

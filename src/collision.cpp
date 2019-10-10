@@ -303,6 +303,7 @@ void collide(Ship& ship, Sea& sea) {
 		ship.state.type = ShipState::SURFING;
 		ship.state.surfing.waveId = wave.id;
 		ship.state.surfing.seaId = sea.id;
+		ship.state.surfing.waveDirection = wave.direction;
 	}
 }
 
