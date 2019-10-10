@@ -53,7 +53,7 @@ inline void updateSurfingShip(Stage& stage, Ship& ship) {
 	// TODO: Keep the ship on the crest of the wave
 	Sea& sea = *findSea(stage, ship.state.surfing.seaId);
 	Wave & wave = *findWave(sea, ship.state.surfing.waveId);
-	ship.velocity.x = wave.velocity.x;
+	ship.velocity.x = wave.velocity.x * wave.direction;
 	updateFallingShip(ship); // do all the same things you do for a falling ship
 	// ship.shape.position.x = wave.position.x;
 }
