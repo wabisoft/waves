@@ -111,40 +111,48 @@ void dispatchPotentialCollision(Stage& stage, const AABBPair& pair) {
 	// Get the a entity (if we need to);
 	Rock* aRock = nullptr;
 	Platform* aPlatform = nullptr;
+	Sea * aSea = nullptr;
 	// Platform* aPlatform = nullptr;
 	switch(pair.a.type) {
 		case ROCK:	aRock = &*findRock(stage, pair.a.id); break;
 		case PLATFORM:	aPlatform = &*findPlatform(stage, pair.a.id); break;
+		case SEA:	aSea= &*findSea(stage, pair.a.id); break;
 		default: break;
 	}
 	Rock* bRock = nullptr;
-	Platform* bPlatform= nullptr;
+	Platform* bPlatform = nullptr;
+	Sea* bSea = nullptr;
 	switch(pair.b.type) {
 		case ROCK:	bRock = &*findRock(stage, pair.b.id); break;
 		case PLATFORM:	bPlatform = &*findPlatform(stage, pair.b.id); break;
+		case SEA:	bSea = &*findSea(stage, pair.b.id); break;
 		default: break;
 	}
 	switch(pair.a.type | pair.b.type){
 		case ROCK|SEA:
-			if (aRock) collide(*aRock, stage.sea);
-			else if (bRock) collide(*bRock, stage.sea);
-			else assert(false);
+			if (aRock) { collide(*aRock, *bSea); }
+			else if (bRock) { collide(*bRock, *aSea); }
+			else { assert(false); }
 			break;
 		case ROCK|PLATFORM:
-			if (aRock && bPlatform) collide(*aRock, *bPlatform);
-			else if (bRock && aPlatform) collide(*bRock, *aPlatform);
-			else assert(false);
+			if (aRock && bPlatform) { collide(*aRock, *bPlatform); }
+			else if (bRock && aPlatform) { collide(*bRock, *aPlatform); }
+			else { assert(false); }
 			break;
 		case ROCK|SHIP: break;
 		case ROCK|ROCK:
 			if (aRock && bRock){ collide(*aRock, *bRock); }
 			else { assert(false); }
 			break;
-		case SHIP|SEA: collide(stage.ship, stage.sea); break;
+		case SHIP|SEA:
+			if(aSea) { collide(stage.ship, *aSea); }
+			else if(bSea) { collide(stage.ship, *bSea); }
+			else { assert(false); }
+			break;
 		case SHIP|PLATFORM:
-			if (aPlatform) collide(stage.ship, *aPlatform);
-			else if (bPlatform) collide(stage.ship, *bPlatform);
-			else assert(false);
+			if (aPlatform) { collide(stage.ship, *aPlatform); }
+			else if (bPlatform) { collide(stage.ship, *bPlatform); }
+			else { assert(false); }
 			break;
 		default: break;
 	}
@@ -155,12 +163,13 @@ inline void collideRed(Rock& rock, Sea& sea) {
 	assert(rock.type.type == RockType::RED);
 	Vector2 rockPosition = rock.shape.position;
 	Vector2 rockNextFramePosition = rock.shape.position + rock.velocity * FIXED_TIMESTEP;
-	if(rockPosition.y < sea.level) {
+	Vector2 seaUpperBound = upperBound(sea.shape);
+	if(rockPosition.y < seaUpperBound.y) {
 		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x), 1);
 		rock.active = 0;
-	} else if (rockPosition.y < heightAtX(sea, rockPosition.x)) {
+	} else if (rockPosition.y < sea.heightAtX(rockPosition.x)) {
 		// TODO: Find nearest wave and maybe distructively interfere with it?
-	} else if (rockNextFramePosition.y < sea.level) {
+	} else if (rockNextFramePosition.y < seaUpperBound.y) {
 		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x), 1);
 		rock.active = 0;
 	}
@@ -168,7 +177,7 @@ inline void collideRed(Rock& rock, Sea& sea) {
 
 inline void collideGreen(Rock& rock, Sea& sea) {
 	assert(rock.type.type == RockType::GREEN);
-	float seaHeight = heightAtX(sea, rock.shape.position.x);
+	float seaHeight = sea.heightAtX(rock.shape.position.x);
 	Vector2 lower = {rock.shape.position.x, rock.shape.position.y - rock.shape.radius};
 	Vector2 upper = {rock.shape.position.x, rock.shape.position.y + rock.shape.radius};
 	if ( seaHeight < lower.y) {
@@ -183,13 +192,15 @@ inline void collideGreen(Rock& rock, Sea& sea) {
 		displacedWater = seaHeight - lower.y;
 	}
 	rock.velocity += VECTOR2_UP * displacedWater * GRAVITATIONAL_CONSTANT * FIXED_TIMESTEP;
-	rock.velocity += velocityAtX(sea, rock.shape.position.x) * FIXED_TIMESTEP;
+	rock.velocity += sea.velocityAtX(rock.shape.position.x) * FIXED_TIMESTEP;
 	auto drag = dragForce(rock.velocity, 600.f, mass(rock));
 	// auto drag = dragForce(rock.velocity, 600.f, area(AABB(rock))*SHIP_AREA_MASS_RATIO);
 	rock.velocity += drag * FIXED_TIMESTEP;
 
 	if(rock.state.type != RockState::FLOATING) {
-		rock.state = {RockState::FLOATING, {{0.f}}};
+		rock.state = {};
+		rock.state.type = RockState::FLOATING;
+		rock.state.floating = { 0.f, sea.id};
 	}
 	if (sea.waves.size() < 0) { return; } // nothing to do for no waves
 	WaveIt closestWaveIt = findWaveAtPosition(sea, rock.shape.position);
@@ -210,12 +221,13 @@ inline void collideBlue(Rock& rock, Sea& sea) {
 	assert(rock.type.type == RockType::BLUE);
 	Vector2 rockPosition = rock.shape.position;
 	Vector2 rockNextFramePosition = rock.shape.position + rock.velocity * FIXED_TIMESTEP;
-	if(rockPosition.y < sea.level) {
+	Vector2 seaUpperBound = upperBound(sea.shape);
+	if(rockPosition.y < seaUpperBound.y) {
 		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x), -1);
 		rock.active = 0;
-	} else if (rockPosition.y < heightAtX(sea, rockPosition.x)) {
+	} else if (rockPosition.y < sea.heightAtX(rockPosition.x)) {
 		// TODO: Find nearest wave and maybe distructively interfere with it?
-	} else if (rockNextFramePosition.y < sea.level) {
+	} else if (rockNextFramePosition.y < seaUpperBound.y) {
 		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x), -1);
 		rock.active = 0;
 	}
@@ -262,7 +274,7 @@ void collide(Rock& rock, Ship& ship) {
 }
 
 void collide(Ship& ship, Sea& sea) {
-	float seaHeight = heightAtX(sea, ship.shape.position.x);
+	float seaHeight = sea.heightAtX(ship.shape.position.x);
 	Vector2 lower, upper;
 	boundingPoints(ship.shape, lower, upper);
 	if ( seaHeight < lower.y) {
@@ -274,7 +286,7 @@ void collide(Ship& ship, Sea& sea) {
 		displacedWater = (seaHeight - lower.y);
 	}
 	ship.velocity += VECTOR2_UP * displacedWater * GRAVITATIONAL_CONSTANT * FIXED_TIMESTEP;
-	ship.velocity += velocityAtX(sea, ship.shape.position.x) * FIXED_TIMESTEP;
+	ship.velocity += sea.velocityAtX(ship.shape.position.x) * FIXED_TIMESTEP;
 	auto drag = dragForce(ship.velocity, 600.f, mass(ship) * SHIP_AREA_MASS_RATIO);
 	ship.velocity += drag * FIXED_TIMESTEP;
 
@@ -286,10 +298,12 @@ void collide(Ship& ship, Sea& sea) {
 	} // if there are no waves then do nothing
 	const Wave& wave = *closestWaveIt;
 	float distFromWave = std::abs(ship.shape.position.x - wave.position.x);
-	if (distFromWave < 0.1) {
+	if (distFromWave < 0.3) {
 		ship.state = {};
 		ship.state.type = ShipState::SURFING;
-		ship.state.surfing.wave_id = wave.id;
+		ship.state.surfing.waveId = wave.id;
+		ship.state.surfing.seaId = sea.id;
+		ship.state.surfing.waveDirection = wave.direction;
 	}
 }
 

@@ -15,12 +15,22 @@ if /i [%1] == [clean] (
 ) else if /i [%1] == [editor] (
 	pushd build\
 	call msbuild waves.sln /p:Configuration=Debug /t:editor
+	if ERRORLEVEL 1 (
+        @echo Build failed
+		popd
+        exit /b 1
+    )
 	popd
 	cp -r assets build\Debug\
 	call "build/Debug/editor.exe"
 ) else if /i [%1] == [game] (
 	pushd build\
 	call msbuild waves.sln /p:Configuration=Debug /t:game
+	if ERRORLEVEL 1 (
+        @echo Build failed
+		popd
+        exit /b 1
+    )
 	popd
 	cp -r assets build\Debug\
 	call "build/Debug/game.exe"

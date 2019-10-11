@@ -2,6 +2,7 @@
 
 #include "prelude.hpp"
 #include "maths.hpp"
+#include "typedefs.hpp"
 #include "shapes.hpp"
 
 struct ShipState {
@@ -11,7 +12,9 @@ struct ShipState {
 		Vector2 surfaceEnd;
 	};
 	struct SurfingState {
-		uint8_t wave_id;
+		uint8 waveId;
+		uint8 seaId;
+		int waveDirection = 0;
 	};
 
 	enum StateType : uint8_t {

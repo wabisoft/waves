@@ -51,8 +51,13 @@ inline void updateStandingShip(Stage& stage, float deltaTime) {
 
 inline void updateSurfingShip(Stage& stage, Ship& ship) {
 	// TODO: Keep the ship on the crest of the wave
-	Wave & wave = *findWave(stage.sea, ship.state.surfing.wave_id);
-	ship.velocity.x = wave.velocity.x;
+	Sea& sea = *findSea(stage, ship.state.surfing.seaId);
+	Wave & wave = *findWave(sea, ship.state.surfing.waveId);
+	if (wave.direction != ship.state.surfing.waveDirection) {
+		ship.state = {ShipState::FALLING, {}}; // If the wave has just reflected then stop surfing
+	} else {
+		ship.velocity.x = wave.velocity.x * wave.direction; // otherwise just ride the wave man
+	}
 	updateFallingShip(ship); // do all the same things you do for a falling ship
 	// ship.shape.position.x = wave.position.x;
 }

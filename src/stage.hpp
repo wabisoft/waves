@@ -52,12 +52,12 @@ struct Win {
 };
 
 struct Stage{
-	Sea sea;
+	// Sea sea;
 	Ship ship;
+	std::vector<Sea> seas;
 	std::vector<Rock> rocks;
 	std::vector<Platform> platforms;
-
-	// TODO: move this ship to a struct just for collision stuff maybe? gonna make addressing it longer though
+	// TODO: move this shit to a struct just for collision stuff maybe? gonna make addressing it longer though
 	std::vector<AABB> aabbs;
 	std::vector<uint8> xAxisOrder;
 	std::vector<uint8> yAxisOrder;

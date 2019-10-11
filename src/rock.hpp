@@ -20,6 +20,7 @@ struct RockState {
 	};
 	struct FloatingState {
 		float timeFloating = 0.f;
+		uint8 seaId = 0;
 	};
 
 	enum StateType : uint8 {

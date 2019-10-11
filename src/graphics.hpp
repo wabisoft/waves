@@ -20,7 +20,7 @@
 extern sf::Font font;
 void initGraphics();
 void drawStage(sf::RenderTarget&, Stage&, bool=false);
-inline void drawSea(sf::RenderTarget&, const Sea&);
+inline void drawSeas(sf::RenderTarget&, const Stage&);
 inline void drawShip(sf::RenderTarget&, const Ship&);
 inline void drawRocks(sf::RenderTarget&, const Stage&);
 inline void drawPlatforms(sf::RenderTarget&, const Stage&);

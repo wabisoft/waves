@@ -9,6 +9,8 @@
 
 // Serialize
 std::string serialize(const Stage& stage);
+std::string serialize(const std::vector<Sea> seas);
+std::string serialize(const std::vector<Wave> waves);
 std::string serialize(const std::vector<Platform> platforms);
 std::string serialize(const wabi::Rectangle& rectangle);
 std::string serialize(const Vector2 v);

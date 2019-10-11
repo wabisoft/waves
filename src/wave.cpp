@@ -10,9 +10,8 @@
 #include "wave.hpp"
 
 
-void updateWaves(Stage& stage){
+void updateWaves(Stage& stage, Sea& sea){
 	//Update the wave for this time step
-	Sea& sea = stage.sea;
 	for(WaveIt waveIt = sea.waves.begin(); waveIt != sea.waves.end(); ++waveIt) {
 		Wave& wave = *waveIt;
 		wave.time += FIXED_TIMESTEP;
@@ -24,12 +23,15 @@ void updateWaves(Stage& stage){
 		else if ((wave.decay <= 0.f && !wave.grow) || wave.minimumX() > STAGE_WIDTH)
 		{
 			// delete this wave
-			if (stage.ship.state.type == ShipState::SURFING && stage.ship.state.surfing.wave_id == wave.id) {
+			if (stage.ship.state.type == ShipState::SURFING && stage.ship.state.surfing.waveId == wave.id) {
 				stage.ship.state = {ShipState::FALLING, {}};
 				stage.ship.velocity = wave.velocity;
 			}
 			waveIt = deleteWave(sea, waveIt);
 			if(waveIt == sea.waves.end()) break; // don't advance past the end
+		}
+		if(wave.position.x >= upperBound(sea.shape).x || wave.position.x <= lowerBound(sea.shape).x) {
+			wave.direction = -wave.direction;
 		}
 		if (wave.decay <= 1 && wave.grow){
 			wave.decay += FIXED_TIMESTEP * WAVE_POSITIVE_DECAY_MULTIPLIER;
@@ -37,10 +39,10 @@ void updateWaves(Stage& stage){
 			wave.decay += FIXED_TIMESTEP * WAVE_NEGATIVE_DECAY_MULTIPLIER;
 		}
 		// Update velocity with timestep
-		wave.velocity[0] += FIXED_TIMESTEP * 0.05f * wave.amplitude * wave.direction;
+		wave.velocity[0] += FIXED_TIMESTEP * 0.05f * wave.amplitude;
 		wave.velocity += dragForce(wave.velocity, 1.225f, .4f);
 		// Update position with velocity;
-		wave.position += wave.velocity;
+		wave.position += wave.velocity * wave.direction;
 	}
 }
 

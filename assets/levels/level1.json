@@ -1,5 +1,15 @@
 {
-  "sea_level": 13.3,
+  "seas": [
+      {
+        "width": 130,
+        "height": 13.3,
+        "position": [
+          64,
+          6.65
+        ],
+		"rotation": 0
+      }
+  ],
   "platforms": [
     {
       "width": 35,
@@ -46,3 +56,4 @@
     }
   }
 }
+
