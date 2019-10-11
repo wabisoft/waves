@@ -298,11 +298,12 @@ void collide(Ship& ship, Sea& sea) {
 	} // if there are no waves then do nothing
 	const Wave& wave = *closestWaveIt;
 	float distFromWave = std::abs(ship.shape.position.x - wave.position.x);
-	if (distFromWave < 0.1) {
+	if (distFromWave < 0.3) {
 		ship.state = {};
 		ship.state.type = ShipState::SURFING;
 		ship.state.surfing.waveId = wave.id;
 		ship.state.surfing.seaId = sea.id;
+		ship.state.surfing.waveDirection = wave.direction;
 	}
 }
 

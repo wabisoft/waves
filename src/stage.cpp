@@ -155,6 +155,10 @@ std::vector<Vector2> pullParabola(Stage& stage) {
 	parabola.push_back(wouldBePosition);
 	for (int i = 1; i < size; ++i){
 		f += GRAVITY * step;
+		f += dragForce(f, 1.225f, mass(rock)) * step;
+		if (squaredMagnitude(f) > SQUARED_TERMINAL_VELOCITY) {
+			f = normalized(f) * TERMINAL_VELOCITY;
+		}
 		wouldBePosition += f * stepsize;
 		parabola.push_back(wouldBePosition);
 		if(outOfBounds(wouldBePosition)) { break; }
