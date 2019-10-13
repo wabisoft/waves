@@ -4,6 +4,7 @@
 #include <string>
 
 #include "clock.hpp"
+#include "json.hpp"
 #include "prelude.hpp"
 #include "stage.hpp"
 #include "SFML/Window.hpp"
@@ -11,33 +12,25 @@
 
 
 // TODO: Write an editor
+struct ErrorPopupState {
+	std::string popupId;
+	std::string message;
+	bool opened = false;
+};
+
 
 struct Editor {
 
-	enum Component {
-		NONE = -1,
-		ROCK = 0,
-		SHIP = 1,
-		PLATFORM,
-		ROCK_SPAWN,
-		WIN_REGION,
-		SIZE
-	};
-
-	enum Mode {
-		DEFAULT,
-	};
-
 	std::string filename;
 	Stage stage;
-	Component currentComponent = SHIP;
-	Mode mode = DEFAULT;
+	std::vector<ErrorPopupState> errorPopups;
 };
 
 void initEditor(Editor& editor);
-void handleEvents(Editor& editor, sf::Window& window);
+// void handleEvents(Editor& editor, sf::RenderWindow& window);
+void processEvent(Editor& editor, const sf::Event& event, const sf::RenderWindow& window);
 void keyEvent(Editor&, sf::Event);
-void startMouseInput(Editor&, sf::Event::MouseButtonEvent);
-void continueMouseInput(Editor&, sf::Event::MouseMoveEvent);
-void endMouseInput(Editor&, sf::Event::MouseButtonEvent);
+void startMouseInput(Editor&, Vector2);
+void continueMouseInput(Editor&, Vector2);
+void endMouseInput(Editor&, Vector2);
 

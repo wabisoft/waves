@@ -21,5 +21,7 @@ struct SerializeError {
 };
 
 
-bool loadStageFromString(std::string, Stage&, SerializeError&);
-bool loadStageFromFile(std::string, Stage&, SerializeError&);
+bool loadStageFromString(std::string data, Stage&, SerializeError&);
+bool loadStageFromFile(std::string filename, Stage&, SerializeError&);
+std::string dumpStageToString(Stage&, SerializeError&);
+bool dumpStageToFile(std::string filename, Stage& stage, SerializeError&);

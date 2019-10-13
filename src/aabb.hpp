@@ -35,15 +35,15 @@ inline bool operator==(const AABB& a, const AABB& b) {
 		return a.id == b.id && a.type == b.type; // note that we do not compare vectors because floats are all shitty
 }
 
-struct AABBPair{
-	enum Axis : uint8 {
-		NONE = 0,
-		X_AXIS = 1 << 0,
-		Y_AXIS = 1 << 1,
-		BOTH = 3
-	};
+enum Axis : uint8 {
+	NO_AXIS = 0,
+	X_AXIS = 1 << 0,
+	Y_AXIS = 1 << 1,
+	BOTH_AXES = 3
+};
 
-	Axis overlap = NONE;
+struct AABBPair{
+	Axis overlap = NO_AXIS;
 	AABB a;
 	AABB b;
 
@@ -56,7 +56,7 @@ struct AABBPair{
 };
 
 inline bool collides(AABBPair pair) {
-	return pair.overlap == (AABBPair::X_AXIS | AABBPair::Y_AXIS);
+	return pair.overlap == (X_AXIS | Y_AXIS);
 }
 
 inline bool operator==(const AABBPair& a, const AABBPair& b){

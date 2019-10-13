@@ -1,4 +1,5 @@
 #include <iostream>
+#include <limits>
 #include "collision.hpp"
 #include "constants.hpp"
 #include "maths.hpp"
@@ -47,6 +48,90 @@ Entity makeSelectionAtPosition(Stage& stage, Vector2 position) {
 		stage.selection.entityPosition = rockIt->shape.position;
 	}
 	return stage.selection.entity;
+}
+
+Entity findEntityAtPosition(Stage& stage, Vector2 position) {
+	// a list of pairs of {Axis of overlap, entity}
+	struct Candidate{
+		Axis axis = NO_AXIS;
+		Entity entity;
+	};
+	std::vector<Candidate> candidates;
+	for(int a = 0; a < 2; ++a) {
+		std::vector<uint8> axisOrder = stage.xAxisOrder;
+		Axis axis = X_AXIS;
+		if(a>0) {
+			axisOrder = stage.yAxisOrder;
+			axis = Y_AXIS;
+		}
+		for(int i = 0; i < axisOrder.size(); ++i) {
+			AABB aabb = *findAABB(stage, axisOrder[i]);
+			if(aabb.lower[a] <= position[a] && aabb.upper[a] >= position[a]) {
+				auto pred = [&aabb](Candidate c) -> bool {
+					return c.entity.id == aabb.id;
+				};
+				auto search = std::find_if(candidates.begin(), candidates.end(), pred);
+				if(search != candidates.end()) {
+					search->axis = (Axis)(search->axis | axis);
+				} else if (a<1) { // if we are on the second axis and the candidate doesn't exist then we can skip
+					candidates.push_back({axis, Entity{aabb.id, aabb.type}});
+				}
+			} else if (aabb.lower[a] >= position[a]) {
+				// since the axis list is sorted from lowest to highest then
+				// we can say that everything after this is not overlaping
+				break;
+			}
+		}
+	}
+	struct Chosen {
+		float squaredDistance;
+		Entity entity;
+	};
+	Chosen chosen = {std::numeric_limits<float>::infinity(), {0, NONE}};
+	for(Candidate & candidate : candidates) {
+		switch(candidate.entity.type) {
+			case NONE:
+				assert(false); // this should never happen
+				break;
+			case SEA:
+				{
+					Sea sea = *findSea(stage, candidate.entity.id);
+					float squaredDistance = squaredMagnitude(sea.shape.position - position);
+					if(chosen.squaredDistance > squaredDistance) {
+						chosen = {squaredDistance, {sea.id, SEA}};
+					}
+				}
+				break;
+			case PLATFORM:
+				{
+					Platform platform = *findPlatform(stage, candidate.entity.id);
+					float squaredDistance = squaredMagnitude(platform.shape.position - position);
+					if(chosen.squaredDistance > squaredDistance) {
+						chosen = {squaredDistance, {platform.id, PLATFORM}};
+					}
+				}
+				break;
+			case ROCK:
+				{
+					Rock rock = *findRock(stage, candidate.entity.id);
+					float squaredDistance = squaredMagnitude(rock.shape.position - position);
+					if(chosen.squaredDistance > squaredDistance) {
+						chosen = {squaredDistance, {rock.id, ROCK}};
+					}
+				}
+				break;
+			case SHIP:
+				{
+					Ship ship = stage.ship;
+					float squaredDistance = squaredMagnitude(ship.shape.position - position);
+					if(chosen.squaredDistance > squaredDistance) {
+						chosen = {squaredDistance, {ship.id, SHIP}};
+					}
+				}
+				break;
+		}
+	}
+	return chosen.entity;
 }
 
 void clearSelection(Stage& stage) {

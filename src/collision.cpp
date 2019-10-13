@@ -46,15 +46,15 @@ void resolveCollisions(Stage& stage) {
 	assert(stage.xAxisOrder.size() == stage.yAxisOrder.size() && stage.xAxisOrder.size() == stage.aabbs.size());
 	for (int a = 0; a< 2; ++a) {
 		// do the x axis on the fist pass
-		AABBPair::Axis axis = AABBPair::X_AXIS;
+		Axis axis = X_AXIS;
 		std::vector<uint8> axisOrder = stage.xAxisOrder;
 		auto check = [&axis](Vector2 point) -> float {
-			return (axis == AABBPair::X_AXIS) ? point.x : point.y;
+			return (axis == X_AXIS) ? point.x : point.y;
 		};
 
 		// do the y axis on the second pass
 		if (a > 0) {
-			axis = AABBPair::Y_AXIS;
+			axis = Y_AXIS;
 			axisOrder = stage.yAxisOrder;
 		}
 		// start with the first aabb upper as the max
@@ -71,7 +71,7 @@ void resolveCollisions(Stage& stage) {
 				// if (check(previous.upper) > check(current.lower)) {
 					// if the pairs list is empty
 					if (pairs.empty()) {
-						assert(axis == AABBPair::X_AXIS); // this should only happen on the x-axis because of the short circuit at the bottom of the outermost loop
+						assert(axis == X_AXIS); // this should only happen on the x-axis because of the short circuit at the bottom of the outermost loop
 						pairs.push_back({axis, current, previous});
 					} else {
 						// otherwise
@@ -83,7 +83,8 @@ void resolveCollisions(Stage& stage) {
 						// if you find it then set the axis
 						if (search != pairs.end()) {
 							search->setAxis(axis);
-						} else {
+						} else if (a<1){ // if this is second axis and we didn't have an overlap already then
+							// we don't there's no potential collision
 							// otherwise add the pair to the list
 							pairs.push_back({axis, current, previous});
 						}

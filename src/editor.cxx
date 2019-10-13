@@ -12,46 +12,107 @@
 #include "serialize.hpp"
 #include "win32_file.hpp"
 
-inline void drawEditorGui(sf::RenderWindow& window, Editor& editor) {
-	// ImGui::SetNextWindowPos({3, 3});
+
+inline void levelOpen(sf::RenderWindow& window, Editor& editor) {
+	std::string filename = "";
+	if(selectAFileForOpen(window, filename, "Select a level to edit", "JSON Files\0*.json\0\0")) {
+		Stage s = {};
+		editor.stage = {};
+		SerializeError e;
+		if(!loadStageFromFile(filename, s, e)) {
+			ErrorPopupState es = {"load-failed", "Failed to load file: " + filename + ".\nError: " + e.what };
+			editor.errorPopups.push_back(es);
+			std::cout << es.message << std::endl;
+			return;
+		} else {
+			editor.filename = filename;
+			editor.stage = s;
+		}
+	} else {
+		// I don't, this is probably fine
+	}
+}
+
+inline void validateSaveToFile(sf::RenderWindow& window, Editor& editor) {
+	SerializeError e;
+	if (! dumpStageToFile(editor.filename, editor.stage, e)) {
+		ErrorPopupState es = {"dump-failed", "Failed to save stage to file.\nError: " + e.what };
+		editor.errorPopups.push_back(es);
+		std::cout << es.message << std::endl;
+		return;
+	}
+}
+
+inline void levelSave(sf::RenderWindow& window, Editor& editor) {
+	if(editor.filename.empty()) {
+		if(selectAFileForSave(window, editor.filename, "Select a file to save level", "JSON Files\0*.json\0\0")) {
+			validateSaveToFile(window, editor);
+		}
+	} else {
+		validateSaveToFile(window, editor);
+	}
+
+}
+
+inline void levelSaveAs(sf::RenderWindow& window, Editor& editor) {
+   	SerializeError e;
+	std::string filename;
+	if(selectAFileForSave(window, filename, "Select a level to edit", "JSON Files\0*.json\0\0")) {
+		editor.filename = filename;
+		validateSaveToFile(window, editor);
+	}
+
+}
+
+inline void editorGuiMenuBar(sf::RenderWindow& window, Editor& editor) {
 	if(ImGui::BeginMainMenuBar()) {
 		if (ImGui::BeginMenu("File")){
 			if(ImGui::MenuItem("Open", "Ctrl+O")) {
-			 // TODO open things I guess
-			 	if(selectAFileForOpen(window, editor.filename, "Select a level to edit", "JSON Files\0*.json\0\0")) {
-					editor.stage = {};
-					SerializeError e;
-					if(loadStageFromFile(editor.filename, editor.stage, e)) {
-						if(ImGui::BeginPopup("Load Failed")) {
-							ImGui::Text("Failed to load file: %s (%s)", editor.filename.c_str(), e.what.c_str());
-							ImGui::EndPopup();
-						}
-					}
-				} else {
-					if(ImGui::BeginPopup("Open Failed")) {
-						ImGui::Text("Failed to open file: %s", editor.filename.c_str());
-						ImGui::EndPopup();
-					}
-				}
+				levelOpen(window, editor);
     		}
-
 			if(ImGui::MenuItem("Save", "Ctrl+S")) {
-				// TODO: Serialize stage and write to filename in editor.filename
+				levelSave(window, editor);
 			}
 			if(ImGui::MenuItem("Save As...", "Ctrl+Shift+S")) {
-				// TODO: Select file, Serialize stage and write to filename in editor.filename
-			 	if(selectAFileForSave(window, editor.filename, "Select a level to edit", "JSON Files\0*.json\0\0")) {
-				}
+				levelSaveAs(window, editor);
 			}
 			ImGui::EndMenu();
 		}
 		ImGui::EndMainMenuBar();
 	}
-    ImGui::Begin("Editor");
+}
+
+inline void editorGuiErrorPopups(sf::RenderWindow& window, Editor& editor) {
+	for(std::vector<ErrorPopupState>::iterator it = editor.errorPopups.begin(); it != editor.errorPopups.end(); ++it) {
+		if(!ImGui::IsPopupOpen(it->popupId.c_str()) && ! it->opened){
+			ImGui::OpenPopup(it->popupId.c_str());
+			it->opened = true;
+		}
+		if(ImGui::BeginPopup(it->popupId.c_str())) {
+			ImGui::TextColored({255, 0, 0, 255}, it->message.c_str());
+			ImGui::EndPopup();
+		} else {
+			it = editor.errorPopups.erase(it);
+			if(it == editor.errorPopups.end()) {break;}
+		}
+	}
+
+}
+
+inline void editorGuiStage(sf::RenderWindow& window, Editor& editor) {
 	ImGui::BeginChild("Stage");
-	ImGui::InputFloat("SeaLevel", &editor.stage.sea.level);
+
     ImGui::EndChild();
-    ImGui::End();
+}
+
+inline void drawEditorGui(sf::RenderWindow& window, Editor& editor) {
+	// ImGui::SetNextWindowPos({3, 3});
+	editorGuiMenuBar(window, editor);
+	editorGuiErrorPopups(window, editor);
+	// editorGuiStage(window, editor);
+	// ImGui::Begin("Editor");
+	// ImGui::InputFloat("SeaLevel", &editor.stage.sea.level);
+    // ImGui::End();
     ImGui::SFML::Render(window);
 }
 
@@ -83,7 +144,7 @@ int main()
         sf::Event event;
         while (window.pollEvent(event)) {
             ImGui::SFML::ProcessEvent(event);
-
+			processEvent(editor, event, window);
             switch(event.type) {
 				case sf::Event::Closed:
                 	window.close();

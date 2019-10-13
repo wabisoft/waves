@@ -14,8 +14,11 @@
 
 struct Selection {
 	enum State : uint8 {
-		SELECT		= 1 << 0,
-		PULL 		= 1 << 2,
+		SELECT,
+		PULL,
+#ifdef _DEBUG
+		REPOSITION,
+#endif
 	};
 	State state = SELECT;
 	Entity entity;
@@ -72,6 +75,7 @@ struct Stage{
 
 void update(Stage& stage, float deltaTime);
 Entity makeSelectionAtPosition(Stage& stage, Vector2 position);
+Entity findEntityAtPosition(Stage& stage, Vector2 position);
 void clearSelection(Stage& stage);
 void processStartInput(Stage& stage, Vector2 position);
 void processContinuingInput(Stage& stage, Vector2 position);

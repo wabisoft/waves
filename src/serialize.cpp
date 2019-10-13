@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdio>
 #include <fstream>
 #include "serialize.hpp"
 #include "json.hpp"
@@ -27,6 +28,7 @@ std::string serialize(const std::vector<Sea> seas) {
 		stream << serialize(seas[i].shape);
 		if ( i < seas.size() - 1) { stream << ","; }
 	}
+	stream << "]";
 	return stream.str();
 }
 std::string serialize(const std::vector<Wave> waves) {
@@ -154,4 +156,17 @@ bool loadStageFromFile(std::string filename, Stage& stage, SerializeError& err) 
 	}
 	ifs.close();
 	return loadStageFromString(data, stage, err);
+}
+
+std::string dumpStageToString(Stage& stage, SerializeError & err) {
+	return serialize(stage);
+}
+
+bool dumpStageToFile(std::string filename, Stage& stage, SerializeError& err) {
+	FILE* pFile;
+	pFile = fopen(filename.c_str(), "w");
+	if (pFile == nullptr){ err.what = "Could not open file: " + filename; return false; }
+	fputs(serialize(stage).c_str(), pFile);
+	fclose(pFile);
+	return true;
 }
