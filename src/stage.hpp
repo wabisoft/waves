@@ -16,16 +16,31 @@ struct Selection {
 	enum State : uint8 {
 		SELECT,
 		PULL,
-#ifdef _DEBUG
-		REPOSITION,
-#endif
 	};
+
+	struct PullState {
+		Vector2 pullPosition = VECTOR2_ZERO;
+	};
+	struct RepositionState {
+		Vector2 repositionPosition = VECTOR2_ZERO;
+	};
+
 	State state = SELECT;
 	Entity entity;
 	Vector2 entityPosition;
-	Vector2 pullPosition;
+
+	PullState pull;
+	RepositionState reposition;
+
 	bool active = false;
 };
+
+inline const char * str(Selection::State s) {
+	const char * names[] = {
+		"SELECT", "PULL"
+	};
+	return names[s];
+}
 
 struct StageState {
 	struct Paused {
@@ -37,11 +52,13 @@ struct StageState {
 	struct Finished {
 		bool win = false;
 	};
+
 	enum StateType : uint8 {
-		PAUSED = 1 << 0,
-		RUNNING = 1 << 1,
-		FINISHED = 1 << 2,
+		PAUSED,
+		RUNNING,
+		FINISHED,
 	};
+
 	StateType type = RUNNING;
 	Paused paused;
 	Running running;
@@ -75,7 +92,6 @@ struct Stage{
 
 void update(Stage& stage, float deltaTime);
 Entity makeSelectionAtPosition(Stage& stage, Vector2 position);
-Entity findEntityAtPosition(Stage& stage, Vector2 position);
 void clearSelection(Stage& stage);
 void processStartInput(Stage& stage, Vector2 position);
 void processContinuingInput(Stage& stage, Vector2 position);

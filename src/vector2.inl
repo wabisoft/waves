@@ -1,4 +1,4 @@
-// maths.hpp
+// vector2.hpp
 // Leave that comment up there, ycm uses it
 
 /*****************
@@ -13,7 +13,6 @@ inline Vector2 operator-(const Vector2& v) {
 // Vector/Vector addition and subtraction
 inline Vector2 operator+(const Vector2& b, const Vector2& a) {
 	return {a.x + b.x, a.y + b.y};
-
 }
 
 inline Vector2 operator-(const Vector2& a, const Vector2& b) {
@@ -28,7 +27,7 @@ inline Vector2& operator+=(Vector2& a, const Vector2& b) {
 
 inline Vector2& operator-=(Vector2& a, const Vector2& b) {
 	a.x -= b.x;
-	a.x -= b.y;
+	a.y -= b.y;
 	return a;
 }
 

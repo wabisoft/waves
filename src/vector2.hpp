@@ -4,7 +4,7 @@
  * Vectors *
  ***********/
 
-struct Vector2{
+struct Vector2 {
 	float& operator[](int i) { return (&x)[i]; } // read
 	const float& operator[](int i) const { return (&x)[i]; }; // write
 	float x = 0.f, y = 0.f;

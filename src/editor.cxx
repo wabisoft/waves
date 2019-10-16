@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <cstdio>
+#include <cstdlib>
 
 #include "imgui.h"
 #include "imgui-SFML.h"
@@ -13,68 +14,17 @@
 #include "win32_file.hpp"
 
 
-inline void levelOpen(sf::RenderWindow& window, Editor& editor) {
-	std::string filename = "";
-	if(selectAFileForOpen(window, filename, "Select a level to edit", "JSON Files\0*.json\0\0")) {
-		Stage s = {};
-		editor.stage = {};
-		SerializeError e;
-		if(!loadStageFromFile(filename, s, e)) {
-			ErrorPopupState es = {"load-failed", "Failed to load file: " + filename + ".\nError: " + e.what };
-			editor.errorPopups.push_back(es);
-			std::cout << es.message << std::endl;
-			return;
-		} else {
-			editor.filename = filename;
-			editor.stage = s;
-		}
-	} else {
-		// I don't, this is probably fine
-	}
-}
-
-inline void validateSaveToFile(sf::RenderWindow& window, Editor& editor) {
-	SerializeError e;
-	if (! dumpStageToFile(editor.filename, editor.stage, e)) {
-		ErrorPopupState es = {"dump-failed", "Failed to save stage to file.\nError: " + e.what };
-		editor.errorPopups.push_back(es);
-		std::cout << es.message << std::endl;
-		return;
-	}
-}
-
-inline void levelSave(sf::RenderWindow& window, Editor& editor) {
-	if(editor.filename.empty()) {
-		if(selectAFileForSave(window, editor.filename, "Select a file to save level", "JSON Files\0*.json\0\0")) {
-			validateSaveToFile(window, editor);
-		}
-	} else {
-		validateSaveToFile(window, editor);
-	}
-
-}
-
-inline void levelSaveAs(sf::RenderWindow& window, Editor& editor) {
-   	SerializeError e;
-	std::string filename;
-	if(selectAFileForSave(window, filename, "Select a level to edit", "JSON Files\0*.json\0\0")) {
-		editor.filename = filename;
-		validateSaveToFile(window, editor);
-	}
-
-}
-
-inline void editorGuiMenuBar(sf::RenderWindow& window, Editor& editor) {
+inline void editorGuiMenuBar(sf::WindowHandle windowHandle, Editor& editor) {
 	if(ImGui::BeginMainMenuBar()) {
 		if (ImGui::BeginMenu("File")){
 			if(ImGui::MenuItem("Open", "Ctrl+O")) {
-				levelOpen(window, editor);
+				levelOpen(windowHandle, editor);
     		}
 			if(ImGui::MenuItem("Save", "Ctrl+S")) {
-				levelSave(window, editor);
+				levelSave(windowHandle, editor);
 			}
 			if(ImGui::MenuItem("Save As...", "Ctrl+Shift+S")) {
-				levelSaveAs(window, editor);
+				levelSaveAs(windowHandle, editor);
 			}
 			ImGui::EndMenu();
 		}
@@ -82,7 +32,7 @@ inline void editorGuiMenuBar(sf::RenderWindow& window, Editor& editor) {
 	}
 }
 
-inline void editorGuiErrorPopups(sf::RenderWindow& window, Editor& editor) {
+inline void editorGuiErrorPopups(Editor& editor) {
 	for(std::vector<ErrorPopupState>::iterator it = editor.errorPopups.begin(); it != editor.errorPopups.end(); ++it) {
 		if(!ImGui::IsPopupOpen(it->popupId.c_str()) && ! it->opened){
 			ImGui::OpenPopup(it->popupId.c_str());
@@ -96,23 +46,27 @@ inline void editorGuiErrorPopups(sf::RenderWindow& window, Editor& editor) {
 			if(it == editor.errorPopups.end()) {break;}
 		}
 	}
-
 }
 
-inline void editorGuiStage(sf::RenderWindow& window, Editor& editor) {
-	ImGui::BeginChild("Stage");
-
-    ImGui::EndChild();
+inline void editorGuiStage(Editor& editor) {
+	ImGui::Begin("Selection");
+	if(editor.stage.selection.active) {
+		char buff[3];
+		ImGui::Text("ID: %s", itoa(editor.stage.selection.entity.id, buff, 10));
+		ImGui::Text("Type: %s", str(editor.stage.selection.entity.type));
+	}
+    ImGui::End();
 }
 
 inline void drawEditorGui(sf::RenderWindow& window, Editor& editor) {
 	// ImGui::SetNextWindowPos({3, 3});
-	editorGuiMenuBar(window, editor);
-	editorGuiErrorPopups(window, editor);
-	// editorGuiStage(window, editor);
-	// ImGui::Begin("Editor");
+	editorGuiMenuBar(window.getSystemHandle(), editor);
+	editorGuiErrorPopups(editor);
+	editorGuiStage(editor);
+	ImGui::Begin("Editor");
+	ImGui::Text("Selection State: %s", str(editor.stage.selection.state));
 	// ImGui::InputFloat("SeaLevel", &editor.stage.sea.level);
-    // ImGui::End();
+    ImGui::End();
     ImGui::SFML::Render(window);
 }
 
@@ -135,40 +89,44 @@ int main()
 	ImGuiIO& io = ImGui::GetIO();
 	ImFont* pFont = io.Fonts->AddFontFromFileTTF((ExePath() + "/assets/fonts/IBMPlexMono-Regular.ttf").c_str(), 15.f);
 	ImGui::SFML::UpdateFontTexture();
-
 	Clock drawClock;
+	EventManager eventManager;
 	Editor editor;
-	editor.stage.state.type = StageState::RUNNING;
+	eventManager.subscribe(editor, Event::Closed);
+	eventManager.subscribe(editor, Event::MouseButtonPressed);
+	eventManager.subscribe(editor, Event::MouseButtonReleased);
+	eventManager.subscribe(editor, Event::MouseMoved);
     sf::Clock deltaClock;
+	levelOpen(editor, "D:/code/wabisoft/waves/assets/levels/level1.json");
+
     while (window.isOpen()) {
         sf::Event event;
-        while (window.pollEvent(event)) {
-            ImGui::SFML::ProcessEvent(event);
-			processEvent(editor, event, window);
-            switch(event.type) {
-				case sf::Event::Closed:
-                	window.close();
-					break;
-				case sf::Event::Resized:
-					{
-						auto view = window.getView();
-						view.setCenter({event.size.width/2.f, event.size.height/2.f});
-						view.setSize({(float)event.size.width, (float)event.size.height});
-						window.setView(view);
-					}
-					break;
-				default: break;
-            }
-        }
+		eventManager.dispatchEvents(reinterpret_cast<sf::Window&>(window));
+        // while (window.pollEvent(event)) {
+        //     // ImGui::SFML::ProcessEvent(event);
+		// 	// processEvent(editor, event, window);
+        //     switch(event.type) {
+		// 		case sf::Event::Closed:
+        //         	window.close();
+		// 			break;
+		// 		case sf::Event::Resized:
+		// 			{
+		// 				auto view = window.getView();
+		// 				view.setCenter({event.size.width/2.f, event.size.height/2.f});
+		// 				view.setSize({(float)event.size.width, (float)event.size.height});
+		// 				window.setView(view);
+		// 			}
+		// 			break;
+		// 		default: break;
+        //     }
+        // }
 
         ImGui::SFML::Update(window, deltaClock.restart());
-
         window.clear();
 		drawStage(window, editor.stage, true);
 		drawEditorGui(window, editor);
 		window.display();
     }
-
     ImGui::SFML::Shutdown();
 	return 0;
 }

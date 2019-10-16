@@ -12,6 +12,11 @@ struct Circle {
 	float radius = 0.f;
 };
 
+inline bool pointInsideCircle(Vector2 point, Circle& circle) {
+	Vector2 relpos = point - circle.position;
+	return magnitude(relpos) <= circle.radius;
+}
+
 // NOTE: Polygon vertices in the array in order from top left to topleft clockwise
 // example:
 //      index 0					index 1

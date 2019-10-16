@@ -28,16 +28,16 @@ void initGraphics() {
 
 }
 
-void drawStage(sf::RenderTarget& target, Stage& stage,  bool showGrid) {
+void drawStage(sf::RenderWindow& target, Stage& stage,  bool showGrid) {
 	target.clear(sf::Color::Black);
 	if (showGrid ) {
 		drawGrid(target);
 	}
 	drawPlatforms(target, stage);
 	drawSeas(target, stage);
-	if(stage.selection.active && stage.selection.state == Selection::PULL && stage.selection.pullPosition != VECTOR2_ZERO) {
+	if(stage.selection.active && stage.selection.state == Selection::PULL && stage.selection.pull.pullPosition != VECTOR2_ZERO) {
 		Rock& rock = *findRock(stage, stage.selection.entity.id);
-		drawLine(target, rock.shape.position, stage.selection.pullPosition, sf::Color::Blue);
+		drawLine(target, rock.shape.position, stage.selection.pull.pullPosition, sf::Color::Blue);
 	}
 	drawRocks(target, stage);
 	drawShip(target, stage.ship);
@@ -49,15 +49,15 @@ void drawStage(sf::RenderTarget& target, Stage& stage,  bool showGrid) {
 	}
 	drawPolygon(target, stage.win.region, sf::Color(0, 204, 102));
 	drawPullParabola(target, stage);
-	// for (AABB aabb : stage.aabbs) {
-	// 	Vector2 diff = aabb.upper - aabb.lower;
-	// 	Vector2 pos = { aabb.lower.x + 0.5f * diff.x, aabb.lower.y + 0.5f * diff.y };
-	// 	drawPolygon(target, makeRectangle(pos, diff.x, diff.y), sf::Color::Yellow);
-	// }
+	for (AABB aabb : stage.aabbs) {
+		Vector2 diff = aabb.upper - aabb.lower;
+		Vector2 pos = { aabb.lower.x + 0.5f * diff.x, aabb.lower.y + 0.5f * diff.y };
+		drawPolygon(target, makeRectangle(pos, diff.x, diff.y), sf::Color::Yellow);
+	}
 }
 
 
-inline void drawSeas(sf::RenderTarget& target, const Stage& stage) {
+inline void drawSeas(sf::RenderWindow& target, const Stage& stage) {
 	for (const Sea& sea: stage.seas) {
 		std::vector<sf::Vertex> vertices;
 		float step = 1 / pixelsPerUnit(target).x;
@@ -69,26 +69,26 @@ inline void drawSeas(sf::RenderTarget& target, const Stage& stage) {
 		}
 		// drawPolygon(target, sea.shape, sf::Color::Yellow);
 		target.draw(&vertices[0], vertices.size(), sf::LineStrip);
-		// for(const Wave& wave : sea.waves) {
-		// 	float minx = wave.minimumX();
-		// 	float maxx = wave.maximumX();
-		// 	sf::CircleShape c;
-		// 	c.setFillColor(sf::Color::Red);
-		// 	c.setRadius(3);
-		// 	c.setPosition(game2ScreenPos(target, {minx, wave.position.y}));
-		// 	target.draw(c);
-		// 	c.setPosition(game2ScreenPos(target, {maxx, wave.position.y}));
-		// 	target.draw(c);
-		// }
+		for(const Wave& wave : sea.waves) {
+			float minx = wave.minimumX();
+			float maxx = wave.maximumX();
+			sf::CircleShape c;
+			c.setFillColor(sf::Color::Red);
+			c.setRadius(3);
+			c.setPosition(game2ScreenPos(target, {minx, wave.position.y}));
+			target.draw(c);
+			c.setPosition(game2ScreenPos(target, {maxx, wave.position.y}));
+			target.draw(c);
+		}
 	}
 }
 
-inline void drawShip(sf::RenderTarget& target, const Ship& ship) {
+inline void drawShip(sf::RenderWindow& target, const Ship& ship) {
 	drawPolygon(target, ship.shape, sf::Color::White);
 	drawId(target, ship.id, ship.shape.position);
 }
 
-inline void drawRocks(sf::RenderTarget& target, const Stage& stage) {
+inline void drawRocks(sf::RenderWindow& target, const Stage& stage) {
 	for(const Rock& rock : stage.rocks) {
 		sf::Color c;
 		switch(rock.type.type) {
@@ -101,14 +101,14 @@ inline void drawRocks(sf::RenderTarget& target, const Stage& stage) {
 	}
 }
 
-inline void drawPlatforms(sf::RenderTarget& target, const Stage& stage) {
+inline void drawPlatforms(sf::RenderWindow& target, const Stage& stage) {
 	for (const Platform& platform : stage.platforms) {
 		drawPolygon(target, platform.shape, sf::Color::Magenta);
 		drawId(target, platform.id, platform.shape.position);
 	}
 }
 
-inline void drawGrid(sf::RenderTarget& target) {
+inline void drawGrid(sf::RenderWindow& target) {
 	// sf::VertexArray vertices(sf::Lines, (int)STAGE_WIDTH*2 + (int)STAGE_HEIGHT*2);
 	std::vector<sf::Vertex> vertices;
 	vertices.reserve((int)STAGE_WIDTH*2 + (int)STAGE_HEIGHT*2);
@@ -124,26 +124,32 @@ inline void drawGrid(sf::RenderTarget& target) {
 	target.draw(&vertices[0], vertices.size(), sf::Lines);
 }
 
-inline void drawPullParabola(sf::RenderTarget& target, Stage& stage) {
-	switch(stage.selection.state) {
-		case Selection::SELECT: break;
-		case Selection::PULL:
-			{
-				std::vector<Vector2> parabola = pullParabola(stage);
-				std::vector<sf::Vertex> drawVertices;
-				drawVertices.reserve(parabola.size());
-				sf::Color c = {183, 183,183};
-				for (Vector2 worldPoint : parabola) {
-					drawVertices.push_back(sf::Vertex(game2ScreenPos(target, worldPoint), c));
-				}
-				target.draw(&drawVertices[0], drawVertices.size(), sf::LineStrip);
+inline void drawPullParabola(sf::RenderWindow& target, Stage& stage) {
+	switch (stage.state.type) {
+		case StageState::PAUSED: break;
+		case StageState::FINISHED:
+		case StageState::RUNNING:
+			switch(stage.selection.state) {
+				case Selection::SELECT: break;
+				case Selection::PULL:
+					{
+						std::vector<Vector2> parabola = pullParabola(stage);
+						std::vector<sf::Vertex> drawVertices;
+						drawVertices.reserve(parabola.size());
+						sf::Color c = {183, 183,183};
+						for (Vector2 worldPoint : parabola) {
+							drawVertices.push_back(sf::Vertex(game2ScreenPos(target, worldPoint), c));
+						}
+						target.draw(&drawVertices[0], drawVertices.size(), sf::LineStrip);
+					}
+					break;
 			}
 			break;
 	}
 }
 
 
-void drawInfoText(sf::RenderTarget& target, const Stage& stage, float drawDelta, float updateDelta, int loopsPerUpdate) {
+void drawInfoText(sf::RenderWindow& target, const Stage& stage, float drawDelta, float updateDelta, int loopsPerUpdate) {
 	std::stringstream infostream;
 	infostream << "Draw (Hz): 				" << 1/drawDelta << std::endl;
 	infostream << "Update (Hz): 			" << 1/updateDelta << std::endl;
@@ -167,7 +173,7 @@ void drawInfoText(sf::RenderTarget& target, const Stage& stage, float drawDelta,
 	drawText(target, infostream.str(), {3, 3}, 13);
 }
 
-inline void drawText(sf::RenderTarget& target, std::string text, sf::Vector2f position, int size, bool centered) {
+inline void drawText(sf::RenderWindow& target, std::string text, sf::Vector2f position, int size, bool centered) {
 	sf::Text sfText((sf::String)text, font, size);
 	sfText.setFillColor(sf::Color::White);
 	sfText.setPosition(position);
@@ -178,15 +184,15 @@ inline void drawText(sf::RenderTarget& target, std::string text, sf::Vector2f po
 	target.draw(sfText);
 }
 
-inline void drawId(sf::RenderTarget& target, int id, sf::Vector2f position) {
+inline void drawId(sf::RenderWindow& target, int id, sf::Vector2f position) {
 	drawText(target, std::to_string(id), position, 15, true);
 }
 
-inline void drawId(sf::RenderTarget& target, int id, Vector2 position) {
+inline void drawId(sf::RenderWindow& target, int id, Vector2 position) {
 	drawId(target, id, game2ScreenPos(target,position));
 }
 
-inline void drawCircle(sf::RenderTarget& target, const Circle& circle, sf::Color c, bool fill) {
+inline void drawCircle(sf::RenderWindow& target, const Circle& circle, sf::Color c, bool fill) {
 	sf::CircleShape shape;
 	Vector2 ppu = pixelsPerUnit(target);
 	// float radius = circle.radius * ppu;
@@ -207,7 +213,7 @@ inline void drawCircle(sf::RenderTarget& target, const Circle& circle, sf::Color
 }
 
 
-inline void drawLine(sf::RenderTarget& target, Vector2 a, Vector2 b, sf::Color c) {
+inline void drawLine(sf::RenderWindow& target, Vector2 a, Vector2 b, sf::Color c) {
 	sf::VertexArray sfVertices(sf::LineStrip, 2);
 	sfVertices[0] = sf::Vertex(game2ScreenPos(target, a), c);
 	sfVertices[1] = sf::Vertex(game2ScreenPos(target, b), c);

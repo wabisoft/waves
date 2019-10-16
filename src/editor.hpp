@@ -4,10 +4,11 @@
 #include <string>
 
 #include "clock.hpp"
+#include "events.hpp"
 #include "json.hpp"
 #include "prelude.hpp"
 #include "stage.hpp"
-#include "SFML/Window.hpp"
+#include "SFML/Window/WindowHandle.hpp"
 #include "SFML/Graphics.hpp"
 
 
@@ -18,11 +19,26 @@ struct ErrorPopupState {
 	bool opened = false;
 };
 
+struct MouseState {
+	bool down = false;
+	Vector2 downPosition;
+};
 
-struct Editor {
+struct Ghost {
+	Entity entity;
+};
+
+class Editor : public EventListener {
+public:
+	virtual void onClosed(sf::Window&)											override;
+	virtual void onMouseButtonPressed(sf::Window&, Event::MouseButtonEvent)		override;
+	virtual void onMouseButtonReleased(sf::Window&, Event::MouseButtonEvent)	override;
+	virtual void onMouseMoved(sf::Window&, Event::MouseMoveEvent)				override;
 
 	std::string filename;
 	Stage stage;
+	MouseState mouseState;
+	Entity selectedEntity;
 	std::vector<ErrorPopupState> errorPopups;
 };
 
@@ -34,3 +50,8 @@ void startMouseInput(Editor&, Vector2);
 void continueMouseInput(Editor&, Vector2);
 void endMouseInput(Editor&, Vector2);
 
+void levelOpen(Editor& editor, std::string filename);
+void levelOpen(sf::WindowHandle windowHandle, Editor& editor);
+void validateSaveToFile(Editor& editor);
+void levelSave(sf::WindowHandle windowHandle, Editor& editor);
+void levelSaveAs(sf::WindowHandle windowHandle, Editor& editor);

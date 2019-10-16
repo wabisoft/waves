@@ -56,4 +56,6 @@ struct Entity {
 	EntityType type = NONE;
 };
 
+Entity findEntityAtPosition(Stage& stage, Vector2 position);
+Vector2 getEntityPosition(Entity entity);
 // NOTE(owen): should we have a base entity class? revisit or don't. I can't decide.

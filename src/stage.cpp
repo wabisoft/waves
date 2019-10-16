@@ -41,97 +41,15 @@ void update(Stage& stage, float deltaTime){
 
 Entity makeSelectionAtPosition(Stage& stage, Vector2 position) {
 	// For now we only select rocks so let's find our rock
-	RockIt rockIt = findRockAtPosition(stage, position);
-	if (rockIt != stage.rocks.end()) {
-		stage.selection.entity = { rockIt->id, ROCK };
-		stage.selection.active = true;
-		stage.selection.entityPosition = rockIt->shape.position;
-	}
+	stage.selection.entity = findEntityAtPosition(stage, position);
+	if(stage.selection.entity.type != NONE) {stage.selection.active = true;}
+	// RockIt rockIt = findRockAtPosition(stage, position);
+	// if (rockIt != stage.rocks.end()) {
+	// 	stage.selection.entity = { rockIt->id, ROCK };
+	// 	stage.selection.active = true;
+	// 	stage.selection.entityPosition = rockIt->shape.position;
+	// }
 	return stage.selection.entity;
-}
-
-Entity findEntityAtPosition(Stage& stage, Vector2 position) {
-	// a list of pairs of {Axis of overlap, entity}
-	struct Candidate{
-		Axis axis = NO_AXIS;
-		Entity entity;
-	};
-	std::vector<Candidate> candidates;
-	for(int a = 0; a < 2; ++a) {
-		std::vector<uint8> axisOrder = stage.xAxisOrder;
-		Axis axis = X_AXIS;
-		if(a>0) {
-			axisOrder = stage.yAxisOrder;
-			axis = Y_AXIS;
-		}
-		for(int i = 0; i < axisOrder.size(); ++i) {
-			AABB aabb = *findAABB(stage, axisOrder[i]);
-			if(aabb.lower[a] <= position[a] && aabb.upper[a] >= position[a]) {
-				auto pred = [&aabb](Candidate c) -> bool {
-					return c.entity.id == aabb.id;
-				};
-				auto search = std::find_if(candidates.begin(), candidates.end(), pred);
-				if(search != candidates.end()) {
-					search->axis = (Axis)(search->axis | axis);
-				} else if (a<1) { // if we are on the second axis and the candidate doesn't exist then we can skip
-					candidates.push_back({axis, Entity{aabb.id, aabb.type}});
-				}
-			} else if (aabb.lower[a] >= position[a]) {
-				// since the axis list is sorted from lowest to highest then
-				// we can say that everything after this is not overlaping
-				break;
-			}
-		}
-	}
-	struct Chosen {
-		float squaredDistance;
-		Entity entity;
-	};
-	Chosen chosen = {std::numeric_limits<float>::infinity(), {0, NONE}};
-	for(Candidate & candidate : candidates) {
-		switch(candidate.entity.type) {
-			case NONE:
-				assert(false); // this should never happen
-				break;
-			case SEA:
-				{
-					Sea sea = *findSea(stage, candidate.entity.id);
-					float squaredDistance = squaredMagnitude(sea.shape.position - position);
-					if(chosen.squaredDistance > squaredDistance) {
-						chosen = {squaredDistance, {sea.id, SEA}};
-					}
-				}
-				break;
-			case PLATFORM:
-				{
-					Platform platform = *findPlatform(stage, candidate.entity.id);
-					float squaredDistance = squaredMagnitude(platform.shape.position - position);
-					if(chosen.squaredDistance > squaredDistance) {
-						chosen = {squaredDistance, {platform.id, PLATFORM}};
-					}
-				}
-				break;
-			case ROCK:
-				{
-					Rock rock = *findRock(stage, candidate.entity.id);
-					float squaredDistance = squaredMagnitude(rock.shape.position - position);
-					if(chosen.squaredDistance > squaredDistance) {
-						chosen = {squaredDistance, {rock.id, ROCK}};
-					}
-				}
-				break;
-			case SHIP:
-				{
-					Ship ship = stage.ship;
-					float squaredDistance = squaredMagnitude(ship.shape.position - position);
-					if(chosen.squaredDistance > squaredDistance) {
-						chosen = {squaredDistance, {ship.id, SHIP}};
-					}
-				}
-				break;
-		}
-	}
-	return chosen.entity;
 }
 
 void clearSelection(Stage& stage) {
@@ -144,17 +62,16 @@ inline bool validateAndSetPullPosition(Stage& stage,  Vector2 position) {
 	Vector2 pull = rock.shape.position - position;
 	float squaredPullLength = squaredMagnitude(pull);
 	if(squaredPullLength < STAGE_MAX_PULL_LENGTH_SQUARED) {
-		stage.selection.pullPosition = position;
+		stage.selection.pull.pullPosition = position;
 		return true;
 	} else {
 		Vector2 relPos = normalized(position - rock.shape.position);
-		stage.selection.pullPosition = rock.shape.position + relPos * STAGE_MAX_PULL_LENGTH;
+		stage.selection.pull.pullPosition = rock.shape.position + relPos * STAGE_MAX_PULL_LENGTH;
 		return true;
 	}
 }
 
 void processStartInput(Stage& stage, Vector2 position) {
-
 	switch(stage.selection.state) {
 		case Selection::SELECT:
 			makeSelectionAtPosition(stage, position);
@@ -168,11 +85,10 @@ void processStartInput(Stage& stage, Vector2 position) {
 			// 		stage.selection.state= Selection::PULL;
 			// 	}
 			// }
-			stage.selection.state= Selection::PULL;
+			if(stage.state.type == StageState::RUNNING){
+				stage.selection.state= Selection::PULL;
+			}
 			break;
-		// case Selection::RESIZE:
-		// 	makeSelectionAtPosition(stage, position);
-		// 	break;
 		case Selection::PULL:
 			if(validateAndSetPullPosition(stage, position)){
 				stage.selection.state = Selection::PULL;
@@ -201,7 +117,7 @@ void processEndInput(Stage& stage, Vector2 position) {
 		assert(stage.selection.active); // I think we should always have a selection in this phase
 		validateAndSetPullPosition(stage, position);
 		Rock& rock = *findRock(stage, stage.selection.entity.id);
-		Vector2 pull = rock.shape.position - stage.selection.pullPosition;
+		Vector2 pull = rock.shape.position - stage.selection.pull.pullPosition;
 		float pullLength = std::abs(magnitude(pull));
 		float throwMag = (pullLength / STAGE_MAX_PULL_LENGTH) * ROCK_MAX_SPEED;
 		rock.shape.position += 0.01f * pull; // If you dont so this then to collision get all weird and bad things happen
@@ -209,7 +125,7 @@ void processEndInput(Stage& stage, Vector2 position) {
 		rock.velocity += force;
 		rock.state = {RockState::FALLING, {}};
 		stage.selection = Selection{};
-		stage.selection.pullPosition = VECTOR2_ZERO;
+		// stage.selection.pull.pullPosition = VECTOR2_ZERO;
 		clearSelection(stage);
 		}
 		break;
@@ -219,7 +135,7 @@ void processEndInput(Stage& stage, Vector2 position) {
 Vector2 getPullForce(Stage& stage) {
 	assert(stage.selection.active && stage.selection.state == Selection::PULL);
 	Rock& rock = *findRock(stage, stage.selection.entity.id);
-	Vector2 pull = rock.shape.position - stage.selection.pullPosition;
+	Vector2 pull = rock.shape.position - stage.selection.pull.pullPosition;
 	float pullLength = std::abs(magnitude(pull));
 	float throwMag = (pullLength / STAGE_MAX_PULL_LENGTH) * ROCK_MAX_SPEED;
 	return (pull/pullLength) * throwMag;
