@@ -3,6 +3,9 @@
 #include <string>
 #include <vector>
 #include <sstream>
+
+#include <glm/vec2.hpp>
+
 #include "shapes.hpp"
 #include "stage.hpp"
 #include "json.hpp"
@@ -13,7 +16,7 @@ std::string serialize(const std::vector<Sea> seas);
 std::string serialize(const std::vector<Wave> waves);
 std::string serialize(const std::vector<Platform> platforms);
 std::string serialize(const wabi::Rectangle& rectangle);
-std::string serialize(const Vector2 v);
+std::string serialize(const glm::vec2 v);
 std::string serialize(const Win w);
 
 struct SerializeError {

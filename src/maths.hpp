@@ -4,39 +4,73 @@
 #include <cmath>
 #include <vector>
 
-#include "vector2.hpp"
+#include <glm/vec2.hpp>
+#include <glm/common.hpp>
+#include <glm/geometric.hpp>
+
+const glm::vec2 VEC2_UP {0.f, 1.f};
+const glm::vec2 VEC2_DOWN {0.f, -1.f};
+const glm::vec2 VEC2_LEFT {-1.f, 0.f};
+const glm::vec2 VEC2_RIGHT {1.f, 0.f};
+const glm::vec2 VEC2_ZERO {0.f, 0.f};
+
+
 
 /********
  * Misc *
  ********/
 
-template <typename T>
-T sign(T t) {
-	return (t == (T)0) ? (T)0 : t / abs(t);
-}
+// template <typename T>
+// T sign(T t) {
+// 	return (t == (T)0) ? (T)0 : t / abs(t);
+// }
 
-template <typename T>
-T signOf(T t) {
-	return sign<T>(t);
-}
+// template <typename T>
+// T signOf(T t) {
+// 	return glm::sign<T>(t);
+// }
 
 /************
  * Geometry *
  ************/
 
-bool lineSegmentIntersection(Vector2 a, Vector2 b, Vector2 c, Vector2 d, Vector2& intersection);
-Vector2 findNormal(Vector2 a, Vector2 b, Vector2 c);
+bool lineSegmentIntersection(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 d, glm::vec2 & intersection);
+glm::vec2 findNormal(glm::vec2 a, glm::vec2 b, glm::vec2 c);
+glm::vec2& clamp(glm::vec2& v, float s); // clamp this vector to a scalar magnitude
 
-// returns + if point on left - if point on right 0 if point on line from b to a
-inline float sideSign(Vector2 a, Vector2 b, Vector2 point) {
-	Vector2 u = b - a;
-	Vector2 v = point - a;
-	float product = cross(u, v);
-	return sign(product);
+/************************************************************
+ * SPECIAL CASE OF 2d cross product							*
+ * NOTE: remember that |a x b| = |a| |b| sin(theta)			*
+ * that means for a 2d cross we have:                    	*
+ * a x b = {												*
+ * 		a.y*b.z - a.z*b.y,									*
+ * 		a.z*b.x - a.x*b.z,									*
+ * 		a.x*b.y - a.y*b.x									*
+ * }														*
+ *															*
+ * in 2d the z is 0 so we get a new 3d vector				*
+ * the magnitude of that vector is just the z component		*
+ * That value is also |a||b|sin(theta)						*
+ * which means that the sign of theta (+/-) can tell us 	*
+ * if we have a counter-clockwise(-) or clockwise(+)		*
+ * rotation between the 2 vectors.							*
+ * this important to determine,	which side of a line a		*
+ * point is on among other things							*
+************************************************************/
+inline float cross(glm::vec2 a, glm::vec2 b) {
+	return  a.x*b.y - a.y*b.x;
 }
 
-inline bool bounded(Vector2 a, Vector2 b, Vector2 point) {
-	Vector2 ba = b - a;
+// returns + if point on left - if point on right 0 if point on line from b to a
+inline float sideSign(glm::vec2 a, glm::vec2 b, glm::vec2 point) {
+	glm::vec2 u = b - a;
+	glm::vec2 v = point - a;
+	float product = cross(u, v);
+	return glm::sign(product);
+}
+
+inline bool bounded(glm::vec2 a, glm::vec2 b, glm::vec2 point) {
+	glm::vec2 ba = b - a;
 	if (std::abs(ba.x) > std::abs(ba.y)) { // line more horizontally oriented
 		// we check that we are bounded on x
 		if (ba.x > 0) { // positive dx means b.x > a.x
@@ -54,3 +88,4 @@ inline bool bounded(Vector2 a, Vector2 b, Vector2 point) {
 	}
 	assert(false);
 }
+

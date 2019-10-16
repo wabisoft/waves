@@ -3,6 +3,8 @@
 #include <cassert>
 #include <cstdint>
 
+#include <glm/vec2.hpp>
+
 #include "aabb.hpp"
 #include "constants.hpp"
 #include "maths.hpp"
@@ -15,8 +17,8 @@
 struct RockState {
 	struct FallingState { };
 	struct StandingState{
-		Vector2 surfaceStart;
-		Vector2 surfaceEnd;
+		glm::vec2 surfaceStart;
+		glm::vec2 surfaceEnd;
 	};
 	struct FloatingState {
 		float timeFloating = 0.f;
@@ -56,7 +58,7 @@ struct RockType {
 
 struct Rock {
 	wabi::Circle shape = {{0.f, 0.f}, 0.f};
-	Vector2 velocity = {0.f, 0.f};
+	glm::vec2 velocity = {0.f, 0.f};
 	RockState state { RockState::FALLING, {} };
 	RockType type;
 	bool active = false;
@@ -71,12 +73,12 @@ inline float mass(Rock& rock) {
 }
 
 void updateRocks(Stage& stage, float deltaTime);
-uint8 createRock(Stage& stage, Vector2 position, float radius, RockType type);
+uint8 createRock(Stage& stage, glm::vec2 position, float radius, RockType type);
 RockIt deleteRock(Stage& stage, RockIt rockIt);
 RockIt deleteRock(Stage& stage, uint8 rockId);
 RockIt findRock(Stage& stage, uint8 rock_id);
-RockIt findRockAtPosition(Stage& stage, Vector2 position);
-void resizeRock(Stage& stage, int rockId, Vector2 position);
+RockIt findRockAtPosition(Stage& stage, glm::vec2 position);
+void resizeRock(Stage& stage, int rockId, glm::vec2 position);
 
 inline float area(const Rock& rock) {
 	return rock.shape.radius * rock.shape.radius * PI;

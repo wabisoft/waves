@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <glm/vec2.hpp>
 
 #include "entity.hpp"
 #include "prelude.hpp"
@@ -13,10 +14,10 @@ struct AABB{
 	explicit AABB (const Platform&);
 	explicit AABB (const Ship&);
 	explicit AABB (const Sea&);
-	Vector2 lower = {0.f,0.f};
-	Vector2 upper = {0.f,0.f};
+	glm::vec2 lower = {0.f,0.f};
+	glm::vec2 upper = {0.f,0.f};
 	EntityType type = NONE;
-	uint8_t id = 0;
+	uint8 id = 0;
 };
 
 typedef std::vector<AABB>::iterator AABBIt;

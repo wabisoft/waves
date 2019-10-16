@@ -6,6 +6,7 @@
 #include "stage.hpp"
 
 using namespace wabi;
+using namespace glm;
 
 inline void updateFallingShip(Ship& ship) {
 	ship.velocity += GRAVITY * FIXED_TIMESTEP;
@@ -21,16 +22,16 @@ inline void updateStandingShip(Stage& stage, float deltaTime) {
 	ship.velocity += GRAVITY * FIXED_TIMESTEP;
 	ship.shape.position += ship.velocity;
 
-	Vector2 futurePos = ship.shape.position + ship.velocity;
-	Vector2& start = ship.state.standing.surfaceStart;
-	Vector2& end = ship.state.standing.surfaceEnd;
-	Vector2 start2Rock = futurePos - start;
-	Vector2 start2End = end - start;
-	Vector2 normalizedStart2End = normalized(start2End);
+	vec2 futurePos = ship.shape.position + ship.velocity;
+	vec2 & start = ship.state.standing.surfaceStart;
+	vec2 & end = ship.state.standing.surfaceEnd;
+	vec2 start2Rock = futurePos - start;
+	vec2 start2End = end - start;
+	vec2 normalizedStart2End = normalize(start2End);
 	float proj = dot(start2Rock, normalizedStart2End);
-	Vector2 anchor = start +  normalizedStart2End * proj;
-	Vector2 anchorRelPos = anchor - ship.shape.position;
-	float sqMagAnchorRelPos = squaredMagnitude(anchorRelPos);
+	vec2 anchor = start +  normalizedStart2End * proj;
+	vec2 anchorRelPos = anchor - ship.shape.position;
+	float sqMagAnchorRelPos = dot(anchorRelPos, anchorRelPos);
 	float sqShipHalfHeight = (ship.shape.height/2) * (ship.shape.height / 2);
 	bool bound = bounded(start, end, anchor);
 	bool anchorOnSurface = sqMagAnchorRelPos <= sqShipHalfHeight;
@@ -70,7 +71,7 @@ void updateShip(Stage& stage, float deltaTime){
 		case ShipState::SURFING: updateSurfingShip(stage, ship); break;
 	}
 	updateVertices(ship.shape);
-	Vector2& shipPos = ship.shape.position;
+	vec2 & shipPos = ship.shape.position;
 	// if (shipPos.x > STAGE_WIDTH || shipPos.x < 0 || shipPos.y < 0) {
 	if (shipPos.x > STAGE_WIDTH || shipPos.x < 0) {
 		stage.state.type = StageState::FINISHED;
@@ -80,7 +81,7 @@ void updateShip(Stage& stage, float deltaTime){
 }
 
 
-uint8_t createShip(Stage& stage, Vector2 position, float width, float height) {
+uint8_t createShip(Stage& stage, vec2 position, float width, float height) {
 	if (stage.ship.active){
 		return -1; // we don't want to make more than one ship probably.
 	}
@@ -88,7 +89,7 @@ uint8_t createShip(Stage& stage, Vector2 position, float width, float height) {
 	ship.active = true;
 	ship.id = ++stage.id_src;
 	ship.shape = makeRectangle(position, width, height);
-	ship.velocity = VECTOR2_ZERO;
+	ship.velocity = VEC2_ZERO;
 	createAABB(stage, AABB(ship));
 	return ship.id;
 }
@@ -101,7 +102,7 @@ uint8_t createShip(Stage& stage, Rectangle rect) {
 	ship.active = true;
 	ship.id = ++stage.id_src;
 	ship.shape = rect;
-	ship.velocity = VECTOR2_ZERO;
+	ship.velocity = VEC2_ZERO;
 	createAABB(stage, AABB(ship));
 	return ship.id;
 }

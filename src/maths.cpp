@@ -1,5 +1,7 @@
 #include "maths.hpp"
 
+using namespace glm;
+
 /******************
  * Geometry Stuff *
  ******************/
@@ -8,7 +10,7 @@
 // if return 0.f then no intersection
 // otherwise return depth of intersection and update intersection param
 // See line segment intersection in owen's notebook or online at http://www.cs.swan.ac.uk/~cssimon/line_intersection.html
-bool lineSegmentIntersection(Vector2 a, Vector2 b, Vector2 c, Vector2 d, Vector2& intersection) {
+bool lineSegmentIntersection(vec2 a, vec2 b, vec2 c, vec2 d, vec2 & intersection) {
 	float h = (d.x - c.x) * (a.y - b.y) - (a.x - b.x) * (d.y - c.y);
 	if (h == 0){
 		return false; // h is zero when the lines are colinear
@@ -26,9 +28,9 @@ bool lineSegmentIntersection(Vector2 a, Vector2 b, Vector2 c, Vector2 d, Vector2
 
 
 // Returns the normal of the vector from a to b (b-a) in the direction of c
-Vector2 findNormal(Vector2 a, Vector2 b, Vector2 c) {
-	Vector2 u = b - a;
-	Vector2 v = c - a;
+vec2 findNormal(vec2 a, vec2 b, vec2 c) {
+	vec2 u = b - a;
+	vec2 v = c - a;
 	float product = cross(u, v);
 	if (product == 0) {
 		// c is colinear/parallel to ba
@@ -40,5 +42,14 @@ Vector2 findNormal(Vector2 a, Vector2 b, Vector2 c) {
 		// c is on the right
 		return {u.y, -u.x};  // {dy, -dx} is the right normal
 	}
+}
+
+vec2 & clamp(vec2& v, float s) {
+	float mag = length(v);
+	if (mag > s) {
+		v /= mag;
+		v *= s;
+	}
+	return v;
 }
 

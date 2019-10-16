@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 
+#include <glm/vec2.hpp>
+
 #include "aabb.hpp"
 #include "prelude.hpp"
 #include "shapes.hpp"
@@ -30,11 +32,11 @@ void collide(Ship& ship, Rock& rock);
 
 struct Collision {
 	bool collides = false;
-	Vector2 intersection;
-	Vector2 normal;
 	float penetration;
-	Vector2 surfaceStart = VECTOR2_ZERO;
-	Vector2 surfaceEnd = VECTOR2_ZERO;
+	glm::vec2 intersection;
+	glm::vec2 normal;
+	glm::vec2 surfaceStart = {0, 0};
+	glm::vec2 surfaceEnd = {0, 0};
 };
 
 template <int N, int M>

@@ -1,6 +1,9 @@
 #pragma once
 
 #include <cstdint>
+
+#include <glm/vec2.hpp>
+
 #include "prelude.hpp"
 
 enum EntityType : uint8_t {
@@ -56,6 +59,5 @@ struct Entity {
 	EntityType type = NONE;
 };
 
-Entity findEntityAtPosition(Stage& stage, Vector2 position);
-Vector2 getEntityPosition(Entity entity);
-// NOTE(owen): should we have a base entity class? revisit or don't. I can't decide.
+Entity findEntityAtPosition(Stage& stage, glm::vec2 position);
+glm::vec2 getEntityPosition(Entity entity);

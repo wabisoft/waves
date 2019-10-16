@@ -1,3 +1,5 @@
+#include <glm/vec2.hpp>
+
 #include "entity.hpp"
 #include "aabb.hpp"
 #include "stage.hpp"
@@ -6,11 +8,13 @@
 #include "ship.hpp"
 #include "platform.hpp"
 
-Vector2 getEntityPosition(Stage& stage,Entity entity) {
+using namespace glm;
+
+vec2 getEntityPosition(Stage& stage,Entity entity) {
 	switch(entity.type) {
 		case NONE:
 			assert(false); // this should never happen
-			return VECTOR2_ZERO;
+			return VEC2_ZERO;
 			break;
 		case SEA:
 			return findSea(stage, entity.id)->shape.position;
@@ -27,7 +31,7 @@ Vector2 getEntityPosition(Stage& stage,Entity entity) {
 	}
 }
 
-bool pointOnEntity(Stage stage, Vector2 point, Entity entity) {
+bool pointOnEntity(Stage stage, vec2 point, Entity entity) {
 	switch(entity.type) {
 		case NONE:
 			assert(false); // this should never happen
@@ -58,7 +62,7 @@ bool pointOnEntity(Stage stage, Vector2 point, Entity entity) {
 
 }
 
-Entity findEntityAtPosition(Stage& stage, Vector2 position) {
+Entity findEntityAtPosition(Stage& stage, vec2 position) {
 	// Adaptation of sweep and prune
 	// takes advantage of the sortedness of the two lists used in our collision detection routine
 	struct Candidate{
@@ -90,8 +94,9 @@ Entity findEntityAtPosition(Stage& stage, Vector2 position) {
 				} else if (a<1) { // if we are on the second axis and the candidate doesn't exist then we can skip
 					// candidates.push_back({axis, Entity{aabb.id, aabb.type}});
 					Entity entity = {aabb.id, aabb.type};
-					Vector2 entityPosition = getEntityPosition(stage, entity);
-					float squaredDistance = squaredMagnitude(entityPosition - position);
+					vec2 entityPosition = getEntityPosition(stage, entity);
+					vec2 rel = entityPosition - position;
+					float squaredDistance = dot(rel, rel);
 					if(chosen.squaredDistance > squaredDistance) {
 						chosen = {squaredDistance, entity};
 					}

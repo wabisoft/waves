@@ -10,14 +10,16 @@
 #include "stage.hpp"
 #include "util.hpp"
 
+using namespace glm;
+
 inline RockIt updateFallingRock(Stage& stage, RockIt rockIt, float deltaTime) {
 	Rock& rock = *rockIt;
 	assert(rock.state.type == RockState::FALLING);
 	rock.velocity += GRAVITY * deltaTime;
 	auto drag = dragForce(rock.velocity, 1.225f, rock.shape.radius * ROCK_RADIUS_MASS_RATIO);
 	rock.velocity += drag * deltaTime;
-	if(squaredMagnitude(rock.velocity) > SQUARED_TERMINAL_VELOCITY) {
-		rock.velocity = normalized(rock.velocity) * TERMINAL_VELOCITY;
+	if(dot(rock.velocity, rock.velocity) > SQUARED_TERMINAL_VELOCITY) {
+		rock.velocity = normalize(rock.velocity) * TERMINAL_VELOCITY;
 	}
 	rock.shape.position += rock.velocity;
 	return rockIt;
@@ -34,16 +36,16 @@ inline RockIt updateStandingRock(Stage& stage, RockIt rockIt, float deltaTime) {
 	rock.shape.position += rock.velocity;
 
 	// Calculate if we should not be standing anymore
-	Vector2 futurePos = rock.shape.position + rock.velocity;
-	Vector2& start = rock.state.standing.surfaceStart;
-	Vector2& end = rock.state.standing.surfaceEnd;
-	Vector2 start2Rock = futurePos - start;
-	Vector2 start2End = end - start;
-	Vector2 normalizedStart2End = normalized(start2End);
+	vec2 futurePos = rock.shape.position + rock.velocity;
+	vec2 & start = rock.state.standing.surfaceStart;
+	vec2 & end = rock.state.standing.surfaceEnd;
+	vec2 start2Rock = futurePos - start;
+	vec2 start2End = end - start;
+	vec2 normalizedStart2End = normalize(start2End);
 	float proj = dot(start2Rock, normalizedStart2End);
-	Vector2 anchor = start +  normalizedStart2End * proj;
-	Vector2 anchorRelPos = anchor - rock.shape.position;
-	float sqMagAnchorRelPos = squaredMagnitude(anchorRelPos);
+	vec2 anchor = start +  normalizedStart2End * proj;
+	vec2 anchorRelPos = anchor - rock.shape.position;
+	float sqMagAnchorRelPos = dot(anchorRelPos, anchorRelPos);
 	float sqrockRadius = rock.shape.radius * rock.shape.radius;
 	bool bound = bounded(start, end, anchor);
 	bool anchorOnSurface = sqMagAnchorRelPos <= sqrockRadius;
@@ -96,7 +98,7 @@ void updateRocks(Stage& stage, float deltaTime) {
 	}
 }
 
-uint8 createRock(Stage& stage, Vector2 position, float radius, RockType type){
+uint8 createRock(Stage& stage, vec2 position, float radius, RockType type){
 	// NOTE (!!!): The implementation of the routine must keep rocks in order of id so that the array can be
 	// binary searched in findRock
 	Rock new_rock;
@@ -125,9 +127,9 @@ RockIt findRock(Stage& stage, uint8 rockId) {
 	return rockIt;
 }
 
-RockIt findRockAtPosition(Stage& stage, Vector2 position) {
+RockIt findRockAtPosition(Stage& stage, vec2 position) {
 	for(RockIt rockIt = stage.rocks.begin(); rockIt != stage.rocks.end(); ++rockIt){
-		float dist = magnitude(position - rockIt->shape.position);
+		float dist = length(position - rockIt->shape.position);
 		if (dist <= rockIt->shape.radius) {
 			return rockIt;
 		}
@@ -135,10 +137,10 @@ RockIt findRockAtPosition(Stage& stage, Vector2 position) {
 	return stage.rocks.end();
 }
 
-void resizeRock(Stage& stage, int rock_id, Vector2 position){
+void resizeRock(Stage& stage, int rock_id, vec2 position){
 	Rock& rock = *findRock(stage, rock_id);
-	Vector2 relPos = position - rock.shape.position;
-	float squaredSize = squaredMagnitude(relPos);
+	vec2 relPos = position - rock.shape.position;
+	float squaredSize = dot(relPos, relPos);
 	if(squaredSize > ROCK_MIN_RADIUS_SQUARED && squaredSize < ROCK_MAX_RADIUS_SQUARED) {
 		rock.shape.radius = std::sqrt(squaredSize);
 	}

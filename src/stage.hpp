@@ -3,6 +3,8 @@
 #include <vector>
 #include <string>
 
+#include <glm/vec2.hpp>
+
 #include "constants.hpp"
 #include "entity.hpp"
 #include "platform.hpp"
@@ -19,15 +21,15 @@ struct Selection {
 	};
 
 	struct PullState {
-		Vector2 pullPosition = VECTOR2_ZERO;
+		glm::vec2 pullPosition = VEC2_ZERO;
 	};
 	struct RepositionState {
-		Vector2 repositionPosition = VECTOR2_ZERO;
+		glm::vec2 repositionPosition = VEC2_ZERO;
 	};
 
 	State state = SELECT;
 	Entity entity;
-	Vector2 entityPosition;
+	glm::vec2 entityPosition;
 
 	PullState pull;
 	RepositionState reposition;
@@ -82,7 +84,7 @@ struct Stage{
 	std::vector<uint8> xAxisOrder;
 	std::vector<uint8> yAxisOrder;
 
-	Vector2 rockSpawn;
+	glm::vec2 rockSpawn;
 	Selection selection;
 	Win win;
 	StageState state;
@@ -91,16 +93,16 @@ struct Stage{
 };
 
 void update(Stage& stage, float deltaTime);
-Entity makeSelectionAtPosition(Stage& stage, Vector2 position);
+Entity makeSelectionAtPosition(Stage& stage, glm::vec2 position);
 void clearSelection(Stage& stage);
-void processStartInput(Stage& stage, Vector2 position);
-void processContinuingInput(Stage& stage, Vector2 position);
-void processEndInput(Stage& stage, Vector2 position);
-Vector2 getPullForce(Stage& stage);
-std::vector<Vector2> pullParabola(Stage& stage);
+void processStartInput(Stage& stage, glm::vec2 position);
+void processContinuingInput(Stage& stage, glm::vec2 position);
+void processEndInput(Stage& stage, glm::vec2 position);
+glm::vec2 getPullForce(Stage& stage);
+std::vector<glm::vec2> pullParabola(Stage& stage);
 
-inline bool validateAndSetPullPosition(Stage& stage, Vector2 position);
-inline bool outOfBounds(Vector2 position) {
+inline bool validateAndSetPullPosition(Stage& stage, glm::vec2 position);
+inline bool outOfBounds(glm::vec2 position) {
 	return (position.x<0 ||position.x > STAGE_WIDTH || position.y < 0);
 }
 

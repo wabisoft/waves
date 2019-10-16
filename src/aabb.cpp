@@ -1,5 +1,9 @@
 #include <iostream>
 #include <cassert>
+
+#include <glm/vec2.hpp>
+
+
 #include "aabb.hpp"
 #include "maths.hpp"
 #include "printing.hpp"
@@ -34,12 +38,12 @@ AABB::AABB(const Platform& platform) {
 }
 
 AABB::AABB(const Rock& rock) {
-	Vector2 diag = {rock.shape.radius, rock.shape.radius};
-	Vector2 lower0 = rock.shape.position - diag;
-	Vector2 upper0 = rock.shape.position + diag;
-	Vector2 futurePos = rock.shape.position + rock.velocity * FIXED_TIMESTEP;
-	Vector2 lower1 = futurePos - diag;
-	Vector2 upper1 = futurePos + diag;
+	glm::vec2 diag = {rock.shape.radius, rock.shape.radius};
+	glm::vec2 lower0 = rock.shape.position - diag;
+	glm::vec2 upper0 = rock.shape.position + diag;
+	glm::vec2 futurePos = rock.shape.position + rock.velocity * FIXED_TIMESTEP;
+	glm::vec2 lower1 = futurePos - diag;
+	glm::vec2 upper1 = futurePos + diag;
 	lower = {std::min(lower0.x, lower1.x), std::min(lower0.y, lower1.y)};
 	upper = {std::max(upper0.x, upper1.x), std::max(upper0.y, upper1.y)};
 	type = ROCK;

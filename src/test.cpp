@@ -5,6 +5,7 @@
 #include <ctime>
 
 #include <SFML/Window.hpp>
+#include <glm/vec2.hpp>
 
 #include "clock.hpp"
 #include "collision.hpp"
@@ -21,6 +22,7 @@
 #include "util.hpp"
 
 using namespace wabi;
+/*
 void test_shapes_and_shit(sf::RenderWindow& window) {
 	// Testing shapes and shit
 	wabi::Rectangle rectangle = wabi::makeRectangle({STAGE_WIDTH/2, STAGE_HEIGHT/2}, 30, 5);
@@ -145,3 +147,4 @@ void test_utils() {
 // 	std::cout << binary_find_where(6, blah, blah_size, [] (int a) { return a; });
 // 	std::cout << std::endl;
 }
+*/

@@ -9,6 +9,7 @@
 #include "typedefs.hpp"
 #include "wave.hpp"
 
+using namespace glm;
 
 void updateWaves(Stage& stage, Sea& sea){
 	//Update the wave for this time step
@@ -42,12 +43,12 @@ void updateWaves(Stage& stage, Sea& sea){
 		wave.velocity[0] += FIXED_TIMESTEP * 0.05f * wave.amplitude;
 		wave.velocity += dragForce(wave.velocity, 1.225f, .4f);
 		// Update position with velocity;
-		wave.position += wave.velocity * wave.direction;
+		wave.position += (float)wave.direction * wave.velocity;
 	}
 }
 
 
-uint8 createWave(Sea& sea, Vector2 position, float amplitude, int direction, int sign){
+uint8 createWave(Sea& sea, vec2 position, float amplitude, int direction, int sign){
 	Wave new_wave;
 	new_wave.position = position;
 	new_wave.amplitude = amplitude;
@@ -76,7 +77,7 @@ WaveIt findWave(Sea& sea, uint8 waveId) {
 	return waveIt;
 }
 
-WaveIt findWaveAtPosition(Sea& sea, Vector2 position) { // returns the index of the closest wave
+WaveIt findWaveAtPosition(Sea& sea, vec2 position) { // returns the index of the closest wave
 	float min = INF;
 	WaveIt retIt = sea.waves.end();
 	for(WaveIt waveIt = sea.waves.begin(); waveIt != sea.waves.end(); ++waveIt) {

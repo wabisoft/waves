@@ -1,12 +1,14 @@
 #include <iostream>
 #include <vector>
 #include <sstream>
+
 #include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Vertex.hpp>
 #include <SFML/Graphics/VertexArray.hpp>
+#include <glm/vec2.hpp>
 
 #include "constants.hpp"
 #include "graphics.hpp"
@@ -20,10 +22,11 @@
 sf::Font font;
 
 using namespace wabi;
+using namespace glm;
 
 void initGraphics() {
 	if (!font.loadFromFile("assets/fonts/IBMPlexMono-Regular.ttf")){
-	 	std::cout << "Couldn't load font" << std::endl;
+		std::cout << "Couldn't load font" << std::endl;
 	}
 
 }
@@ -35,7 +38,7 @@ void drawStage(sf::RenderWindow& target, Stage& stage,  bool showGrid) {
 	}
 	drawPlatforms(target, stage);
 	drawSeas(target, stage);
-	if(stage.selection.active && stage.selection.state == Selection::PULL && stage.selection.pull.pullPosition != VECTOR2_ZERO) {
+	if(stage.selection.active && stage.selection.state == Selection::PULL && stage.selection.pull.pullPosition != VEC2_ZERO) {
 		Rock& rock = *findRock(stage, stage.selection.entity.id);
 		drawLine(target, rock.shape.position, stage.selection.pull.pullPosition, sf::Color::Blue);
 	}
@@ -50,8 +53,8 @@ void drawStage(sf::RenderWindow& target, Stage& stage,  bool showGrid) {
 	drawPolygon(target, stage.win.region, sf::Color(0, 204, 102));
 	drawPullParabola(target, stage);
 	for (AABB aabb : stage.aabbs) {
-		Vector2 diff = aabb.upper - aabb.lower;
-		Vector2 pos = { aabb.lower.x + 0.5f * diff.x, aabb.lower.y + 0.5f * diff.y };
+		vec2 diff = aabb.upper - aabb.lower;
+		vec2 pos = { aabb.lower.x + 0.5f * diff.x, aabb.lower.y + 0.5f * diff.y };
 		drawPolygon(target, makeRectangle(pos, diff.x, diff.y), sf::Color::Yellow);
 	}
 }
@@ -61,8 +64,8 @@ inline void drawSeas(sf::RenderWindow& target, const Stage& stage) {
 	for (const Sea& sea: stage.seas) {
 		std::vector<sf::Vertex> vertices;
 		float step = 1 / pixelsPerUnit(target).x;
-		Vector2 lower = lowerBound(sea.shape);
-		Vector2 upper = upperBound(sea.shape);
+		vec2 lower = lowerBound(sea.shape);
+		vec2  upper = upperBound(sea.shape);
 		for (float i = lower.x; i < upper.x; i += step)
 		{
 			vertices.push_back(sf::Vertex(game2ScreenPos(target, {i, sea.heightAtX(i)}), SEA_COLOR));
@@ -114,12 +117,12 @@ inline void drawGrid(sf::RenderWindow& target) {
 	vertices.reserve((int)STAGE_WIDTH*2 + (int)STAGE_HEIGHT*2);
 	sf::Color c = sf::Color(175,175,175,32);
 	for(float i = 0; i < STAGE_WIDTH; ++i) {
-		vertices.push_back(sf::Vertex(game2ScreenPos(target, Vector2{i, 0.f}), c));
-		vertices.push_back(sf::Vertex(game2ScreenPos(target, Vector2{i, STAGE_HEIGHT}), c));
+		vertices.push_back(sf::Vertex(game2ScreenPos(target, vec2{i, 0.f}), c));
+		vertices.push_back(sf::Vertex(game2ScreenPos(target, vec2{i, STAGE_HEIGHT}), c));
 	}
 	for(float i = 0; i < STAGE_HEIGHT; ++i) {
-		vertices.push_back(sf::Vertex(game2ScreenPos(target, Vector2{0.f, i}), c));
-		vertices.push_back(sf::Vertex(game2ScreenPos(target, Vector2{STAGE_WIDTH, i}), c));
+		vertices.push_back(sf::Vertex(game2ScreenPos(target, vec2{0.f, i}), c));
+		vertices.push_back(sf::Vertex(game2ScreenPos(target, vec2{STAGE_WIDTH, i}), c));
 	}
 	target.draw(&vertices[0], vertices.size(), sf::Lines);
 }
@@ -133,11 +136,11 @@ inline void drawPullParabola(sf::RenderWindow& target, Stage& stage) {
 				case Selection::SELECT: break;
 				case Selection::PULL:
 					{
-						std::vector<Vector2> parabola = pullParabola(stage);
+						std::vector<vec2> parabola = pullParabola(stage);
 						std::vector<sf::Vertex> drawVertices;
 						drawVertices.reserve(parabola.size());
 						sf::Color c = {183, 183,183};
-						for (Vector2 worldPoint : parabola) {
+						for (vec2 worldPoint : parabola) {
 							drawVertices.push_back(sf::Vertex(game2ScreenPos(target, worldPoint), c));
 						}
 						target.draw(&drawVertices[0], drawVertices.size(), sf::LineStrip);
@@ -151,18 +154,18 @@ inline void drawPullParabola(sf::RenderWindow& target, Stage& stage) {
 
 void drawInfoText(sf::RenderWindow& target, const Stage& stage, float drawDelta, float updateDelta, int loopsPerUpdate) {
 	std::stringstream infostream;
-	infostream << "Draw (Hz): 				" << 1/drawDelta << std::endl;
-	infostream << "Update (Hz): 			" << 1/updateDelta << std::endl;
-	infostream << "Loops/Update: 			" << loopsPerUpdate <<std::endl;
+	infostream << "Draw (Hz):				" << 1/drawDelta << std::endl;
+	infostream << "Update (Hz):				" << 1/updateDelta << std::endl;
+	infostream << "Loops/Update:			" << loopsPerUpdate <<std::endl;
 	if (stage.state.type == StageState::RUNNING) {
-		infostream << "Running Time: 			" << stage.state.running.time <<std::endl;
+		infostream << "Running Time:			" << stage.state.running.time <<std::endl;
 	} else if (stage.state.type == StageState::PAUSED) {
-		infostream << "Paused Time: 			" << stage.state.paused.time <<std::endl;
+		infostream << "Paused Time:				" << stage.state.paused.time <<std::endl;
 	}
 	infostream << std::endl;
-	infostream << "#Rocks: 					" << stage.rocks.size() << std::endl;
-	// infostream << "#Waves: 					" << stage.sea.waves.size()<< std::endl;
-	infostream << "#AABBs: 					" << stage.aabbs.size() << std::endl;
+	infostream << "#Rocks:					" << stage.rocks.size() << std::endl;
+	// infostream << "#Waves:					" << stage.sea.waves.size()<< std::endl;
+	infostream << "#AABBs:					" << stage.aabbs.size() << std::endl;
 	if(stage.rocks.size() > 0 ) {
 		infostream << "P:						" << stage.rocks[0].shape.position<< std::endl;
 		infostream << "V:						" << stage.rocks[0].velocity << std::endl;
@@ -188,13 +191,13 @@ inline void drawId(sf::RenderWindow& target, int id, sf::Vector2f position) {
 	drawText(target, std::to_string(id), position, 15, true);
 }
 
-inline void drawId(sf::RenderWindow& target, int id, Vector2 position) {
+inline void drawId(sf::RenderWindow& target, int id, vec2 position) {
 	drawId(target, id, game2ScreenPos(target,position));
 }
 
 inline void drawCircle(sf::RenderWindow& target, const Circle& circle, sf::Color c, bool fill) {
 	sf::CircleShape shape;
-	Vector2 ppu = pixelsPerUnit(target);
+	vec2 ppu = pixelsPerUnit(target);
 	// float radius = circle.radius * ppu;
 	auto pos = game2ScreenPos(target, circle.position);
 	shape.setPosition(pos);
@@ -213,7 +216,7 @@ inline void drawCircle(sf::RenderWindow& target, const Circle& circle, sf::Color
 }
 
 
-inline void drawLine(sf::RenderWindow& target, Vector2 a, Vector2 b, sf::Color c) {
+inline void drawLine(sf::RenderWindow& target, vec2 a, vec2 b, sf::Color c) {
 	sf::VertexArray sfVertices(sf::LineStrip, 2);
 	sfVertices[0] = sf::Vertex(game2ScreenPos(target, a), c);
 	sfVertices[1] = sf::Vertex(game2ScreenPos(target, b), c);

@@ -4,6 +4,7 @@
 #include <string>
 #include <cstdio>
 #include <cstdlib>
+#include <glm/vec2.hpp>
 
 #include "imgui.h"
 #include "imgui-SFML.h"
@@ -72,6 +73,7 @@ inline void drawEditorGui(sf::RenderWindow& window, Editor& editor) {
 
 int main()
 {
+
 	sf::RenderWindow window;
 	sf::ContextSettings settings;
 	sf::VideoMode videoMode = {800, 450};
@@ -98,7 +100,6 @@ int main()
 	eventManager.subscribe(editor, Event::MouseMoved);
     sf::Clock deltaClock;
 	levelOpen(editor, "D:/code/wabisoft/waves/assets/levels/level1.json");
-
     while (window.isOpen()) {
         sf::Event event;
 		eventManager.dispatchEvents(reinterpret_cast<sf::Window&>(window));

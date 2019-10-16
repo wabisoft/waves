@@ -3,8 +3,11 @@
 #include "entity.hpp"
 #include "editor.hpp"
 #include "graphics.hpp"
+#include "maths.hpp"
 #include "serialize.hpp"
 #include "win32_file.hpp"
+
+using namespace glm;
 
 void Editor::onClosed(sf::Window& window) {
 	window.close();
@@ -12,7 +15,7 @@ void Editor::onClosed(sf::Window& window) {
 
 void Editor::onMouseButtonPressed(sf::Window& window, Event::MouseButtonEvent mouseButton)	{
 	// TODO: something state dependent
-	Vector2 position = screen2GamePos(window, {mouseButton.x, mouseButton.y});
+	vec2 position = screen2GamePos(window, {mouseButton.x, mouseButton.y});
 	selectedEntity = findEntityAtPosition(stage, position);
 	mouseState.down = true;
 	mouseState.downPosition = position;

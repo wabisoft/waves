@@ -21,7 +21,7 @@ struct ErrorPopupState {
 
 struct MouseState {
 	bool down = false;
-	Vector2 downPosition;
+	glm::vec2 downPosition;
 };
 
 struct Ghost {
@@ -46,9 +46,9 @@ void initEditor(Editor& editor);
 // void handleEvents(Editor& editor, sf::RenderWindow& window);
 void processEvent(Editor& editor, const sf::Event& event, const sf::RenderWindow& window);
 void keyEvent(Editor&, sf::Event);
-void startMouseInput(Editor&, Vector2);
-void continueMouseInput(Editor&, Vector2);
-void endMouseInput(Editor&, Vector2);
+void startMouseInput(Editor&, glm::vec2 );
+void continueMouseInput(Editor&, glm::vec2 );
+void endMouseInput(Editor&, glm::vec2 );
 
 void levelOpen(Editor& editor, std::string filename);
 void levelOpen(sf::WindowHandle windowHandle, Editor& editor);
