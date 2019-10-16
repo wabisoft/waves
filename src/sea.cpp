@@ -5,6 +5,7 @@
 #include "wave.hpp"
 
 using namespace wabi;
+using namespace glm;
 
 uint8_t Sea::id_src = 0;
 
@@ -14,7 +15,7 @@ void updateSeas(Stage& stage) {
 	}
 }
 
-uint8 createSea(Stage& stage, Vector2 position, float width, float height) {
+uint8 createSea(Stage& stage, vec2 position, float width, float height) {
 	Sea new_sea;
 	new_sea.shape = makeRectangle(position, width, height);
 	new_sea.id = ++stage.id_src;

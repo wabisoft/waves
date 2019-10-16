@@ -4,40 +4,54 @@
 #include <string>
 
 #include "clock.hpp"
+#include "events.hpp"
+#include "json.hpp"
 #include "prelude.hpp"
 #include "stage.hpp"
-#include "SFML/Window.hpp"
+#include "SFML/Window/WindowHandle.hpp"
 #include "SFML/Graphics.hpp"
 
 
 // TODO: Write an editor
+struct ErrorPopupState {
+	std::string popupId;
+	std::string message;
+	bool opened = false;
+};
 
-struct Editor {
+struct MouseState {
+	bool down = false;
+	glm::vec2 downPosition;
+};
 
-	enum Component {
-		NONE = -1,
-		ROCK = 0,
-		SHIP = 1,
-		PLATFORM,
-		ROCK_SPAWN,
-		WIN_REGION,
-		SIZE
-	};
+struct Ghost {
+	Entity entity;
+};
 
-	enum Mode {
-		DEFAULT,
-	};
+class Editor : public EventListener {
+public:
+	virtual void onClosed(sf::Window&)											override;
+	virtual void onMouseButtonPressed(sf::Window&, Event::MouseButtonEvent)		override;
+	virtual void onMouseButtonReleased(sf::Window&, Event::MouseButtonEvent)	override;
+	virtual void onMouseMoved(sf::Window&, Event::MouseMoveEvent)				override;
 
 	std::string filename;
 	Stage stage;
-	Component currentComponent = SHIP;
-	Mode mode = DEFAULT;
+	MouseState mouseState;
+	Entity selectedEntity;
+	std::vector<ErrorPopupState> errorPopups;
 };
 
 void initEditor(Editor& editor);
-void handleEvents(Editor& editor, sf::Window& window);
+// void handleEvents(Editor& editor, sf::RenderWindow& window);
+void processEvent(Editor& editor, const sf::Event& event, const sf::RenderWindow& window);
 void keyEvent(Editor&, sf::Event);
-void startMouseInput(Editor&, sf::Event::MouseButtonEvent);
-void continueMouseInput(Editor&, sf::Event::MouseMoveEvent);
-void endMouseInput(Editor&, sf::Event::MouseButtonEvent);
+void startMouseInput(Editor&, glm::vec2 );
+void continueMouseInput(Editor&, glm::vec2 );
+void endMouseInput(Editor&, glm::vec2 );
 
+void levelOpen(Editor& editor, std::string filename);
+void levelOpen(sf::WindowHandle windowHandle, Editor& editor);
+void validateSaveToFile(Editor& editor);
+void levelSave(sf::WindowHandle windowHandle, Editor& editor);
+void levelSaveAs(sf::WindowHandle windowHandle, Editor& editor);

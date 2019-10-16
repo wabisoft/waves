@@ -2,7 +2,9 @@
 #include "aabb.hpp"
 #include "maths.hpp"
 
-std::ostream& operator<<(std::ostream& os, Vector2 v) {
+using namespace glm;
+
+std::ostream& operator<<(std::ostream& os, vec2 v) {
 	return os << "[" << v[0] << ", " << v[1] << "]";
 }
 

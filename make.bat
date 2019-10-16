@@ -6,8 +6,8 @@ if /i [%1] == [clean] (
 ) else if /i [%1] == [cmake] (
 	mkdir build
 	pushd build\
-	cmake ../src -DSFML_DIR=D:\libs\SFML-2.5.1 -DCMAKE_BUILD_TYPE=Debug
-	:: cmake ../src -DSFML_DIR=D:\libs\SFML-2.5.1 -DCMAKE_BUILD_TYPE=Debug -DImGui-SFML_DIR=D:\libs\ImGui-SFML
+	REM cmake .. -DSFML_DIR=D:\libs\SFML-2.5.1 -DCMAKE_BUILD_TYPE=Debug -DGLM_DIR=D:\code\g-truc\glm
+	cmake .. -DSFML_DIR=D:\libs\SFML-2.5.1 -DCMAKE_BUILD_TYPE=Debug -DImGui-SFML_DIR=D:\libs\ImGui-SFML -DGLM_DIR=D:\code\g-truc\glm
 	popd
 ) else if /i [%1] == [tags] (
 	echo "updating tags"

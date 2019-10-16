@@ -49,7 +49,7 @@ void update(Game& game) {
 	}
 }
 
-void processEvent(Game& game, const sf::Event& event, const sf::RenderTarget& target) {
+void processEvent(Game& game, const sf::Event& event, const sf::RenderWindow& target) {
 	// TODO (owen): Factor the identical portions of mouse and touch input into functions or something
 	switch (event.type) {
 	    case sf::Event::Closed:	game.end = true; break;

@@ -1,8 +1,10 @@
 #include "shapes.hpp"
 
+using namespace glm;
+
 namespace wabi {
 
-Rectangle::Rectangle(Vector2 p, float w, float h, float r) : width(w), height(h) {
+Rectangle::Rectangle(vec2 p, float w, float h, float r) : width(w), height(h) {
 	position = p;
 	rotation = r;
 	float halfWidth = w/2.f;
@@ -18,7 +20,7 @@ Rectangle::Rectangle(Vector2 p, float w, float h, float r) : width(w), height(h)
 
 }
 
-Rectangle makeRectangle(Vector2 p, float w, float h, float rotation) {
+Rectangle makeRectangle(vec2 p, float w, float h, float rotation) {
 	return Rectangle(p, w, h, rotation);
 }
 

@@ -1,37 +1,39 @@
 #pragma once
 
+#include <glm/vec2.hpp>
+
 #include "constants.hpp"
 #include "maths.hpp"
 
-const Vector2 GRAVITY = {0.f, -GRAVITATIONAL_CONSTANT};
-const Vector2 GRAVITY_PER_FRAME = {0.f, -GRAVITATIONAL_CONSTANT * FIXED_TIMESTEP};
+const glm::vec2 GRAVITY = {0.f, -GRAVITATIONAL_CONSTANT};
+const glm::vec2 GRAVITY_PER_FRAME = {0.f, -GRAVITATIONAL_CONSTANT * FIXED_TIMESTEP};
 const float TERMINAL_VELOCITY = std::sqrt(SQUARED_TERMINAL_VELOCITY);
 
 
-inline Vector2 dragForce(Vector2 velocity, float fluidDensity, float mass) {
+inline glm::vec2 dragForce(glm::vec2 velocity, float fluidDensity, float mass) {
     float dragCoef = 0.5f * fluidDensity * mass;
-    Vector2 velocitySquared = {-1 * sign(velocity.x) * velocity.x * velocity.x, -1 * sign(velocity.y) * velocity.y * velocity.y};
+    glm::vec2 velocitySquared = {-1 * glm::sign(velocity.x) * velocity.x * velocity.x, -1 * glm::sign(velocity.y) * velocity.y * velocity.y};
     auto drag = dragCoef * velocitySquared;
 
-    if (squaredMagnitude(drag) > SQUARED_TERMINAL_VELOCITY)
+    if (glm::dot(drag, drag) > SQUARED_TERMINAL_VELOCITY)
     {
-        drag = normalized(drag) * TERMINAL_VELOCITY;
+        drag = glm::normalize(drag) * TERMINAL_VELOCITY;
     }
     return drag;
 }
 
 // NOTE: Don't forget to devide by the mass of the object you're using this on
-inline float linearImpulse(Vector2 velocity1, Vector2 velocity2, float mass1, float mass2, float restitution) {
+inline float linearImpulse(glm::vec2 velocity1, glm::vec2 velocity2, float mass1, float mass2, float restitution) {
 	float reducedMass = (mass1 * mass2)/(mass1 + mass2);
 	float coefficient = 1 + restitution;
-	float velocityDifference =  magnitude(velocity1) - magnitude(velocity2);
+	float velocityDifference =  glm::length(velocity1) - glm::length(velocity2);
 	return reducedMass * coefficient * velocityDifference;
 }
 
 
 // returns the magnitude of the friction of a "surface" defined by points a and b on an object with given mass
-inline Vector2 friction(Vector2 a, Vector2 b, float mass, Vector2 velocity, Vector2 position) {
-	Vector2 ABBA;
+inline glm::vec2 friction(glm::vec2 a, glm::vec2 b, float mass, glm::vec2 velocity, glm::vec2 position) {
+	glm::vec2 ABBA;
 	// easy for unlevel surface
 	if (a.y > b.y) {
 		ABBA = a - b;
@@ -39,11 +41,15 @@ inline Vector2 friction(Vector2 a, Vector2 b, float mass, Vector2 velocity, Vect
 		ABBA = b - a;
 	} else {
 		// need to specifically resist velocity
-		float sqDistA = squaredMagnitude(a - position);
-		float sqDistB = squaredMagnitude(b - position);
-		Vector2 futurePos = position + velocity;
-		float futureSqDistA = squaredMagnitude(a - futurePos);
-		float futureSqDistB = squaredMagnitude(b - futurePos);
+		glm::vec2 relA = a - position;
+		glm::vec2 relB = b - position;
+		float sqDistA = dot(relA, relA);
+		float sqDistB = dot(relB, relB);
+		glm::vec2 futurePos = position + velocity;
+		glm::vec2 relAFuture = a - futurePos;
+		glm::vec2 relBFuture = b - futurePos;
+		float futureSqDistA = glm::dot(relAFuture, relBFuture);
+		float futureSqDistB = glm::dot(relBFuture, relBFuture);
 		if (sqDistA - futureSqDistA > 0) {
 			// then we're moving toward a and friction should be from a to b
 			ABBA = b - a;
@@ -61,6 +67,6 @@ inline Vector2 friction(Vector2 a, Vector2 b, float mass, Vector2 velocity, Vect
 	// if(velocity.x < 1.f) {
 	//  	return COEFFICIENT_OF_FRICTION * mass * GRAVITATIONAL_CONSTANT * -normalized(ABBA) * velocity.x;
 	// } else {
-	return COEFFICIENT_OF_FRICTION * mass * GRAVITATIONAL_CONSTANT * -normalized(ABBA);
+	return COEFFICIENT_OF_FRICTION * mass * GRAVITATIONAL_CONSTANT * - glm::normalize(ABBA);
 	// }
 }

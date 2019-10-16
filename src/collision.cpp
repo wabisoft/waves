@@ -2,6 +2,8 @@
 #include <iostream>
 #include <vector>
 
+#include <glm/vec2.hpp>
+
 #include "aabb.hpp"
 #include "entity.hpp"
 #include "collision.hpp"
@@ -16,6 +18,7 @@
 #include "util.hpp"
 
 using namespace wabi;
+using namespace glm;
 
 void resolveCollisions(Stage& stage) {
 	// NOTE (owen): if it starts to get slow this is definately a place we can optimize
@@ -46,15 +49,15 @@ void resolveCollisions(Stage& stage) {
 	assert(stage.xAxisOrder.size() == stage.yAxisOrder.size() && stage.xAxisOrder.size() == stage.aabbs.size());
 	for (int a = 0; a< 2; ++a) {
 		// do the x axis on the fist pass
-		AABBPair::Axis axis = AABBPair::X_AXIS;
+		Axis axis = X_AXIS;
 		std::vector<uint8> axisOrder = stage.xAxisOrder;
-		auto check = [&axis](Vector2 point) -> float {
-			return (axis == AABBPair::X_AXIS) ? point.x : point.y;
+		auto check = [&axis](vec2 point) -> float {
+			return (axis == X_AXIS) ? point.x : point.y;
 		};
 
 		// do the y axis on the second pass
 		if (a > 0) {
-			axis = AABBPair::Y_AXIS;
+			axis = Y_AXIS;
 			axisOrder = stage.yAxisOrder;
 		}
 		// start with the first aabb upper as the max
@@ -71,7 +74,7 @@ void resolveCollisions(Stage& stage) {
 				// if (check(previous.upper) > check(current.lower)) {
 					// if the pairs list is empty
 					if (pairs.empty()) {
-						assert(axis == AABBPair::X_AXIS); // this should only happen on the x-axis because of the short circuit at the bottom of the outermost loop
+						assert(axis == X_AXIS); // this should only happen on the x-axis because of the short circuit at the bottom of the outermost loop
 						pairs.push_back({axis, current, previous});
 					} else {
 						// otherwise
@@ -83,7 +86,8 @@ void resolveCollisions(Stage& stage) {
 						// if you find it then set the axis
 						if (search != pairs.end()) {
 							search->setAxis(axis);
-						} else {
+						} else if (a<1){ // if this is second axis and we didn't have an overlap already then
+							// we don't there's no potential collision
 							// otherwise add the pair to the list
 							pairs.push_back({axis, current, previous});
 						}
@@ -161,16 +165,16 @@ void dispatchPotentialCollision(Stage& stage, const AABBPair& pair) {
 
 inline void collideRed(Rock& rock, Sea& sea) {
 	assert(rock.type.type == RockType::RED);
-	Vector2 rockPosition = rock.shape.position;
-	Vector2 rockNextFramePosition = rock.shape.position + rock.velocity * FIXED_TIMESTEP;
-	Vector2 seaUpperBound = upperBound(sea.shape);
+	vec2 rockPosition = rock.shape.position;
+	vec2 rockNextFramePosition = rock.shape.position + rock.velocity * FIXED_TIMESTEP;
+	vec2 seaUpperBound = upperBound(sea.shape);
 	if(rockPosition.y < seaUpperBound.y) {
-		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x), 1);
+		createWave(sea, rockPosition, length(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x), 1);
 		rock.active = 0;
 	} else if (rockPosition.y < sea.heightAtX(rockPosition.x)) {
 		// TODO: Find nearest wave and maybe distructively interfere with it?
 	} else if (rockNextFramePosition.y < seaUpperBound.y) {
-		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x), 1);
+		createWave(sea, rockPosition, length(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x), 1);
 		rock.active = 0;
 	}
 }
@@ -178,8 +182,8 @@ inline void collideRed(Rock& rock, Sea& sea) {
 inline void collideGreen(Rock& rock, Sea& sea) {
 	assert(rock.type.type == RockType::GREEN);
 	float seaHeight = sea.heightAtX(rock.shape.position.x);
-	Vector2 lower = {rock.shape.position.x, rock.shape.position.y - rock.shape.radius};
-	Vector2 upper = {rock.shape.position.x, rock.shape.position.y + rock.shape.radius};
+	vec2 lower = {rock.shape.position.x, rock.shape.position.y - rock.shape.radius};
+	vec2 upper = {rock.shape.position.x, rock.shape.position.y + rock.shape.radius};
 	if ( seaHeight < lower.y) {
 		// we say this is no collision
 		return;
@@ -191,7 +195,7 @@ inline void collideGreen(Rock& rock, Sea& sea) {
 		// displacedWater = r * r * std::acos((r-h)/r) * (r-h) * std::sqrt(2*r*h - h*h);
 		displacedWater = seaHeight - lower.y;
 	}
-	rock.velocity += VECTOR2_UP * displacedWater * GRAVITATIONAL_CONSTANT * FIXED_TIMESTEP;
+	rock.velocity += VEC2_UP * displacedWater * GRAVITATIONAL_CONSTANT * FIXED_TIMESTEP;
 	rock.velocity += sea.velocityAtX(rock.shape.position.x) * FIXED_TIMESTEP;
 	auto drag = dragForce(rock.velocity, 600.f, mass(rock));
 	// auto drag = dragForce(rock.velocity, 600.f, area(AABB(rock))*SHIP_AREA_MASS_RATIO);
@@ -219,16 +223,16 @@ inline void collideGreen(Rock& rock, Sea& sea) {
 
 inline void collideBlue(Rock& rock, Sea& sea) {
 	assert(rock.type.type == RockType::BLUE);
-	Vector2 rockPosition = rock.shape.position;
-	Vector2 rockNextFramePosition = rock.shape.position + rock.velocity * FIXED_TIMESTEP;
-	Vector2 seaUpperBound = upperBound(sea.shape);
+	vec2 rockPosition = rock.shape.position;
+	vec2 rockNextFramePosition = rock.shape.position + rock.velocity * FIXED_TIMESTEP;
+	vec2 seaUpperBound = upperBound(sea.shape);
 	if(rockPosition.y < seaUpperBound.y) {
-		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x), -1);
+		createWave(sea, rockPosition, length(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x), -1);
 		rock.active = 0;
 	} else if (rockPosition.y < sea.heightAtX(rockPosition.x)) {
 		// TODO: Find nearest wave and maybe distructively interfere with it?
 	} else if (rockNextFramePosition.y < seaUpperBound.y) {
-		createWave(sea, rockPosition, magnitude(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x), -1);
+		createWave(sea, rockPosition, length(rock.velocity) * rock.shape.radius * rock.shape.radius * PI, (short)sign(rock.velocity.x), -1);
 		rock.active = 0;
 	}
 
@@ -249,11 +253,11 @@ void collide(Rock& rock, const Platform& platform) {
 	// FIXME: still need to figure out tunneling for really fast and small shit // need to make a polygon for the 4 dimensional position of the circle and do something clever with that
 	Collision col = collision(rock.shape, platform.shape);
 	if (col.collides) {
-		if(rock.state.type == RockState::FALLING && col.normal == VECTOR2_UP) {
+		if(rock.state.type == RockState::FALLING && col.normal == VEC2_UP) {
 			rock.state = {RockState::STANDING, {{col.surfaceStart, col.surfaceEnd}}};
 		}
 		rock.shape.position += col.normal * col.penetration;
-		float j = linearImpulse(rock.velocity, VECTOR2_ZERO, mass(rock) , mass(platform), ROCK_RESTITUTION);
+		float j = linearImpulse(rock.velocity, VEC2_ZERO, mass(rock) , mass(platform), ROCK_RESTITUTION);
 		rock.velocity += (j/mass(rock)) * col.normal;
 	}
 }
@@ -275,7 +279,7 @@ void collide(Rock& rock, Ship& ship) {
 
 void collide(Ship& ship, Sea& sea) {
 	float seaHeight = sea.heightAtX(ship.shape.position.x);
-	Vector2 lower, upper;
+	vec2 lower, upper;
 	boundingPoints(ship.shape, lower, upper);
 	if ( seaHeight < lower.y) {
 		// we say this is no collision
@@ -285,7 +289,7 @@ void collide(Ship& ship, Sea& sea) {
 	if (upper.y > seaHeight) {
 		displacedWater = (seaHeight - lower.y);
 	}
-	ship.velocity += VECTOR2_UP * displacedWater * GRAVITATIONAL_CONSTANT * FIXED_TIMESTEP;
+	ship.velocity += VEC2_UP * displacedWater * GRAVITATIONAL_CONSTANT * FIXED_TIMESTEP;
 	ship.velocity += sea.velocityAtX(ship.shape.position.x) * FIXED_TIMESTEP;
 	auto drag = dragForce(ship.velocity, 600.f, mass(ship) * SHIP_AREA_MASS_RATIO);
 	ship.velocity += drag * FIXED_TIMESTEP;
@@ -311,14 +315,14 @@ void collide(Ship& ship, const Platform& platform) {
 	Collision col = collision(ship.shape, platform.shape);
 	if(col.collides) {
 		if(ship.state.type != ShipState::STANDING) {
-			if (col.normal == VECTOR2_UP) {
+			if (col.normal == VEC2_UP) {
 				ship.state = {ShipState::STANDING, {{col.surfaceStart, col.surfaceEnd}}};
 			} else {
 				ship.state = {ShipState::FALLING, {}};
 			}
 		}
 		ship.shape.position += col.normal * col.penetration;
-		float j = linearImpulse(ship.velocity, VECTOR2_ZERO, mass(ship), mass(platform), SHIP_RESTITUTION);
+		float j = linearImpulse(ship.velocity, VEC2_ZERO, mass(ship), mass(platform), SHIP_RESTITUTION);
 		ship.velocity += (j/mass(ship)) * col.normal;
 	}
 }
@@ -328,17 +332,17 @@ void collide(Ship& ship, Rock& rock) {
 
 
 Collision collision(const Circle& c1, const Circle& c2) {
-	Vector2 relativePosition = c1.position - c2.position;
+	vec2 relativePosition = c1.position - c2.position;
 	float sumOfRadii = (c1.radius + c2.radius);
 	float sumOfRadiiSquared =  sumOfRadii * (c1.radius + c2.radius);
-	if (squaredMagnitude(relativePosition) < sumOfRadiiSquared) {
-		Vector2 normalizedRelPos = normalized(relativePosition); // normalize in place;
+	if (dot(relativePosition, relativePosition) < sumOfRadiiSquared) {
+		vec2 normalizedRelPos = normalize(relativePosition); // normalize in place;
 		Collision col;
 		col.collides = true;
 		col.intersection = c1.position + c1.radius * normalizedRelPos;
 		// col.normal = normalized(col.intersection - c2.position);
-		col.normal = normalized(c1.position - c2.position);
-		col.penetration = std::abs(magnitude(relativePosition) - sumOfRadii);
+		col.normal = normalize(c1.position - c2.position);
+		col.penetration = std::abs(length(relativePosition) - sumOfRadii);
 		return col;
 	} else {
 		return Collision();

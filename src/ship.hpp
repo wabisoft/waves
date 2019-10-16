@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/vec2.hpp>
+
 #include "prelude.hpp"
 #include "maths.hpp"
 #include "typedefs.hpp"
@@ -8,8 +10,8 @@
 struct ShipState {
 	struct FallingState { };
 	struct StandingState{
-		Vector2 surfaceStart;
-		Vector2 surfaceEnd;
+		glm::vec2 surfaceStart;
+		glm::vec2 surfaceEnd;
 	};
 	struct SurfingState {
 		uint8 waveId;
@@ -33,7 +35,7 @@ struct ShipState {
 
 struct Ship {
 	wabi::Rectangle shape;
-	Vector2 velocity;
+	glm::vec2 velocity;
 	ShipState state = {ShipState::FALLING, {}};
 	uint8_t id = 0;
 	bool active = false;
@@ -44,7 +46,7 @@ inline float mass(const Ship& ship) {
 }
 
 void updateShip(Stage& stage, float deltaTime);
-uint8_t createShip(Stage& stage, Vector2 position, float width, float height);
+uint8_t createShip(Stage& stage, glm::vec2 position, float width, float height);
 uint8_t createShip(Stage& stage, wabi::Rectangle rect);
 
 

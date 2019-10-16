@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <glm/vec2.hpp>
 
 #include "entity.hpp"
 #include "prelude.hpp"
@@ -13,10 +14,10 @@ struct AABB{
 	explicit AABB (const Platform&);
 	explicit AABB (const Ship&);
 	explicit AABB (const Sea&);
-	Vector2 lower = {0.f,0.f};
-	Vector2 upper = {0.f,0.f};
+	glm::vec2 lower = {0.f,0.f};
+	glm::vec2 upper = {0.f,0.f};
 	EntityType type = NONE;
-	uint8_t id = 0;
+	uint8 id = 0;
 };
 
 typedef std::vector<AABB>::iterator AABBIt;
@@ -35,15 +36,15 @@ inline bool operator==(const AABB& a, const AABB& b) {
 		return a.id == b.id && a.type == b.type; // note that we do not compare vectors because floats are all shitty
 }
 
-struct AABBPair{
-	enum Axis : uint8 {
-		NONE = 0,
-		X_AXIS = 1 << 0,
-		Y_AXIS = 1 << 1,
-		BOTH = 3
-	};
+enum Axis : uint8 {
+	NO_AXIS = 0,
+	X_AXIS = 1 << 0,
+	Y_AXIS = 1 << 1,
+	BOTH_AXES = 3
+};
 
-	Axis overlap = NONE;
+struct AABBPair{
+	Axis overlap = NO_AXIS;
 	AABB a;
 	AABB b;
 
@@ -56,7 +57,7 @@ struct AABBPair{
 };
 
 inline bool collides(AABBPair pair) {
-	return pair.overlap == (AABBPair::X_AXIS | AABBPair::Y_AXIS);
+	return pair.overlap == (X_AXIS | Y_AXIS);
 }
 
 inline bool operator==(const AABBPair& a, const AABBPair& b){
