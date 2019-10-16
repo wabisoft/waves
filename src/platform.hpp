@@ -1,4 +1,7 @@
 #pragma once
+
+#include <glm/vec2.hpp>
+
 #include "aabb.hpp"
 #include "constants.hpp"
 #include "maths.hpp"
@@ -13,7 +16,7 @@ struct Platform {
 
 typedef std::vector<Platform>::iterator PlatformIt;
 
-uint8 createPlatform(Stage& stage, Vector2 position, float width, float height);
+uint8 createPlatform(Stage& stage, glm::vec2 position, float width, float height);
 uint8 createPlatform(Stage& stage, wabi::Rectangle);
 PlatformIt findPlatform(Stage& stage, uint8 platform_id);
 

@@ -3,8 +3,9 @@
 #include "stage.hpp"
 
 using namespace wabi;
+using namespace glm;
 
-uint8 createPlatform(Stage& stage, Vector2 position, float width, float height) {
+uint8 createPlatform(Stage& stage, vec2 position, float width, float height) {
 	Platform platform;
 	platform.shape = makeRectangle(position, width, height);
 	platform.id = ++stage.id_src;

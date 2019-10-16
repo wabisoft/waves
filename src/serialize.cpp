@@ -1,10 +1,12 @@
 #include <iostream>
+#include <cstdio>
 #include <fstream>
 #include "serialize.hpp"
 #include "json.hpp"
 
 using namespace std;
 using namespace wabi;
+using namespace glm;
 
 // TODO: serialize a more complete game state (i.e. every piece of state)
 string serialize(const Stage& stage) {
@@ -27,6 +29,7 @@ std::string serialize(const std::vector<Sea> seas) {
 		stream << serialize(seas[i].shape);
 		if ( i < seas.size() - 1) { stream << ","; }
 	}
+	stream << "]";
 	return stream.str();
 }
 std::string serialize(const std::vector<Wave> waves) {
@@ -62,7 +65,7 @@ std::string serialize(const Rectangle& rectangle) {
 	return stream.str();
 }
 
-std::string serialize(const Vector2 v) {
+std::string serialize(const vec2 v) {
 	stringstream stream;
 	stream << "[" << v.x << "," << v.y << "]";
 	return stream.str();
@@ -90,7 +93,7 @@ inline std::vector<T> extractArray(JSON j, JSONError& e, T(*extractT)(JSON, JSON
 	return ret;
 }
 
-inline Vector2 extractVector2(JSON j, JSONError& e) {
+inline vec2 extractVec2(JSON j, JSONError& e) {
 	std::vector<float> nums = extractArray(j, e, &getNumber);
 	return {nums[0], nums[1]};
 }
@@ -103,7 +106,7 @@ inline Rectangle extractRectangle(JSON j, JSONError& e) {
 	if(e.no) { return r;}
 	r.height = getNumber(getValue(object, "height"), e);
 	if(e.no) { return r;}
-	r.position = extractVector2(getValue(object, "position"), e);
+	r.position = extractVec2(getValue(object, "position"), e);
 	if(e.no) { return r;}
 	r.rotation = getNumber(getValue(object, "rotation"), e);
 	if(e.no) { return r;}
@@ -136,7 +139,7 @@ bool loadStageFromString(std::string data, Stage& stage, SerializeError& err) {
 	Rectangle r = extractRectangle(getValue(object, "ship"), e);
 	if(e.no) {err.what = e.what; return false;}
 	createShip(stage, r);
-	stage.rockSpawn = extractVector2(getValue(object, "rock_spawn"), e);
+	stage.rockSpawn = extractVec2(getValue(object, "rock_spawn"), e);
 	JSONObject jWinObject = getObject(getValue(object, "win"), e);
 	if(e.no) {err.what = e.what; return false;}
 	stage.win.timeToWin = getNumber(getValue(jWinObject, "time"), e);
@@ -154,4 +157,17 @@ bool loadStageFromFile(std::string filename, Stage& stage, SerializeError& err) 
 	}
 	ifs.close();
 	return loadStageFromString(data, stage, err);
+}
+
+std::string dumpStageToString(Stage& stage, SerializeError & err) {
+	return serialize(stage);
+}
+
+bool dumpStageToFile(std::string filename, Stage& stage, SerializeError& err) {
+	FILE* pFile;
+	pFile = fopen(filename.c_str(), "w");
+	if (pFile == nullptr){ err.what = "Could not open file: " + filename; return false; }
+	fputs(serialize(stage).c_str(), pFile);
+	fclose(pFile);
+	return true;
 }

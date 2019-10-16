@@ -6,14 +6,14 @@ inline float Wave::heightAtX(float x) const {
 	return sign * amplitude * decay * pow(E, -pow(WAVE_WIDTH_MULTIPLIER * (x - position.x), 2));
 }
 
-inline Vector2 Wave::velocityAtX(float x) const {
+inline glm::vec2 Wave::velocityAtX(float x) const {
 	float distFromMid = std::fabs(x - position.x);
 	float max = maximumX();
-	if (max < x) { return VECTOR2_ZERO; }
+	if (max < x) { return VEC2_ZERO; }
 	float min = minimumX();
-	if (min > x) { return VECTOR2_ZERO; }
+	if (min > x) { return VEC2_ZERO; }
 	float halfLength = (max - min)/2.f;
-	return ((halfLength - distFromMid)/halfLength) * velocity * direction;
+	return ((halfLength - distFromMid)/halfLength) * direction * velocity;
 }
 
 inline float Wave::slopeAtX(float x) const {

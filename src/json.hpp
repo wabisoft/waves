@@ -13,7 +13,8 @@ typedef std::string::iterator string_it;
 
 struct JSONError{
 	enum Type {
-		INCOMPLETE, // expected more json
+		OK = 0,
+		INCOMPLETE = 1, // expected more json
 		INCORRECT, // malformed json
 		OTHER // catch all
 	};
@@ -125,7 +126,7 @@ inline string_it getNext(string_it start, string_it end, char c, JSONError& e) {
 
 
 inline string_it getNextBalanced(string_it start, string_it end, char open, char close, JSONError &e) {
-	assert(*start == open);
+	assert(*start == open); // ensure that the squence begins with desired opening character
 	++start;
 	int count = 1;
 	while(count > 0) {
@@ -135,6 +136,7 @@ inline string_it getNextBalanced(string_it start, string_it end, char open, char
 			e.what += close;
 			e.what += "'";
 			e.where = start;
+			return start;
 		}
 		if(*start == open) { ++count; }
 		else if (*start == close) { --count; }
@@ -217,7 +219,7 @@ inline std::string getString(string_it& start, string_it& end, JSONError& e) {
 	expect(start, '"', e);
 	string_it it = start;
 	if (e.no) { return ""; }
-	while(*it != '"' && it != end) {
+	while(it != end && *it != '"') {
 		++it;
 	}
 	std::string ret = std::string(start, it);
@@ -242,7 +244,7 @@ inline JSONArray getArray(string_it& start, string_it& end, JSONError& e) {
 	if(e.no) { return {}; }
 	consumeWhitespace(start, end);
 	JSONArray arr;
-	while(*start != ']' && start != end) {
+	while(start != end && *start != ']') {
 		consumeWhitespace(start, end);
 		arr.push_back(getJSON(start, end,e ));
 		start = arr.back().end;
@@ -261,7 +263,7 @@ inline JSONObject getObject(string_it& start, string_it& end, JSONError& e) {
 	if(e.no) { return {}; }
 	consumeWhitespace(start, end);
 	JSONObject object;
-	while(*start != '}' && start != end) {
+	while(start != end && *start != '}') {
 		consumeWhitespace(start, end);
 		JSON j = getJSON(start, end, e);
 		if(e.no) { return object; };

@@ -20,6 +20,6 @@ struct Game {
 
 void start(Game& game);
 void update(Game& game);
-void processEvent(Game& game, const sf::Event&, const sf::RenderTarget&);
+void processEvent(Game& game, const sf::Event&, const sf::RenderWindow&);
 void keyEvent(Game& game, const sf::Event& event);
 void stop(Game& game);

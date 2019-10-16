@@ -1,11 +1,20 @@
 {
   "seas": [
       {
-        "width": 130,
+        "width": 64,
+        "height": 13.3,
+        "position": [
+          32,
+          6.65
+        ],
+		"rotation": 0
+      },
+	  {
+        "width": 64,
         "height": 13.3,
         "position": [
           64,
-          6.65
+          15
         ],
 		"rotation": 0
       }
