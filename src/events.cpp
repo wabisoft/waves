@@ -2,8 +2,27 @@
 #include "events.hpp"
 #include "str.hpp"
 
-void EventManager::subscribe(EventListener& listener, Event::EventType eventType) {
-	_listeners[eventType].push_back(&listener);
+logging::Logger EventManager::logger = logging::Logger("EventManager");
+
+void EventListener::subscribe(EventManager& manager, std::vector<Event::EventType> eventTypes) {
+	for(Event::EventType eventType : eventTypes) {
+		auto search = std::lower_bound(_subscribedEvents.begin(), _subscribedEvents.end(), eventType);
+		if(search == _subscribedEvents.end()) {
+			manager._subscribe(*this, eventType);
+			sorted_insert(_subscribedEvents, eventType);
+		}
+	}
+}
+
+void EventManager::_subscribe(EventListener& listener, Event::EventType eventType) {
+	std::vector<EventListener*> listeners = _listeners[eventType];
+	auto search = std::find(listeners.begin(), listeners.end(), &listener);
+	if(search != listeners.end()) {
+		logger.warning("%s subscribed to %s, but was already subscribed", listener.name, str(eventType).c_str());
+		return;
+	} else {
+		_listeners[eventType].push_back(&listener);
+	}
 }
 
 void EventManager::dispatchEvents(sf::Window& window){
@@ -15,14 +34,14 @@ void EventManager::dispatchEvents(sf::Window& window){
 			listener = *it;
 			listener->onAll(window, event);
 			if (event.handled) {
-				printf_s("Warning: Event %s marked handled by: %s!\n", str(event.type).c_str(), listener->name);
+				logger.debug("Event %s marked handled by: %s!\n", str(event.type).c_str(), listener->name);
 				goto OUTER;
 			}
 
 		}
 		std::vector<EventListener*>& listeners  = _listeners[event.type];
 		if (listeners.empty()) {
-			printf_s("Warning: Recieved Event %s with no listeners\n", str(event.type).c_str());
+			logger.debug("Recieved Event %s with no listeners\n", str(event.type).c_str());
 			continue;
 		}
 		for(auto it = listeners.begin(); it != listeners.end(); ++it) {
@@ -100,7 +119,7 @@ void EventManager::dispatchEvents(sf::Window& window){
 				default: break;
 			}
 			if (event.handled) {
-				printf_s("Warning: Event %s marked handled by: %s!\n", str(event.type).c_str(), listener->name);
+				logger.debug("Event %s marked handled by: %s!\n", str(event.type).c_str(), listener->name);
 				goto OUTER;
 			}
 		}

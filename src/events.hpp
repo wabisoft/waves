@@ -4,9 +4,14 @@
 
 #include <SFML/Window.hpp>
 
+#include "logging.hpp"
+#include "util.hpp"
+
 struct Event : sf::Event {
 	bool handled = false;
 };
+
+struct EventManager;
 
 struct EventListener {
 	virtual void onClosed(sf::Window&) { }
@@ -34,14 +39,20 @@ struct EventListener {
 	virtual void onSensorChanged(sf::Window&, Event::SensorEvent) { }
 	virtual void onAll(sf::Window&, Event&) { }
 
+	virtual void subscribe(EventManager&, std::vector<Event::EventType>);
+
 	const char * name = "anonymous";
+	std::vector<Event::EventType> _subscribedEvents;  // I don't believe in access specifiers
+	// but the order of this vector is managed by EventListener::subscribe method, use that
+	// unless you feel confident ;)
 };
 
 // one event manager per sfml window
 struct EventManager {
-	std::vector<EventListener*> _listeners[sf::Event::Count+1]; // an array of vectors of listeners
-	void subscribe(EventListener& listener, sf::Event::EventType eventType);
+	std::vector<EventListener*> _listeners[Event::Count+1]; // an array of vectors of listeners
+	void _subscribe(EventListener& listener, Event::EventType eventType);
 	void dispatchEvents(sf::Window& window);
+	static logging::Logger logger;
 };
 
 

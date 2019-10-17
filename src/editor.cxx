@@ -11,14 +11,20 @@
 #include "imgui_stdlib.h"
 #include "editor.hpp"
 #include "graphics.hpp"
+#include "logging.hpp"
 #include "serialize.hpp"
 #include "str.hpp"
 #include "win32_file.hpp"
+
+
+static logging::Logger logger = logging::Logger("main");
 
 struct ImGuiEL : public EventListener {
 	ImGuiEL() { name = "ImGui"; }
 	virtual void onAll(sf::Window& window, Event& event) override {
 		ImGui::SFML::ProcessEvent(event);
+    	ImGuiIO& io = ImGui::GetIO();
+		event.handled = io.WantCaptureKeyboard || io.WantCaptureMouse;
 	}
 };
 
@@ -58,28 +64,28 @@ inline void editorGuiErrorPopups(Editor& editor) {
 }
 
 inline void editorGuiStage(Editor& editor) {
-	ImGui::Begin("Selection");
+	ImGui::BeginChild("Selection");
 	if(editor.selection.entity.type != NONE) {
 		char buff[3];
 		ImGui::Text("ID: %s", itoa(editor.selection.entity.id, buff, 10));
 		ImGui::Text("Type: %s", str(editor.selection.entity.type).c_str());
 		ImGui::Text("Position: %s", str(editor.selection.entityPosition).c_str());
 	}
-    ImGui::End();
+    ImGui::EndChild();
 }
 
 inline void drawEditorGui(sf::RenderWindow& window, Editor& editor) {
 	// ImGui::SetNextWindowPos({3, 3});
 	editorGuiMenuBar(window.getSystemHandle(), editor);
 	editorGuiErrorPopups(editor);
-	editorGuiStage(editor);
 	ImGui::Begin("Editor");
-	ImGui::Text("Selection State: %s", str(editor.stage.selection.state));
+	editorGuiStage(editor);
 	// ImGui::InputFloat("SeaLevel", &editor.stage.sea.level);
     ImGui::End();
 }
 
 int main() {
+	logger.setLoggerLevel("EventManager", logging::CRITICAL);
 	sf::RenderWindow window;
 	sf::ContextSettings settings;
 	sf::VideoMode videoMode = {800, 450};
@@ -99,12 +105,13 @@ int main() {
 	Clock drawClock;
 	EventManager eventManager;
 	Editor editor;
-	eventManager.subscribe(editor, Event::Closed);
-	eventManager.subscribe(editor, Event::MouseButtonPressed);
-	eventManager.subscribe(editor, Event::MouseButtonReleased);
-	eventManager.subscribe(editor, Event::MouseMoved);
+	editor.subscribe(eventManager, {Event::Closed, Event::MouseButtonPressed, Event::MouseButtonReleased, Event::MouseMoved});
+	// eventManager.subscribe(editor, Event::Closed);
+	// eventManager.subscribe(editor, Event::MouseButtonPressed);
+	// eventManager.subscribe(editor, Event::MouseButtonReleased);
+	// eventManager.subscribe(editor, Event::MouseMoved);
 	ImGuiEL imguiListener;
-	eventManager.subscribe(imguiListener, Event::Count);
+	eventManager._subscribe(imguiListener, {Event::Count});
     sf::Clock deltaClock;
 	levelOpen(editor, "D:/code/wabisoft/waves/assets/levels/level1.json");
     while (window.isOpen()) {

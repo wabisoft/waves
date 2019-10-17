@@ -81,8 +81,10 @@ uint8_t createAABB(Stage& stage, AABB aabb) {
 		AABB b = *findAABB(stage, bId);
 		return a.lower.y < b.lower.y;
 	};
-	sorted_insert<uint8, std::vector<uint8>::iterator>(stage.xAxisOrder, aabb.id, xSortPredicate); // keep the x axis sorted
-	sorted_insert<uint8, std::vector<uint8>::iterator>(stage.yAxisOrder, aabb.id, ySortPredicate); // keep the y axis sorted
+	// sorted_insert<uint8, std::vector<uint8>::iterator>(stage.xAxisOrder, aabb.id, xSortPredicate); // keep the x axis sorted
+	// sorted_insert<uint8, std::vector<uint8>::iterator>(stage.yAxisOrder, aabb.id, ySortPredicate); // keep the y axis sorted
+	sorted_insert(stage.xAxisOrder, aabb.id, xSortPredicate); // keep the x axis sorted
+	sorted_insert(stage.yAxisOrder, aabb.id, ySortPredicate); // keep the y axis sorted
 	return aabb.id;
 }
 
@@ -95,12 +97,12 @@ AABBIt findAABB(Stage& stage, uint8 aabbId) {
 AABBIt deleteAABB(Stage& stage, AABBIt aabbIt) {
 	uint8 aabbId = aabbIt->id;
 	// look for id in xAxisOrdering
-	auto search = find_if(stage.xAxisOrder.begin(), stage.xAxisOrder.end(), [aabbId](uint8 id) -> bool { return aabbId == id; });	
+	auto search = find_if(stage.xAxisOrder.begin(), stage.xAxisOrder.end(), [aabbId](uint8 id) -> bool { return aabbId == id; });
 	assert(search != stage.xAxisOrder.end()); // don't look for unicorns!
 	// delete from xAxisOrdering
 	stage.xAxisOrder.erase(search);
 	// look for id in yAxisOrdering
-	search = find_if(stage.yAxisOrder.begin(), stage.yAxisOrder.end(), [aabbId](uint8 id) -> bool { return aabbId == id; });	
+	search = find_if(stage.yAxisOrder.begin(), stage.yAxisOrder.end(), [aabbId](uint8 id) -> bool { return aabbId == id; });
 	assert(search != stage.yAxisOrder.end()); // don't look for unicorns!
 	// delete from yAxisOrdering
 	stage.yAxisOrder.erase(search);

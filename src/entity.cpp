@@ -80,7 +80,6 @@ Entity findEntityAtPosition(Stage& stage, vec2 position, vec2& entityPosition) {
 		Entity entity;
 	};
 	std::vector<Candidate> candidates;
-	Chosen chosen = {std::numeric_limits<float>::infinity(),{0, 0}, {0, NONE}};
 	for(int a = 0; a < 2; ++a) {
 		std::vector<uint8> axisOrder = stage.xAxisOrder;
 		Axis axis = X_AXIS;
@@ -98,14 +97,7 @@ Entity findEntityAtPosition(Stage& stage, vec2 position, vec2& entityPosition) {
 				if(search != candidates.end()) {
 					search->axis = (Axis)(search->axis | axis);
 				} else if (a<1) { // if we are on the second axis and the candidate doesn't exist then we can skip
-					// candidates.push_back({axis, Entity{aabb.id, aabb.type}});
-					Entity entity = {aabb.id, aabb.type};
-					vec2 thisEntityPosition = getEntityPosition(stage, entity);
-					vec2 rel = thisEntityPosition - position;
-					float squaredDistance = dot(rel, rel);
-					if(chosen.squaredDistance > squaredDistance) {
-						chosen = {squaredDistance, thisEntityPosition, entity};
-					}
+					candidates.push_back({axis, Entity{aabb.id, aabb.type}});
 				}
 			} else if (aabb.lower[a] >= position[a]) {
 				// since the axis list is sorted from lowest to highest then
@@ -114,9 +106,20 @@ Entity findEntityAtPosition(Stage& stage, vec2 position, vec2& entityPosition) {
 			}
 		}
 	}
+	Chosen chosen = {std::numeric_limits<float>::infinity(),{0, 0}, {0, NONE}};
+	for(Candidate candidate : candidates) {
+		if (candidate.axis != BOTH_AXES) { continue; }
+		vec2 ep = getEntityPosition(stage, candidate.entity);
+		vec2 rel = ep - position;
+		float squaredDistance = dot(rel, rel);
+		if(chosen.squaredDistance > squaredDistance) {
+			chosen = {squaredDistance, ep, candidate.entity};
+		}
+	}
 	if(chosen.entity.id && pointOnEntity(stage, position, chosen.entity)) {
-		entityPosition = chosen.position;
-		return chosen.entity;
+			entityPosition = chosen.position;
+			return chosen.entity;
 	};
+
 	return {0, NONE};
 }
