@@ -37,13 +37,6 @@ struct Selection {
 	bool active = false;
 };
 
-inline const char * str(Selection::State s) {
-	const char * names[] = {
-		"SELECT", "PULL"
-	};
-	return names[s];
-}
-
 struct StageState {
 	struct Paused {
 		float time = 0.f;

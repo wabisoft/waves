@@ -12,7 +12,15 @@
 #include "editor.hpp"
 #include "graphics.hpp"
 #include "serialize.hpp"
+#include "str.hpp"
 #include "win32_file.hpp"
+
+struct ImGuiEL : public EventListener {
+	ImGuiEL() { name = "ImGui"; }
+	virtual void onAll(sf::Window& window, Event& event) override {
+		ImGui::SFML::ProcessEvent(event);
+	}
+};
 
 
 inline void editorGuiMenuBar(sf::WindowHandle windowHandle, Editor& editor) {
@@ -51,10 +59,11 @@ inline void editorGuiErrorPopups(Editor& editor) {
 
 inline void editorGuiStage(Editor& editor) {
 	ImGui::Begin("Selection");
-	if(editor.stage.selection.active) {
+	if(editor.selection.entity.type != NONE) {
 		char buff[3];
-		ImGui::Text("ID: %s", itoa(editor.stage.selection.entity.id, buff, 10));
-		ImGui::Text("Type: %s", str(editor.stage.selection.entity.type));
+		ImGui::Text("ID: %s", itoa(editor.selection.entity.id, buff, 10));
+		ImGui::Text("Type: %s", str(editor.selection.entity.type).c_str());
+		ImGui::Text("Position: %s", str(editor.selection.entityPosition).c_str());
 	}
     ImGui::End();
 }
@@ -68,12 +77,9 @@ inline void drawEditorGui(sf::RenderWindow& window, Editor& editor) {
 	ImGui::Text("Selection State: %s", str(editor.stage.selection.state));
 	// ImGui::InputFloat("SeaLevel", &editor.stage.sea.level);
     ImGui::End();
-    ImGui::SFML::Render(window);
 }
 
-int main()
-{
-
+int main() {
 	sf::RenderWindow window;
 	sf::ContextSettings settings;
 	sf::VideoMode videoMode = {800, 450};
@@ -88,8 +94,7 @@ int main()
 	}
 
     ImGui::SFML::Init(window);
-	ImGuiIO& io = ImGui::GetIO();
-	ImFont* pFont = io.Fonts->AddFontFromFileTTF((ExePath() + "/assets/fonts/IBMPlexMono-Regular.ttf").c_str(), 15.f);
+	ImFont* pFont = ImGui::GetIO().Fonts->AddFontFromFileTTF((ExePath() + "/assets/fonts/IBMPlexMono-Regular.ttf").c_str(), 15.f);
 	ImGui::SFML::UpdateFontTexture();
 	Clock drawClock;
 	EventManager eventManager;
@@ -98,34 +103,18 @@ int main()
 	eventManager.subscribe(editor, Event::MouseButtonPressed);
 	eventManager.subscribe(editor, Event::MouseButtonReleased);
 	eventManager.subscribe(editor, Event::MouseMoved);
+	ImGuiEL imguiListener;
+	eventManager.subscribe(imguiListener, Event::Count);
     sf::Clock deltaClock;
 	levelOpen(editor, "D:/code/wabisoft/waves/assets/levels/level1.json");
     while (window.isOpen()) {
         sf::Event event;
-		eventManager.dispatchEvents(reinterpret_cast<sf::Window&>(window));
-        // while (window.pollEvent(event)) {
-        //     // ImGui::SFML::ProcessEvent(event);
-		// 	// processEvent(editor, event, window);
-        //     switch(event.type) {
-		// 		case sf::Event::Closed:
-        //         	window.close();
-		// 			break;
-		// 		case sf::Event::Resized:
-		// 			{
-		// 				auto view = window.getView();
-		// 				view.setCenter({event.size.width/2.f, event.size.height/2.f});
-		// 				view.setSize({(float)event.size.width, (float)event.size.height});
-		// 				window.setView(view);
-		// 			}
-		// 			break;
-		// 		default: break;
-        //     }
-        // }
-
+		eventManager.dispatchEvents(window);
         ImGui::SFML::Update(window, deltaClock.restart());
         window.clear();
 		drawStage(window, editor.stage, true);
 		drawEditorGui(window, editor);
+		ImGui::SFML::Render(window);
 		window.display();
     }
     ImGui::SFML::Shutdown();

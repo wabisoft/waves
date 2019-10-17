@@ -63,6 +63,11 @@ bool pointOnEntity(Stage stage, vec2 point, Entity entity) {
 }
 
 Entity findEntityAtPosition(Stage& stage, vec2 position) {
+	vec2 _v;
+	return findEntityAtPosition(stage, position, _v);
+}
+
+Entity findEntityAtPosition(Stage& stage, vec2 position, vec2& entityPosition) {
 	// Adaptation of sweep and prune
 	// takes advantage of the sortedness of the two lists used in our collision detection routine
 	struct Candidate{
@@ -71,10 +76,11 @@ Entity findEntityAtPosition(Stage& stage, vec2 position) {
 	};
 	struct Chosen {
 		float squaredDistance;
+		vec2 position;
 		Entity entity;
 	};
 	std::vector<Candidate> candidates;
-	Chosen chosen = {std::numeric_limits<float>::infinity(), {0, NONE}};
+	Chosen chosen = {std::numeric_limits<float>::infinity(),{0, 0}, {0, NONE}};
 	for(int a = 0; a < 2; ++a) {
 		std::vector<uint8> axisOrder = stage.xAxisOrder;
 		Axis axis = X_AXIS;
@@ -94,11 +100,11 @@ Entity findEntityAtPosition(Stage& stage, vec2 position) {
 				} else if (a<1) { // if we are on the second axis and the candidate doesn't exist then we can skip
 					// candidates.push_back({axis, Entity{aabb.id, aabb.type}});
 					Entity entity = {aabb.id, aabb.type};
-					vec2 entityPosition = getEntityPosition(stage, entity);
-					vec2 rel = entityPosition - position;
+					vec2 thisEntityPosition = getEntityPosition(stage, entity);
+					vec2 rel = thisEntityPosition - position;
 					float squaredDistance = dot(rel, rel);
 					if(chosen.squaredDistance > squaredDistance) {
-						chosen = {squaredDistance, entity};
+						chosen = {squaredDistance, thisEntityPosition, entity};
 					}
 				}
 			} else if (aabb.lower[a] >= position[a]) {
@@ -109,6 +115,7 @@ Entity findEntityAtPosition(Stage& stage, vec2 position) {
 		}
 	}
 	if(chosen.entity.id && pointOnEntity(stage, position, chosen.entity)) {
+		entityPosition = chosen.position;
 		return chosen.entity;
 	};
 	return {0, NONE};

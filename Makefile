@@ -2,11 +2,11 @@
 
 cmake-debug:
 	mkdir -p build
-	cd build && cmake ../src -DCMAKE_BUILD_TYPE=Debug
+	cd build && cmake .. -DCMAKE_BUILD_TYPE=Debug
 
 cmake-release:
 	mkdir -p build
-	cd build && cmake ../src -DCMAKE_BUILD_TYPE=Release
+	cd build && cmake .. -DCMAKE_BUILD_TYPE=Release
 
 clean:
 	rm -rf build

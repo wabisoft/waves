@@ -24,12 +24,17 @@ struct MouseState {
 	glm::vec2 downPosition;
 };
 
-struct Ghost {
+struct EditorSelection{
+	EditorSelection() : entity(), entityPosition(0), transform(1) {}
 	Entity entity;
+	glm::vec2 entityPosition;
+	glm::mat4 transform;
 };
 
-class Editor : public EventListener {
-public:
+struct Editor : public EventListener {
+	Editor() {
+		name = "Editor";
+	}
 	virtual void onClosed(sf::Window&)											override;
 	virtual void onMouseButtonPressed(sf::Window&, Event::MouseButtonEvent)		override;
 	virtual void onMouseButtonReleased(sf::Window&, Event::MouseButtonEvent)	override;
@@ -38,17 +43,12 @@ public:
 	std::string filename;
 	Stage stage;
 	MouseState mouseState;
-	Entity selectedEntity;
+	EditorSelection selection;
 	std::vector<ErrorPopupState> errorPopups;
 };
 
 void initEditor(Editor& editor);
-// void handleEvents(Editor& editor, sf::RenderWindow& window);
-void processEvent(Editor& editor, const sf::Event& event, const sf::RenderWindow& window);
 void keyEvent(Editor&, sf::Event);
-void startMouseInput(Editor&, glm::vec2 );
-void continueMouseInput(Editor&, glm::vec2 );
-void endMouseInput(Editor&, glm::vec2 );
 
 void levelOpen(Editor& editor, std::string filename);
 void levelOpen(sf::WindowHandle windowHandle, Editor& editor);

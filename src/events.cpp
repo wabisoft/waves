@@ -1,5 +1,6 @@
 #include <iostream>
 #include "events.hpp"
+#include "str.hpp"
 
 void EventManager::subscribe(EventListener& listener, Event::EventType eventType) {
 	_listeners[eventType].push_back(&listener);
@@ -8,11 +9,24 @@ void EventManager::subscribe(EventListener& listener, Event::EventType eventType
 void EventManager::dispatchEvents(sf::Window& window){
 	Event event;
 	while (window.pollEvent(event)) {
+		EventListener * listener;
+		std::vector<EventListener*>& _power_listeners = _listeners[Event::Count];
+		for(auto it = _power_listeners.begin(); it != _power_listeners.end(); ++it) {
+			listener = *it;
+			listener->onAll(window, event);
+			if (event.handled) {
+				printf_s("Warning: Event %s marked handled by: %s!\n", str(event.type).c_str(), listener->name);
+				goto OUTER;
+			}
+
+		}
 		std::vector<EventListener*>& listeners  = _listeners[event.type];
 		if (listeners.empty()) {
-			printf_s("Warning: Recieved Event %s with no listeners\n", str(event.type));
+			printf_s("Warning: Recieved Event %s with no listeners\n", str(event.type).c_str());
+			continue;
 		}
-		for(EventListener* listener : listeners) {
+		for(auto it = listeners.begin(); it != listeners.end(); ++it) {
+			listener = *it;
 			switch (event.type) {
  				case Event::Closed:
 					listener->onClosed(window);
@@ -85,7 +99,13 @@ void EventManager::dispatchEvents(sf::Window& window){
 					break;
 				default: break;
 			}
+			if (event.handled) {
+				printf_s("Warning: Event %s marked handled by: %s!\n", str(event.type).c_str(), listener->name);
+				goto OUTER;
+			}
 		}
+OUTER:
+		;
 	}
 }
 

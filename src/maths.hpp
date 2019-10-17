@@ -7,6 +7,7 @@
 #include <glm/vec2.hpp>
 #include <glm/common.hpp>
 #include <glm/geometric.hpp>
+#include <glm/mat3x3.hpp>
 
 const glm::vec2 VEC2_UP {0.f, 1.f};
 const glm::vec2 VEC2_DOWN {0.f, -1.f};
@@ -14,6 +15,7 @@ const glm::vec2 VEC2_LEFT {-1.f, 0.f};
 const glm::vec2 VEC2_RIGHT {1.f, 0.f};
 const glm::vec2 VEC2_ZERO {0.f, 0.f};
 
+const glm::mat3 MAT3_IDENTITY(1);
 
 
 /********

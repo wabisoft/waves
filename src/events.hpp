@@ -4,7 +4,9 @@
 
 #include <SFML/Window.hpp>
 
-using Event = sf::Event;
+struct Event : sf::Event {
+	bool handled = false;
+};
 
 struct EventListener {
 	virtual void onClosed(sf::Window&) { }
@@ -30,42 +32,17 @@ struct EventListener {
 	virtual void onTouchMoved(sf::Window&, Event::TouchEvent) { }
 	virtual void onTouchEnded(sf::Window&, Event::TouchEvent) { }
 	virtual void onSensorChanged(sf::Window&, Event::SensorEvent) { }
+	virtual void onAll(sf::Window&, Event&) { }
+
+	const char * name = "anonymous";
 };
 
 // one event manager per sfml window
 struct EventManager {
-	std::vector<EventListener*> _listeners[sf::Event::Count]; // an array of vectors of listeners
-
+	std::vector<EventListener*> _listeners[sf::Event::Count+1]; // an array of vectors of listeners
 	void subscribe(EventListener& listener, sf::Event::EventType eventType);
 	void dispatchEvents(sf::Window& window);
 };
 
-inline const char * str(Event::EventType type) {
-	const char * names[] = {
-		"Closed",
-        "Resized",
-        "LostFocus",
-        "GainedFocus",
-        "TextEntered",
-        "KeyPressed",
-        "KeyReleased",
-        "MouseWheelMoved",
-        "MouseWheelScrolled",
-        "MouseButtonPressed",
-        "MouseButtonReleased",
-        "MouseMoved",
-        "MouseEntered",
-        "MouseLeft",
-        "JoystickButtonPressed",
-        "JoystickButtonReleased",
-        "JoystickMoved",
-        "JoystickConnected",
-        "JoystickDisconnected",
-        "TouchBegan",
-        "TouchMoved",
-        "TouchEnded",
-        "SensorChanged"
-	};
-	return names[type];
-}
+
 

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "entity.hpp"
 #include "editor.hpp"
@@ -16,7 +17,7 @@ void Editor::onClosed(sf::Window& window) {
 void Editor::onMouseButtonPressed(sf::Window& window, Event::MouseButtonEvent mouseButton)	{
 	// TODO: something state dependent
 	vec2 position = screen2GamePos(window, {mouseButton.x, mouseButton.y});
-	selectedEntity = findEntityAtPosition(stage, position);
+	selection.entity = findEntityAtPosition(stage, position, selection.entityPosition);
 	mouseState.down = true;
 	mouseState.downPosition = position;
 }
@@ -28,25 +29,14 @@ void Editor::onMouseButtonReleased(sf::Window& window, Event::MouseButtonEvent m
 
 void Editor::onMouseMoved(sf::Window& window, Event::MouseMoveEvent mouseMove) {
 	// TODO: something state dependent
-}
-
-
-// void handleEvents(Editor& editor, sf::RenderWindow& window) {
-void processEvent(Editor& editor, const sf::Event& event, const sf::RenderWindow& window) {
-	switch(event.type){
-		// case sf::Event::Closed: window.close(); break;
-	    // case sf::Event::KeyPressed: keyEvent(editor, event);
-		// case sf::Event::MouseButtonPressed: processStartInput(editor.stage, screen2GamePos(window, {event.mouseButton.x, event.mouseButton.y})); break;
-		// case sf::Event::MouseMoved: processContinuingInput(editor.stage, screen2GamePos(window, {event.mouseMove.x, event.mouseMove.y})); break;
-		// case sf::Event::MouseButtonReleased: processEndInput(editor.stage, screen2GamePos(window, {event.mouseButton.x, event.mouseButton.y})); break;
-	    // case sf::Event::TouchBegan: startMouseInput(editor, event.mouseButton); break;
-	    // case sf::Event::TouchMoved: continueMouseInput(editor, event.mouseMove); break;
-	    // case sf::Event::TouchEnded: endMouseInput(editor, event.mouseButton); break;
-		default: break;
-	}
+	if(selection.entity.type == NONE) { return; }
+	vec2 position = screen2GamePos(window, {mouseMove.x, mouseMove.y});
+	vec3 moveVec(selection.entityPosition - position, 0);
+	glm::translate(selection.transform, moveVec);
 }
 
 void keyEvent(Editor& editor, sf::Event event) {
+
 }
 
 void levelOpen(Editor& editor, std::string filename) {
