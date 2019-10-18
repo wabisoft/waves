@@ -28,7 +28,6 @@ inline void drawPullParabola(sf::RenderWindow&, Stage&);
 inline void drawGrid(sf::RenderWindow&);
 void drawInfoText(sf::RenderWindow&, const Stage& , float, float, int);
 
-template <int N>
 inline void drawPolygon(sf::RenderWindow&, const wabi::Polygon&, sf::Color);
 inline void drawText(sf::RenderWindow&, std::string, sf::Vector2f, int=15, bool=false);
 inline void drawId(sf::RenderWindow&, int, sf::Vector2f);

@@ -11,6 +11,7 @@
 #include "util.hpp"
 
 using namespace glm;
+using namespace wabi;
 
 inline RockIt updateFallingRock(Stage& stage, RockIt rockIt, float deltaTime) {
 	Rock& rock = *rockIt;
@@ -105,8 +106,9 @@ uint8 createRock(Stage& stage, vec2 position, float radius, RockType type){
 	Rock new_rock;
 	new_rock.active = true;
 	new_rock.id = ++stage.id_src;
-	new_rock.shape.position = position;
-	new_rock.shape.radius = radius;
+	new_rock.shape = Circle(position, radius);
+	// new_rock.shape.position = position;
+	// new_rock.shape.radius = radius;
 	new_rock.type = type;
 	stage.rocks.push_back(new_rock);
 	createAABB(stage, AABB(new_rock));

@@ -19,7 +19,7 @@ int main() {
 	window.create(videoMode, "Waves", sf::Style::Default, settings);
 	// TODO: Why doesn't the screen start at the top left corner?
 	window.setFramerateLimit(1.f/FRAME_RATE);
-	if (!font.loadFromFile(cwd() + "/assets/fonts/IBMPlexMono-Regular.ttf")){
+	if (!font.loadFromFile(exePath() + "/assets/fonts/IBMPlexMono-Regular.ttf")){
 	 	std::cout << "Couldn't load font" << std::endl;
 	}
 
