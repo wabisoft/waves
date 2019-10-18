@@ -57,7 +57,7 @@ struct RockType {
 
 
 struct Rock {
-	wabi::Circle shape = {{0.f, 0.f}, 0.f};
+	wabi::Circle shape;
 	glm::vec2 velocity = {0.f, 0.f};
 	RockState state { RockState::FALLING, {} };
 	RockType type;

@@ -41,7 +41,7 @@ inline void updateStandingShip(Stage& stage, float deltaTime) {
 	}
 	bool inWinRegion = true;
 	for(int i = 0; i < ship.shape.size; ++i) {
-		inWinRegion &= pointInsidePolygon(ship.shape.vertices[i], stage.win.region);
+		inWinRegion &= pointInside(ship.shape.vertices[i], stage.win.region);
 		if (!inWinRegion) {break;}
 	}
 	if (inWinRegion) {
@@ -70,7 +70,7 @@ void updateShip(Stage& stage, float deltaTime){
 		case ShipState::STANDING: updateStandingShip(stage, deltaTime); break;
 		case ShipState::SURFING: updateSurfingShip(stage, ship); break;
 	}
-	updateVertices(ship.shape);
+	update(ship.shape);
 	vec2 & shipPos = ship.shape.position;
 	// if (shipPos.x > STAGE_WIDTH || shipPos.x < 0 || shipPos.y < 0) {
 	if (shipPos.x > STAGE_WIDTH || shipPos.x < 0) {

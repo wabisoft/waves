@@ -5,11 +5,12 @@
 #include "printing.hpp"
 #include "graphics.hpp"
 #include "serialize.hpp"
-#include "win32_file.hpp"
+#include "system.hpp"
 
 
 int main() {
-	std::cout << ExePath() << std::endl;
+	std::cout << exePath() << std::endl;
+	std::cout << cwd() << std::endl;
 	sf::RenderWindow window;
 	sf::ContextSettings settings;
 	// sf::VideoMode videoMode = sf::VideoMode::getDesktopMode();
@@ -18,7 +19,7 @@ int main() {
 	window.create(videoMode, "Waves", sf::Style::Default, settings);
 	// TODO: Why doesn't the screen start at the top left corner?
 	window.setFramerateLimit(1.f/FRAME_RATE);
-	if (!font.loadFromFile("assets/fonts/IBMPlexMono-Regular.ttf")){
+	if (!font.loadFromFile(cwd() + "/assets/fonts/IBMPlexMono-Regular.ttf")){
 	 	std::cout << "Couldn't load font" << std::endl;
 	}
 

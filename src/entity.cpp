@@ -10,7 +10,7 @@
 
 using namespace glm;
 
-vec2 getEntityPosition(Stage& stage,Entity entity) {
+vec2 getEntityPosition(Stage& stage, Entity entity) {
 	switch(entity.type) {
 		case NONE:
 			assert(false); // this should never happen
@@ -40,26 +40,26 @@ bool pointOnEntity(Stage stage, vec2 point, Entity entity) {
 		case SEA:
 			{
 				Sea& sea = *findSea(stage, entity.id);
-				return pointInsidePolygon(point, sea.shape);
+				return pointInside(point, sea.shape);
 			}
 			break;
 		case PLATFORM:
 			{
 				Platform& platform = *findPlatform(stage, entity.id);
-				return pointInsidePolygon(point, platform.shape);
+				return pointInside(point, platform.shape);
 			}
 			break;
 		case ROCK:
 			{
 				Rock& rock = *findRock(stage, entity.id);
-				return pointInsideCircle(point, rock.shape);
+				return pointInside(point, rock.shape);
 			}
 			break;
 		case SHIP:
-			return pointInsidePolygon(point, stage.ship.shape);
+			return pointInside(point, stage.ship.shape);
 			break;
 	}
-
+	return false;
 }
 
 Entity findEntityAtPosition(Stage& stage, vec2 position) {

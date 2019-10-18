@@ -39,10 +39,8 @@ struct Collision {
 	glm::vec2 surfaceEnd = {0, 0};
 };
 
-template <int N, int M>
-Collision collision(const wabi::Polygon<N>& poly1, const wabi::Polygon<M>& poly2);
-template <int N>
-Collision collision(const wabi::Circle& circle, const wabi::Polygon<N>& polygon);
+Collision collision(const wabi::Polygon& poly1, const wabi::Polygon& poly2);
+Collision collision(const wabi::Circle& circle, const wabi::Polygon& polygon);
 Collision collision(const wabi::Circle& c1, const wabi::Circle& c2);
 
 #include "collision.inl"

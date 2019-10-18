@@ -5,6 +5,8 @@
 #include <glm/vec2.hpp>
 
 #include "prelude.hpp"
+#include "typedefs.hpp"
+#include "shapes.hpp"
 
 enum EntityType : uint8_t {
 	NONE		= 1 << 0, // 0000001
@@ -17,10 +19,11 @@ enum EntityType : uint8_t {
 struct Entity {
 	// Specifically not a base class, more of a proxy or indirect reference
 	// to things with ids and a type
-	uint8_t id = 0;  // non-zero if refers to valid entity
+	uint8 id = 0;  // non-zero if refers to valid entity
 	EntityType type = NONE;
 };
 
+
 Entity findEntityAtPosition(Stage& stage, glm::vec2 position);
 Entity findEntityAtPosition(Stage& stage, glm::vec2 position, glm::vec2& entityPosition);
-glm::vec2 getEntityPosition(Entity entity);
+glm::vec2 getEntityPosition(Stage& stage, Entity entity);

@@ -95,6 +95,7 @@ void updateRocks(Stage& stage, float deltaTime) {
 			}
 		}
 		if (rockIt == stage.rocks.end()) break; // because our vector can change sizes while we're iterating
+		update(rockIt->shape);
 	}
 }
 

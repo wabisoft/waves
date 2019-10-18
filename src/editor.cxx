@@ -100,7 +100,7 @@ int main() {
 	}
 
     ImGui::SFML::Init(window);
-	ImFont* pFont = ImGui::GetIO().Fonts->AddFontFromFileTTF((ExePath() + "/assets/fonts/IBMPlexMono-Regular.ttf").c_str(), 15.f);
+	ImFont* pFont = ImGui::GetIO().Fonts->AddFontFromFileTTF((exePath() + "/assets/fonts/IBMPlexMono-Regular.ttf").c_str(), 15.f);
 	ImGui::SFML::UpdateFontTexture();
 	Clock drawClock;
 	EventManager eventManager;

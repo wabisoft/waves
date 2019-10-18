@@ -24,6 +24,11 @@ struct MouseState {
 	glm::vec2 downPosition;
 };
 
+struct EditorHotEntity{
+	Entity entity;
+	glm::vec2 entityPosition;
+};
+
 struct EditorSelection{
 	EditorSelection() : entity(), entityPosition(0), transform(1) {}
 	Entity entity;
@@ -44,6 +49,7 @@ struct Editor : public EventListener {
 	Stage stage;
 	MouseState mouseState;
 	EditorSelection selection;
+	EditorHotEntity hotEntity;
 	std::vector<ErrorPopupState> errorPopups;
 };
 

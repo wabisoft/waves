@@ -99,7 +99,7 @@ inline void drawRocks(sf::RenderWindow& target, const Stage& stage) {
 			case RockType::GREEN: c = sf::Color::Green; break;
 			case RockType::BLUE: c = sf::Color::Blue; break;
 		}
-		drawCircle(target, rock.shape, c);
+		drawPolygon(target, rock.shape, c);
 		drawId(target, rock.id, rock.shape.position);
 	}
 }

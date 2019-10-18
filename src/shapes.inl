@@ -2,43 +2,8 @@
 
 #include "constants.hpp"
 namespace wabi {
-inline float area(const Circle& circle) {
-	return circle.radius * circle.radius * PI;
-}
 
-inline float area(const Rectangle& rectangle) {
-	return rectangle.width * rectangle.height;
-}
-
-template <int N>
-inline void updateVertices(Polygon<N>& polygon){
-	// Since I don't feel like making a matrix struct and writing a bunch of other
-	// code to model matrix math, here is our rotation matrix
-	glm::vec2 xRotation = {std::cos(polygon.rotation), std::sinf(polygon.rotation)};
-	glm::vec2 yRotation = {-std::sin(polygon.rotation), std::cosf(polygon.rotation)};
-	for(int i = 0; i < polygon.size; ++i) {
-		// rotation plus transformation
-		polygon.vertices[i] = polygon.position + polygon.model[i].x * xRotation + polygon.model[i].y * yRotation;
-	}
-}
-
-
-template <int N>
-inline bool pointInsidePolygon(glm::vec2 point, Polygon<N>& polygon) {
-	for (int i = 0; i < polygon.size; ++i) {
-		glm::vec2 a = polygon.vertices[i];
-		glm::vec2 b = polygon.vertices[(i+1) % polygon.size];
-		float sign = sideSign(a, b, point);
-		// If the point is on the right (remeber we are going clock wise) then return false
-		if (sign > 0) { // the > 0 here means that points on an edge are considered inside the polygon
-			return false;
-		}
-	}
-	return true;
-}
-
-template <int N>
-inline glm::vec2 lower(const Polygon<N>& polygon) {
+inline glm::vec2 lower(const Polygon& polygon) {
 	float minX = INF;
 	float minY = INF;
 	for (int i = 0; i < polygon.size; ++i) {
@@ -48,13 +13,11 @@ inline glm::vec2 lower(const Polygon<N>& polygon) {
 	return {minX, minY};
 }
 
-template<int N>
-inline glm::vec2 lowerBound(const Polygon<N>& polygon) {
-	return lower<N>(polygon);
+inline glm::vec2 lowerBound(const Polygon& polygon) {
+	return lower(polygon);
 }
 
-template <int N>
-inline glm::vec2 upper(const Polygon<N>& polygon) {
+inline glm::vec2 upper(const Polygon& polygon) {
 	float maxX = -INF;
 	float maxY = -INF;
 	for (int i = 0; i < polygon.size; ++i) {
@@ -64,13 +27,11 @@ inline glm::vec2 upper(const Polygon<N>& polygon) {
 	return {maxX, maxY};
 }
 
-template<int N>
-inline glm::vec2 upperBound(const Polygon<N>& polygon) {
-	return upper<N>(polygon);
+inline glm::vec2 upperBound(const Polygon& polygon) {
+	return upper(polygon);
 }
 
-template <int N>
-inline void boundingPoints(const Polygon<N>& polygon, glm::vec2 & lower, glm::vec2 & upper) {
+inline void boundingPoints(const Polygon& polygon, glm::vec2 & lower, glm::vec2 & upper) {
 	float minX = INF;
 	float minY = INF;
 	float maxX = -INF;

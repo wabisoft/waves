@@ -29,8 +29,13 @@ void Editor::onMouseButtonReleased(sf::Window& window, Event::MouseButtonEvent m
 
 void Editor::onMouseMoved(sf::Window& window, Event::MouseMoveEvent mouseMove) {
 	// TODO: something state dependent
-	if(selection.entity.type == NONE) { return; }
 	vec2 position = screen2GamePos(window, {mouseMove.x, mouseMove.y});
+	// Check for hot entities;
+	// hotEntity.entity = findEntityAtPosition(stage, position, hotEnity.position);
+	// if(hotEntity.type != NONE) {
+
+	// }
+	if(selection.entity.type == NONE) { return; }
 	vec3 moveVec(selection.entityPosition - position, 0);
 	glm::translate(selection.transform, moveVec);
 }

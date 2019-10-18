@@ -6,14 +6,14 @@
 #include <string>
 #include <SFML/Window/WindowHandle.hpp>
 
-inline std::string ExePath() {
+inline std::string exePath() {
     char buffer[MAX_PATH];
     GetModuleFileName( NULL, buffer, MAX_PATH );
     std::string::size_type pos = std::string( buffer ).find_last_of( "\\/" );
     return std::string( buffer ).substr( 0, pos);
 }
 
-inline std::string CurrentWorkingDir() {
+inline std::string cwd() {
 	char buff[FILENAME_MAX];
   	_getcwd( buff, FILENAME_MAX );
   	std::string currentWorkingDir(buff);
