@@ -42,7 +42,7 @@ int main() {
 			float drawDelta = drawClock.getElapsedTime().asSeconds();
 			if (drawDelta >= FRAME_RATE) {
 				drawStage(window, game.stage, true);
-				drawInfoText(window, game.stage, drawDelta, game.updateDelta, 0);
+				// drawInfoText(window, game.stage, drawDelta, game.updateDelta, 0);
 				window.display();
 				drawClock.restart();
 			}

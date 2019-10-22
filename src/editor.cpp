@@ -10,6 +10,13 @@
 
 using namespace glm;
 
+// Static shit
+SelectAction StaticActions::select = SelectAction();
+MoveAction StaticActions::move = MoveAction();
+ResizeAction StaticActions::resize = ResizeAction();
+
+// Editor shit
+
 void Editor::onClosed(sf::Window& window) {
 	window.close();
 }
@@ -17,64 +24,145 @@ void Editor::onClosed(sf::Window& window) {
 void Editor::onMouseButtonPressed(sf::Window& window, Event::MouseButtonEvent mouseButton)	{
 	// TODO: something state dependent
 	vec2 position = screen2GamePos(window, {mouseButton.x, mouseButton.y});
-	selectedEntity = hotEntity;
 	mouseState.down = true;
 	mouseState.downPosition = position;
 	mouseState.prevPosition = position;
+	actions.push(actions.rpop()->onMouseButtonPressed(window, position, *this));
 }
 
 void Editor::onMouseButtonReleased(sf::Window& window, Event::MouseButtonEvent mouseButton) {
 	// TODO: Not sure yet...
+	vec2 position = screen2GamePos(window, {mouseButton.x, mouseButton.y});
 	mouseState.down = false;
+	actions.push(actions.rpop()->onMouseButtonReleased(window, position, *this));
 }
 
 void Editor::onMouseMoved(sf::Window& window, Event::MouseMoveEvent mouseMove) {
 	vec2 position = screen2GamePos(window, {mouseMove.x, mouseMove.y});
-	if(!mouseState.down) {
-		hotEntity = findEntityAtPosition(stage, position);
-	}
-	else if(selectedEntity.type != NONE) {
-		vec2 delta = position - mouseState.prevPosition;
-		*selectedEntity.pPosition += delta;
-		update(*selectedEntity.pShape);
-		updateAABBS(stage);
-	}
+	hotEntity = findEntityAtPosition(stage, position);
+	actions.push(actions.rpop()->onMouseMoved(window, position, *this));
 	mouseState.prevPosition = position;
 }
 
-Cursor::Type getCursorStyle(sf::Window& window, Editor& editor) {
-	if(editor.hotEntity.type == NONE) {
-		// normal pointer
-		return Cursor::Arrow;
-	} else if(editor.selectedEntity.type == NONE || editor.hotEntity.id != editor.selectedEntity.id) {
-		return Cursor::Hand;
-	} else {
-		// check closeness to edge and do either translate or resize pointers
-		int edgeIndex = 0;
-		float distFromHotEntityEdge = minDistFromEdge(editor.mouseState.prevPosition, *editor.hotEntity.pShape, edgeIndex);
-		if(distFromHotEntityEdge <=0.5) {
-			// use resize cursor
-			return Cursor::ResizeNESW;
-		} else {
-			// use move cursor
-			return Cursor::ResizeAll;
-		}
+void Editor::onKeyPressed(sf::Window& window, Event::KeyEvent key) {
+	using Key = sf::Keyboard;
+	switch(key.code) {
+		case Key::S:
+			if(key.control && key.shift) {
+				levelSaveAs(window.getSystemHandle(), *this);
+			} else if (key.control) {
+				levelSave(window.getSystemHandle(), *this);
+			}
+			break;
+		case Key::O:
+			break;
+		default: break;
 	}
+	// sorted_insert(keysDown, keyEvent.code);
 }
+
+void Editor::onKeyReleased(sf::Window&, Event::KeyEvent) { }
 
 void keyEvent(Editor& editor, sf::Event event) {
 
 }
 
+Action* Editor::getAction() {
+	if(selectedEntity.type == NONE || hotEntity.type == NONE || hotEntity.id != selectedEntity.id) {
+		return StaticActions::select();
+	} else {
+		// check closeness to edge and do either translate or resize pointers
+		int edgeIndex = 0;
+		bool onVert = false;
+		float distFromSelectedEntityEdge = minDistFromEdge(mouseState.prevPosition, *selectedEntity.pShape, edgeIndex, onVert);
+		if(distFromSelectedEntityEdge <= 1) {
+			// RESIZE
+			return StaticActions::resize(edgeIndex, onVert);
+		} else {
+			// MOVE
+			return StaticActions::move();
+		}
+	}
+}
+
+// Action shit
+
+Action* Action::onMouseButtonPressed(sf::Window&, glm::vec2, Editor& editor) { return editor.getAction(); };
+Action* Action::onMouseButtonReleased(sf::Window&, glm::vec2, Editor& editor) {return editor.getAction(); };
+Action* Action::onMouseMoved(sf::Window&, glm::vec2, Editor& editor) { return editor.getAction(); };
+
+
+
+Action* SelectAction::onMouseButtonPressed(sf::Window& window, glm::vec2 position, Editor& editor) {
+	editor.selectedEntity = editor.hotEntity;
+	return editor.getAction();
+}
+
+Action* MoveAction::onMouseMoved(sf::Window& window, glm::vec2 position, Editor& editor) {
+	if(editor.mouseState.down) {
+		vec2 delta = position - editor.mouseState.prevPosition;
+		*editor.selectedEntity.pPosition += delta;
+		update(*editor.selectedEntity.pShape);
+		updateAABBS(editor.stage);
+	}
+	return editor.getAction();
+}
+
+Action* ResizeAction::onMouseMoved(sf::Window& window, glm::vec2 position, Editor& editor) {
+	// NOTE: I'm pretty sure this is only gonna work on rectangles
+	// so we may need to rethink this if we add other shapes
+	if(editor.mouseState.down) {
+		vec2 delta = position - editor.mouseState.prevPosition;
+		wabi::Polygon& polygon = *editor.selectedEntity.pShape;
+		if(isDiagonal) {
+			glm::vec2& prev = edgeIndex == 0 ? polygon.model[polygon.size-1] : polygon.model[edgeIndex-1];
+			glm::vec2& next = polygon.model[(edgeIndex+1)%polygon.size];
+			polygon.model[edgeIndex] += delta;
+			if(edgeIndex % 2) {
+				prev.y += delta.y;
+				next.x += delta.x;
+			} else {
+				prev.x += delta.x;
+				next.y += delta.y;
+			}
+		} else {
+			// Todo don't allow a resize to cross itself
+			// (i.e. so you can't pull edge 1to the left of edge 3 or edge 0 below edge 2 (etc)
+			// 				0 (vertical)
+			//				 -------
+			// 3(horizontal |		| 1 (horizontal)
+			// 				 -------
+			// 				2 (vertical)
+			if(edgeIndex%2) { // horizontal
+				polygon.model[edgeIndex].x += delta.x;
+				polygon.model[(edgeIndex+1)%polygon.size].x += delta.x;
+			} else { // vertical
+				polygon.model[edgeIndex].y += delta.y;
+				polygon.model[(edgeIndex+1)%polygon.size].y += delta.y;
+			}
+		}
+		update(polygon);
+		updateAABBS(editor.stage);
+		return this;
+	} else {
+		return editor.getAction();
+	}
+}
+
+
+// File menu shit
+
 void levelOpen(Editor& editor, std::string filename) {
 	Stage s = {};
 	SerializeError e;
 	if(!loadStageFromFile(filename, s, e)) {
-		ErrorPopupState es = {"load-failed", "Failed to load file: " + filename + ".\nError: " + e.what };
-		editor.errorPopups.push_back(es);
+		PopupState es = {"load-failed", "Failed to load file: " + filename + ".\nError: " + e.what, RED};
+		editor.popups.push_back(es);
 		std::cout << es.message << std::endl;
 		return;
 	} else {
+		PopupState p = {"load-successful", "Opened file: " + filename + ".", GREEN};
+		editor.popups.push_back(p);
 		editor.filename = filename;
 		s.state = editor.stage.state;
 		editor.stage = s;
@@ -93,11 +181,14 @@ void levelOpen(sf::WindowHandle windowHandle, Editor& editor) {
 void validateSaveToFile(Editor& editor) {
 	SerializeError e;
 	if (! dumpStageToFile(editor.filename, editor.stage, e)) {
-		ErrorPopupState es = {"dump-failed", "Failed to save stage to file.\nError: " + e.what };
-		editor.errorPopups.push_back(es);
+		PopupState es = {"dump-failed", "Failed to save stage to file.\nError: " + e.what, RED};
+		editor.popups.push_back(es);
 		std::cout << es.message << std::endl;
 		return;
 	}
+	PopupState p = {"save-successful", "Save successful!", GREEN};
+	editor.popups.push_back(p);
+
 }
 
 void levelSave(sf::WindowHandle windowHandle, Editor& editor) {
@@ -118,5 +209,4 @@ void levelSaveAs(sf::WindowHandle windowHandle, Editor& editor) {
 		editor.filename = filename;
 		validateSaveToFile(editor);
 	}
-
 }

@@ -24,7 +24,14 @@ struct ImGuiEL : public EventListener {
 	virtual void onAll(sf::Window& window, Event& event) override {
 		ImGui::SFML::ProcessEvent(event);
     	ImGuiIO& io = ImGui::GetIO();
-		event.handled = io.WantCaptureKeyboard || io.WantCaptureMouse;
+		bool keyHandled = (event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased) && io.WantCaptureKeyboard;
+		bool mouseHandled = (
+			event.type == sf::Event::MouseButtonPressed
+			|| event.type == sf::Event::MouseButtonReleased
+			|| event.type == sf::Event::MouseEntered
+			|| event.type == sf::Event::MouseLeft
+			|| event.type == sf::Event::MouseMoved) && io.WantCaptureMouse;
+		event.handled = keyHandled || mouseHandled;
 	}
 };
 
@@ -48,17 +55,17 @@ inline void editorGuiMenuBar(sf::WindowHandle windowHandle, Editor& editor) {
 }
 
 inline void editorGuiErrorPopups(Editor& editor) {
-	for(std::vector<ErrorPopupState>::iterator it = editor.errorPopups.begin(); it != editor.errorPopups.end(); ++it) {
+	for(std::vector<PopupState>::iterator it = editor.popups.begin(); it != editor.popups.end(); ++it) {
 		if(!ImGui::IsPopupOpen(it->popupId.c_str()) && ! it->opened){
 			ImGui::OpenPopup(it->popupId.c_str());
 			it->opened = true;
 		}
 		if(ImGui::BeginPopup(it->popupId.c_str())) {
-			ImGui::TextColored({255, 0, 0, 255}, it->message.c_str());
+			ImGui::TextColored(it->color, it->message.c_str());
 			ImGui::EndPopup();
 		} else {
-			it = editor.errorPopups.erase(it);
-			if(it == editor.errorPopups.end()) {break;}
+			it = editor.popups.erase(it);
+			if(it == editor.popups.end()) {break;}
 		}
 	}
 }
@@ -106,14 +113,14 @@ int main() {
 	Clock drawClock;
 	EventManager eventManager;
 	Editor editor;
-	editor.subscribe(eventManager, {Event::Closed, Event::MouseButtonPressed, Event::MouseButtonReleased, Event::MouseMoved});
+	editor.subscribe(eventManager, {Event::Closed, Event::MouseButtonPressed, Event::MouseButtonReleased, Event::MouseMoved, Event::KeyPressed});
 	ImGuiEL imguiListener;
 	eventManager._subscribe(imguiListener, {Event::Count});
     sf::Clock deltaClock;
 	levelOpen(editor, "D:/code/wabisoft/waves/assets/levels/level1.json");
 	while (window.isOpen()) {
 		eventManager.dispatchEvents(window);
-		auto style = getCursorStyle(window, editor);
+		auto style = editor.actions.top()->getCursorStyle();
 		ImGui::SetMouseCursor(style);
         ImGui::SFML::Update(window, deltaClock.restart());
 		// window.setMouseCursor(cursors[style]);

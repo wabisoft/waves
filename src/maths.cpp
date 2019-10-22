@@ -33,13 +33,16 @@ inline float cross(glm::vec2 a, glm::vec2 b) {
 	************************************************************/
 }
 
+float sideProduct(glm::vec2 a, glm::vec2 b, glm::vec2 point) {
+	// returns mag of a perpendicular vector
+	vec2 u = b - a;
+	vec2 v = point - a;
+	return cross(u, v);
+}
 
 float sideSign(glm::vec2 a, glm::vec2 b, glm::vec2 point) {
 	// returns + if point on left - if point on right 0 if point on line from b to a
-	glm::vec2 u = b - a;
-	glm::vec2 v = point - a;
-	float product = cross(u, v);
-	return glm::sign(product);
+	return glm::sign(sideProduct(a, b, point));
 }
 
 bool bounded(glm::vec2 a, glm::vec2 b, glm::vec2 point) {

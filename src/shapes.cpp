@@ -21,13 +21,18 @@ void update(Polygon& polygon, mat3 transform) {
 	}
 }
 
-float minDistFromEdge(const glm::vec2 point, const Polygon& polygon, int& edgeStartIndex) {
+float minDistFromEdge(const glm::vec2 point, const Polygon& polygon, int& edgeStartIndex, bool& onVertex, float onVertexTolerance) {
 	float min = INF;
 	for (int i = 0; i < polygon.size; ++i) {
 		vec2 a = polygon.vertices[i];
 		vec2 b = polygon.vertices[(i+1) % polygon.vertices.size()];
 		vec2 ba = b - a;
 		vec2 pa = point - a;
+		float pa_d = length(pa);
+		bool _onVert = false;
+		if(pa_d <= onVertexTolerance) {
+			_onVert = true;
+		}
 		float len_ba = length(ba);
 		vec2 pp = (dot(pa, ba) / len_ba) * (ba/len_ba) ;
 		pp = a + pp;
@@ -35,6 +40,7 @@ float minDistFromEdge(const glm::vec2 point, const Polygon& polygon, int& edgeSt
 		if(min > dist) {
 			min = dist;
 			edgeStartIndex = i;
+			onVertex = _onVert;
 		}
 		min = min > dist ? dist : min;
 	}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <stack>
 #include <algorithm>
 #include "constants.hpp"
 
@@ -132,6 +133,13 @@ inline int binary_find_where(U search, const T* const t, const int count, Prop p
 }
 
 
-
-
+// Data Structures
+template <typename T>
+struct Stack : std::stack<T> {
+	T rpop() {
+		T t = top();
+		pop();
+		return t;
+	}
+};
 

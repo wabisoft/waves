@@ -72,17 +72,17 @@ inline void drawSeas(sf::RenderWindow& target, const Stage& stage) {
 		}
 		// drawPolygon(target, sea.shape, sf::Color::Yellow);
 		target.draw(&vertices[0], vertices.size(), sf::LineStrip);
-		for(const Wave& wave : sea.waves) {
-			float minx = wave.minimumX();
-			float maxx = wave.maximumX();
-			sf::CircleShape c;
-			c.setFillColor(sf::Color::Red);
-			c.setRadius(3);
-			c.setPosition(game2ScreenPos(target, {minx, wave.position.y}));
-			target.draw(c);
-			c.setPosition(game2ScreenPos(target, {maxx, wave.position.y}));
-			target.draw(c);
-		}
+		// for(const Wave& wave : sea.waves) {
+		// 	float minx = wave.minimumX();
+		// 	float maxx = wave.maximumX();
+		// 	sf::CircleShape c;
+		// 	c.setFillColor(sf::Color::Red);
+		// 	c.setRadius(3);
+		// 	c.setPosition(game2ScreenPos(target, {minx, wave.position.y}));
+		// 	target.draw(c);
+		// 	c.setPosition(game2ScreenPos(target, {maxx, wave.position.y}));
+		// 	target.draw(c);
+		// }
 	}
 }
 

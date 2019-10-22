@@ -41,7 +41,8 @@ struct Polygon {
 };
 
 void update(Polygon& polygon, glm::mat3 transform = glm::mat3(1));
-float minDistFromEdge(const glm::vec2 point, const Polygon& polygon, int& edgeStartIndex);
+
+float minDistFromEdge(const glm::vec2 point, const Polygon& polygon, int& edgeStartIndex, bool& onVertex, float onVertexTolerance = 1.f);
 bool pointInside(const glm::vec2 point, const Polygon& polygon);
 
 

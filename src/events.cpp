@@ -7,7 +7,7 @@ logging::Logger EventManager::logger = logging::Logger("EventManager");
 void EventListener::subscribe(EventManager& manager, std::vector<Event::EventType> eventTypes) {
 	for(Event::EventType eventType : eventTypes) {
 		auto search = std::lower_bound(_subscribedEvents.begin(), _subscribedEvents.end(), eventType);
-		if(search == _subscribedEvents.end()) {
+		if(search == _subscribedEvents.end() || *search != eventType) {
 			manager._subscribe(*this, eventType);
 			sorted_insert(_subscribedEvents, eventType);
 		}

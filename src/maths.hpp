@@ -20,6 +20,7 @@ const glm::mat3 MAT3_IDENTITY(1);
 
 glm::vec2 operator*(const glm::mat3& m, const glm::vec2& v);
 float cross(glm::vec2 a, glm::vec2 b);
+float sideProduct(glm::vec2 a, glm::vec2 b, glm::vec2 point);
 float sideSign(glm::vec2 a, glm::vec2 b, glm::vec2 point);
 bool bounded(glm::vec2 a, glm::vec2 b, glm::vec2 point);
 bool lineSegmentIntersection(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 d, glm::vec2 & intersection);
