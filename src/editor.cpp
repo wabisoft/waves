@@ -17,9 +17,10 @@ void Editor::onClosed(sf::Window& window) {
 void Editor::onMouseButtonPressed(sf::Window& window, Event::MouseButtonEvent mouseButton)	{
 	// TODO: something state dependent
 	vec2 position = screen2GamePos(window, {mouseButton.x, mouseButton.y});
-	selection.entity = findEntityAtPosition(stage, position, selection.entityPosition);
+	selectedEntity = hotEntity;
 	mouseState.down = true;
 	mouseState.downPosition = position;
+	mouseState.prevPosition = position;
 }
 
 void Editor::onMouseButtonReleased(sf::Window& window, Event::MouseButtonEvent mouseButton) {
@@ -28,16 +29,37 @@ void Editor::onMouseButtonReleased(sf::Window& window, Event::MouseButtonEvent m
 }
 
 void Editor::onMouseMoved(sf::Window& window, Event::MouseMoveEvent mouseMove) {
-	// TODO: something state dependent
 	vec2 position = screen2GamePos(window, {mouseMove.x, mouseMove.y});
-	// Check for hot entities;
-	// hotEntity.entity = findEntityAtPosition(stage, position, hotEnity.position);
-	// if(hotEntity.type != NONE) {
+	if(!mouseState.down) {
+		hotEntity = findEntityAtPosition(stage, position);
+	}
+	else if(selectedEntity.type != NONE) {
+		vec2 delta = position - mouseState.prevPosition;
+		*selectedEntity.pPosition += delta;
+		update(*selectedEntity.pShape);
+		updateAABBS(stage);
+	}
+	mouseState.prevPosition = position;
+}
 
-	// }
-	if(selection.entity.type == NONE) { return; }
-	vec3 moveVec(selection.entityPosition - position, 0);
-	glm::translate(selection.transform, moveVec);
+Cursor::Type getCursorStyle(sf::Window& window, Editor& editor) {
+	if(editor.hotEntity.type == NONE) {
+		// normal pointer
+		return Cursor::Arrow;
+	} else if(editor.selectedEntity.type == NONE || editor.hotEntity.id != editor.selectedEntity.id) {
+		return Cursor::Hand;
+	} else {
+		// check closeness to edge and do either translate or resize pointers
+		int edgeIndex = 0;
+		float distFromHotEntityEdge = minDistFromEdge(editor.mouseState.prevPosition, *editor.hotEntity.pShape, edgeIndex);
+		if(distFromHotEntityEdge <=0.5) {
+			// use resize cursor
+			return Cursor::ResizeNESW;
+		} else {
+			// use move cursor
+			return Cursor::ResizeAll;
+		}
+	}
 }
 
 void keyEvent(Editor& editor, sf::Event event) {

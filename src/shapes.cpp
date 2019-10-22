@@ -21,6 +21,26 @@ void update(Polygon& polygon, mat3 transform) {
 	}
 }
 
+float minDistFromEdge(const glm::vec2 point, const Polygon& polygon, int& edgeStartIndex) {
+	float min = INF;
+	for (int i = 0; i < polygon.size; ++i) {
+		vec2 a = polygon.vertices[i];
+		vec2 b = polygon.vertices[(i+1) % polygon.vertices.size()];
+		vec2 ba = b - a;
+		vec2 pa = point - a;
+		float len_ba = length(ba);
+		vec2 pp = (dot(pa, ba) / len_ba) * (ba/len_ba) ;
+		pp = a + pp;
+		float dist = std::fabs(length(point - pp));
+		if(min > dist) {
+			min = dist;
+			edgeStartIndex = i;
+		}
+		min = min > dist ? dist : min;
+	}
+	return min;
+}
+
 bool pointInside(const glm::vec2 point, const Polygon& polygon) {
 	for (int i = 0; i < polygon.size; ++i) {
 		glm::vec2 a = polygon.vertices[i];
@@ -40,15 +60,16 @@ Circle::Circle(vec2 pos, float rad, float rot) : Polygon(CIRCLE_SIZE, pos, rot),
 	constexpr float step = 1.f / 20;
 	for(int i = 0 ; i < size; ++i) {
 		float theta = 2.f * PI * step * i;
-		model[i] = vec2(std::cos(theta), std::sin(theta));
+		// NOTE: negative cos makes the circle parameterization clockwise, which is important for our collision checking routine
+		model[i] = vec2(-std::cos(theta), std::sin(theta)) * radius;
 	}
 	update(*this); // update vertices from model
 }
 
-void update(Circle& circle, mat3 transform) {
-	transform = glm::scale(transform, vec2(circle.radius, circle.radius));
-	update(reinterpret_cast<Polygon&>(circle), transform);
-}
+// void update(Circle& circle, mat3 transform) {
+	// transform = glm::scale(transform, vec2(circle.radius, circle.radius));
+	// update(reinterpret_cast<Polygon&>(circle), transform);
+// }
 
 bool pointInside(const glm::vec2 point, const Circle& circle) {
 	glm::vec2 relpos = point - circle.position;

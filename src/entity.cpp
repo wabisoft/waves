@@ -10,64 +10,66 @@
 
 using namespace glm;
 
-vec2 getEntityPosition(Stage& stage, Entity entity) {
+EntityHandle getEntityHandle(Stage& stage, Entity entity) {
 	switch(entity.type) {
 		case NONE:
 			assert(false); // this should never happen
-			return VEC2_ZERO;
 			break;
-		case SEA:
-			return findSea(stage, entity.id)->shape.position;
+		case SEA: {
+				SeaIt sea = findSea(stage, entity.id);
+				return {&sea->shape.position, &sea->shape, SEA, sea->id};
+			}
 			break;
-		case PLATFORM:
-			return findPlatform(stage, entity.id)->shape.position;
+		case PLATFORM: {
+				PlatformIt platform = findPlatform(stage, entity.id);
+				return {&platform->shape.position, &platform->shape, PLATFORM, platform->id};
+			}
 			break;
-		case ROCK:
-			return findRock(stage, entity.id)->shape.position;
+		case ROCK: {
+				RockIt rock = findRock(stage, entity.id);
+				return {&rock->shape.position, &rock->shape, ROCK, rock->id};
+			}
 			break;
 		case SHIP:
-			return stage.ship.shape.position;
+			return {&stage.ship.shape.position, &stage.ship.shape, SHIP, stage.ship.id};
 			break;
 	}
 }
 
 bool pointOnEntity(Stage stage, vec2 point, Entity entity) {
-	switch(entity.type) {
-		case NONE:
-			assert(false); // this should never happen
-			return false;
-			break;
-		case SEA:
-			{
-				Sea& sea = *findSea(stage, entity.id);
-				return pointInside(point, sea.shape);
-			}
-			break;
-		case PLATFORM:
-			{
-				Platform& platform = *findPlatform(stage, entity.id);
-				return pointInside(point, platform.shape);
-			}
-			break;
-		case ROCK:
-			{
-				Rock& rock = *findRock(stage, entity.id);
-				return pointInside(point, rock.shape);
-			}
-			break;
-		case SHIP:
-			return pointInside(point, stage.ship.shape);
-			break;
-	}
-	return false;
+	EntityHandle handle = getEntityHandle(stage, entity);
+	return pointInside(point, *handle.pShape);
+	// switch(entity.type) {
+	// 	case NONE:
+	// 		assert(false); // this should never happen
+	// 		return false;
+	// 		break;
+	// 	case SEA:
+	// 		{
+	// 			Sea& sea = *findSea(stage, entity.id);
+	// 			return pointInside(point, sea.shape);
+	// 		}
+	// 		break;
+	// 	case PLATFORM:
+	// 		{
+	// 			Platform& platform = *findPlatform(stage, entity.id);
+	// 			return pointInside(point, platform.shape);
+	// 		}
+	// 		break;
+	// 	case ROCK:
+	// 		{
+	// 			Rock& rock = *findRock(stage, entity.id);
+	// 			return pointInside(point, rock.shape);
+	// 		}
+	// 		break;
+	// 	case SHIP:
+	// 		return pointInside(point, stage.ship.shape);
+	// 		break;
+	// }
+	// return false;
 }
 
-Entity findEntityAtPosition(Stage& stage, vec2 position) {
-	vec2 _v;
-	return findEntityAtPosition(stage, position, _v);
-}
-
-Entity findEntityAtPosition(Stage& stage, vec2 position, vec2& entityPosition) {
+EntityHandle findEntityAtPosition(Stage& stage, vec2 position) {
 	// Adaptation of sweep and prune
 	// takes advantage of the sortedness of the two lists used in our collision detection routine
 	struct Candidate{
@@ -76,8 +78,7 @@ Entity findEntityAtPosition(Stage& stage, vec2 position, vec2& entityPosition) {
 	};
 	struct Chosen {
 		float squaredDistance;
-		vec2 position;
-		Entity entity;
+		EntityHandle handle;
 	};
 	std::vector<Candidate> candidates;
 	for(int a = 0; a < 2; ++a) {
@@ -106,20 +107,19 @@ Entity findEntityAtPosition(Stage& stage, vec2 position, vec2& entityPosition) {
 			}
 		}
 	}
-	Chosen chosen = {std::numeric_limits<float>::infinity(),{0, 0}, {0, NONE}};
+	Chosen chosen = {std::numeric_limits<float>::infinity(), {}};
 	for(Candidate candidate : candidates) {
 		if (candidate.axis != BOTH_AXES) { continue; }
-		vec2 ep = getEntityPosition(stage, candidate.entity);
-		vec2 rel = ep - position;
+		EntityHandle handle = getEntityHandle(stage, candidate.entity);
+		vec2 rel = *handle.pPosition - position;
 		float squaredDistance = dot(rel, rel);
 		if(chosen.squaredDistance > squaredDistance) {
-			chosen = {squaredDistance, ep, candidate.entity};
+			chosen = {squaredDistance, handle };
 		}
 	}
-	if(chosen.entity.id && pointOnEntity(stage, position, chosen.entity)) {
-			entityPosition = chosen.position;
-			return chosen.entity;
+	if(chosen.handle.id && pointInside(position, *chosen.handle.pShape)){
+		return chosen.handle;
 	};
 
-	return {0, NONE};
+	return {};
 }

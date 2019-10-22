@@ -43,7 +43,8 @@ void update(Stage& stage, float deltaTime){
 
 Entity makeSelectionAtPosition(Stage& stage, vec2 position) {
 	// For now we only select rocks so let's find our rock
-	stage.selection.entity = findEntityAtPosition(stage, position);
+	EntityHandle h = findEntityAtPosition(stage, position);
+	stage.selection.entity = {h.id, h.type};
 	if(stage.selection.entity.type != NONE) {stage.selection.active = true;}
 	// RockIt rockIt = findRockAtPosition(stage, position);
 	// if (rockIt != stage.rocks.end()) {

@@ -65,22 +65,23 @@ inline void editorGuiErrorPopups(Editor& editor) {
 
 inline void editorGuiStage(Editor& editor) {
 	ImGui::BeginChild("Selection");
-	if(editor.selection.entity.type != NONE) {
+	if(editor.selectedEntity.type != NONE) {
 		char buff[3];
-		ImGui::Text("ID: %s", itoa(editor.selection.entity.id, buff, 10));
-		ImGui::Text("Type: %s", str(editor.selection.entity.type).c_str());
-		ImGui::Text("Position: %s", str(editor.selection.entityPosition).c_str());
+		ImGui::Text("ID: %s", itoa(editor.selectedEntity.id, buff, 10));
+		ImGui::Text("Type: %s", str(editor.selectedEntity.type).c_str());
+		if (ImGui::InputFloat2(" Position", reinterpret_cast<float*>(editor.selectedEntity.pPosition))) {
+			update(*editor.selectedEntity.pShape);
+			updateAABBS(editor.stage);
+		}
 	}
     ImGui::EndChild();
 }
 
 inline void drawEditorGui(sf::RenderWindow& window, Editor& editor) {
-	// ImGui::SetNextWindowPos({3, 3});
 	editorGuiMenuBar(window.getSystemHandle(), editor);
 	editorGuiErrorPopups(editor);
 	ImGui::Begin("Editor");
 	editorGuiStage(editor);
-	// ImGui::InputFloat("SeaLevel", &editor.stage.sea.level);
     ImGui::End();
 }
 
@@ -94,32 +95,33 @@ int main() {
 	// TODO: Why doesn't the screen start at the top left corner?
 	window.setFramerateLimit(1.f/FRAME_RATE);
 	window.setVerticalSyncEnabled(true);
-	// window.setPosition({0,0});
 	if (!font.loadFromFile("assets/fonts/IBMPlexMono-Regular.ttf")){
 	 	std::cout << "Couldn't load font" << std::endl;
 	}
 
     ImGui::SFML::Init(window);
-	ImFont* pFont = ImGui::GetIO().Fonts->AddFontFromFileTTF((exePath() + "/assets/fonts/IBMPlexMono-Regular.ttf").c_str(), 15.f);
+	ImGuiIO& io = ImGui::GetIO();
+	ImFont* pFont = io.Fonts->AddFontFromFileTTF((exePath() + "/assets/fonts/IBMPlexMono-Regular.ttf").c_str(), 15.f);
 	ImGui::SFML::UpdateFontTexture();
 	Clock drawClock;
 	EventManager eventManager;
 	Editor editor;
 	editor.subscribe(eventManager, {Event::Closed, Event::MouseButtonPressed, Event::MouseButtonReleased, Event::MouseMoved});
-	// eventManager.subscribe(editor, Event::Closed);
-	// eventManager.subscribe(editor, Event::MouseButtonPressed);
-	// eventManager.subscribe(editor, Event::MouseButtonReleased);
-	// eventManager.subscribe(editor, Event::MouseMoved);
 	ImGuiEL imguiListener;
 	eventManager._subscribe(imguiListener, {Event::Count});
     sf::Clock deltaClock;
 	levelOpen(editor, "D:/code/wabisoft/waves/assets/levels/level1.json");
-    while (window.isOpen()) {
-        sf::Event event;
+	while (window.isOpen()) {
 		eventManager.dispatchEvents(window);
+		auto style = getCursorStyle(window, editor);
+		ImGui::SetMouseCursor(style);
         ImGui::SFML::Update(window, deltaClock.restart());
+		// window.setMouseCursor(cursors[style]);
         window.clear();
 		drawStage(window, editor.stage, true);
+		if(editor.selectedEntity.type != NONE) {
+			drawPolygon(window, *editor.selectedEntity.pShape, sf::Color(0, 255, 204), sf::Color::Red);
+		}
 		drawEditorGui(window, editor);
 		ImGui::SFML::Render(window);
 		window.display();

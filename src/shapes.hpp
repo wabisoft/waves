@@ -40,8 +40,9 @@ struct Polygon {
 
 };
 
-bool pointInside(const glm::vec2 point, const Polygon& polygon);
 void update(Polygon& polygon, glm::mat3 transform = glm::mat3(1));
+float minDistFromEdge(const glm::vec2 point, const Polygon& polygon, int& edgeStartIndex);
+bool pointInside(const glm::vec2 point, const Polygon& polygon);
 
 
 inline glm::vec2 lower(const Polygon& polygon); // gets the bottom left point of a polygon in relation to x, y axis
@@ -62,7 +63,7 @@ struct Circle : Polygon{
 	float radius = 0.f;
 };
 
-void update(Circle& circle, glm::mat3 transform = glm::mat3(1));
+// void update(Circle& circle, glm::mat3 transform = glm::mat3(1));
 bool pointInside(const glm::vec2 point, const Circle& circle);
 float area(const Circle& circle);
 

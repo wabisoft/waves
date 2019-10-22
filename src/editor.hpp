@@ -22,24 +22,28 @@ struct ErrorPopupState {
 struct MouseState {
 	bool down = false;
 	glm::vec2 downPosition;
+	glm::vec2 prevPosition;
 };
 
-struct EditorHotEntity{
-	Entity entity;
-	glm::vec2 entityPosition;
+namespace Cursor {
+	enum Type {
+	    Arrow = 0,
+	    TextInput,
+	    ResizeAll,
+	    ResizeNS,
+	    ResizeEW,
+	    ResizeNESW,
+	    ResizeNWSE,
+	    Hand,
+	    COUNT
+	};
 };
 
-struct EditorSelection{
-	EditorSelection() : entity(), entityPosition(0), transform(1) {}
-	Entity entity;
-	glm::vec2 entityPosition;
-	glm::mat4 transform;
-};
 
 struct Editor : public EventListener {
 	Editor() {
 		name = "Editor";
-	}
+	 }
 	virtual void onClosed(sf::Window&)											override;
 	virtual void onMouseButtonPressed(sf::Window&, Event::MouseButtonEvent)		override;
 	virtual void onMouseButtonReleased(sf::Window&, Event::MouseButtonEvent)	override;
@@ -48,11 +52,13 @@ struct Editor : public EventListener {
 	std::string filename;
 	Stage stage;
 	MouseState mouseState;
-	EditorSelection selection;
-	EditorHotEntity hotEntity;
+	EntityHandle selectedEntity;
+	EntityHandle hotEntity;
 	std::vector<ErrorPopupState> errorPopups;
+	sf::Cursor cursors [(int)sf::Cursor::NotAllowed + 1];
 };
 
+Cursor::Type getCursorStyle(sf::Window&, Editor&);
 void initEditor(Editor& editor);
 void keyEvent(Editor&, sf::Event);
 
