@@ -89,8 +89,8 @@ float area(const Circle& circle) {
 // RECTANGLE
 
 float area(const Rectangle& rect) {
-	vec2 diag = rect.model[0] - rect.model[1];
-	return diag.x * diag.y;
+	vec2 diag = rect.model[0] - rect.model[2];
+	return std::fabs(diag.x * diag.y);
 }
 
 Rectangle::Rectangle(vec2 p, float w, float h, float r) : Polygon(RECTANGLE_SIZE, p, r) {

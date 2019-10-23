@@ -13,8 +13,9 @@ if (WIN32)
 	set(SFML_STATIC_LIBRARIES TRUE)
 	set(SFML_DIR "${SFML_DIR}/lib/cmake/SFML")
 	set(CMAKE_SUPPRESS_REGENERATION true)
-	get_filename_component(PROJECT_DIR "${CMAKE_CURRENT_SOURCE_DIR}" DIRECTORY)
 endif (WIN32)
+
+get_filename_component(PROJECT_DIR "${CMAKE_CURRENT_SOURCE_DIR}" ABSOLUTE)
 find_package(SFML 2.5 COMPONENTS system window graphics audio REQUIRED)
 find_library (SFML REQUIRED sfml-window sfml-system sfml-graphics sfml-audio)
 include_directories(${SFML_INCLUDE_DIR})
@@ -34,8 +35,9 @@ file(GLOB_RECURSE wavesSource
 	"src/*.cpp"
 )
 
-
+message("${PROJECT_DIR}")
 add_executable(editor src/editor.cxx ${wavesSource})
+list(REMOVE_ITEM wavesSource "${PROJECT_DIR}/src/editor.hpp" "${PROJECT_DIR}/src/editor.cpp")
 add_executable(game src/game.cxx ${wavesSource})
 
 target_compile_definitions(editor PRIVATE SFML_STATIC)

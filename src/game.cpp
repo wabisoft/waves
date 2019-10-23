@@ -14,7 +14,7 @@
 
 inline void loadStage(Game& game) {
 	SerializeError e;
-	if (loadStageFromFile(exePath() + "\\assets\\levels\\level1.json", game.stage, e)) {
+	if (loadStageFromFile(exePath() + "\\assets\\levels\\level3.json", game.stage, e)) {
 		game.stage.state.type = StageState::RUNNING;
 		// createAABB(game.stage, AABB(game.stage.sea)); // TODO: make seas a list so there can be seas anywhere
 		return;
