@@ -32,7 +32,7 @@ inline void updateStandingShip(Stage& stage, float deltaTime) {
 	vec2 anchor = start +  normalizedStart2End * proj;
 	vec2 anchorRelPos = anchor - ship.shape.position;
 	float sqMagAnchorRelPos = dot(anchorRelPos, anchorRelPos);
-	float sqShipHalfHeight = (ship.shape.height/2) * (ship.shape.height / 2);
+	float sqShipHalfHeight = (ship.shape.height()/2) * (ship.shape.height() / 2);
 	bool bound = bounded(start, end, anchor);
 	bool anchorOnSurface = sqMagAnchorRelPos <= sqShipHalfHeight;
 	bool staysInContact = bound && anchorOnSurface;

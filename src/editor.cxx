@@ -117,7 +117,7 @@ int main() {
 	ImGuiEL imguiListener;
 	eventManager._subscribe(imguiListener, {Event::Count});
     sf::Clock deltaClock;
-	levelOpen(editor, "D:/code/wabisoft/waves/assets/levels/level1.json");
+	levelOpen(editor, "D:/code/wabisoft/waves/assets/levels/level3.json");
 	while (window.isOpen()) {
 		eventManager.dispatchEvents(window);
 		auto style = editor.actions.top()->getCursorStyle();

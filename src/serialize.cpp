@@ -12,8 +12,8 @@ using namespace glm;
 string serialize(const Stage& stage) {
 	stringstream stream;
 	stream << "{" <<
-		"\"seas\"" << ":" << serialize(stage.seas) << "," <<
-		"\"platforms\"" << ":" << serialize(stage.platforms) << "," <<
+		"\"seas\"" << ":" << serialize<Sea>(stage.seas, [](const Sea& s) { return serialize(s.shape); }) << "," <<
+		"\"platforms\"" << ":" << serialize<Platform>(stage.platforms, [](const Platform& p) { return serialize(p.shape); }) << "," <<
 		"\"ship\"" 		<< ":" << serialize(stage.ship.shape) << "," <<
 		"\"rock_spawn\""<< ":" << serialize(stage.rockSpawn) << "," <<
 		"\"win\""		<< ":" << serialize(stage.win) <<
@@ -21,46 +21,48 @@ string serialize(const Stage& stage) {
 	return stream.str();
 }
 
-std::string serialize(const std::vector<Sea> seas) {
-	stringstream stream;
-	stream << "[";
-	for (int i = 0 ; i < seas.size(); ++i) {
-		// TODO: serialize more stuff
-		stream << serialize(seas[i].shape);
-		if ( i < seas.size() - 1) { stream << ","; }
-	}
-	stream << "]";
-	return stream.str();
-}
-std::string serialize(const std::vector<Wave> waves) {
-	stringstream stream;
-	stream << "[";
-	for(int i = 0; i < waves.size(); ++i) {
-		stream << "{" <<
-		"}";
-		if ( i < waves.size() - 1) { stream << ","; }
-	}
-	return stream.str();
-}
+// std::string serialize(const std::vector<Sea> seas) {
+// 	stringstream stream;
+// 	stream << "[";
+// 	for (int i = 0 ; i < seas.size(); ++i) {
+// 		// TODO: serialize more stuff
+// 		stream << serialize(seas[i].shape);
+// 		if ( i < seas.size() - 1) { stream << ","; }
+// 	}
+// 	stream << "]";
+// 	return stream.str();
+// }
 
-std::string serialize(const std::vector<Platform> platforms) {
-	stringstream stream;
-	stream << "[";
-	for (int i = 0 ; i < platforms.size(); ++i) {
-		stream << serialize(platforms[i].shape);
-		if ( i < platforms.size() - 1) { stream << ","; }
-	}
-	stream << "]";
-	return stream.str();
-}
+// std::string serialize(const std::vector<Wave> waves) {
+// 	stringstream stream;
+// 	stream << "[";
+// 	for(int i = 0; i < waves.size(); ++i) {
+// 		stream << "{" <<
+// 		"}";
+// 		if ( i < waves.size() - 1) { stream << ","; }
+// 	}
+// 	return stream.str();
+// }
+
+// std::string serialize(const std::vector<Platform> platforms) {
+// 	stringstream stream;
+// 	stream << "[";
+// 	for (int i = 0 ; i < platforms.size(); ++i) {
+// 		stream << serialize(platforms[i].shape);
+// 		if ( i < platforms.size() - 1) { stream << ","; }
+// 	}
+// 	stream << "]";
+// 	return stream.str();
+// }
 
 std::string serialize(const Rectangle& rectangle) {
 	stringstream stream;
 	stream << "{" <<
-		"\"width\"" << ":" << rectangle.width << "," <<
-		"\"height\"" << ":" << rectangle.height << "," <<
+		// "\"width\"" << ":" << rectangle.width << "," <<
+		// "\"height\"" << ":" << rectangle.height << "," <<
 		"\"position\"" << ":" << serialize(rectangle.position) << "," <<
-		"\"rotation\"" << ":" << rectangle.rotation <<
+		"\"rotation\"" << ":" << rectangle.rotation << "," <<
+		"\"model\"" << ":" << serialize<vec2>(rectangle.model, [](const vec2& v) {return serialize(v);}) <<
 	"}";
 	return stream.str();
 }
@@ -102,15 +104,14 @@ inline Rectangle extractRectangle(JSON j, JSONError& e) {
 	Rectangle r;
 	JSONObject object = getObject(j, e);
 	if(e.no) { return r;}
-	r.width = getNumber(getValue(object, "width"), e);
+	r.position = extractVec2(getValue(object, "position", e), e);
 	if(e.no) { return r;}
-	r.height = getNumber(getValue(object, "height"), e);
+	r.rotation = getNumber(getValue(object, "rotation", e), e);
 	if(e.no) { return r;}
-	r.position = extractVec2(getValue(object, "position"), e);
+	r.model = extractArray(getValue(object, "model", e), e, &extractVec2);
 	if(e.no) { return r;}
-	r.rotation = getNumber(getValue(object, "rotation"), e);
-	if(e.no) { return r;}
-	return makeRectangle(r.position, r.width, r.height, r.rotation);
+	update(r);
+	return r;
 }
 
 bool loadStageFromString(std::string data, Stage& stage, SerializeError& err) {
@@ -125,25 +126,25 @@ bool loadStageFromString(std::string data, Stage& stage, SerializeError& err) {
 	}
 	JSONObject object = getObject(json, e);
 	if(e.no) {err.what = e.what; return false;}
-	auto seaRectangles = extractArray(getValue(object, "seas"), e, &extractRectangle);
+	auto seaRectangles = extractArray(getValue(object, "seas", e), e, &extractRectangle);
 	if (e.no) {err.what = e.what; return false;}
 	for(Rectangle& r : seaRectangles) {
 		createSea(stage, r);
 	}
 	if(e.no) {err.what = e.what; return false;}
-	auto platformRectangles = extractArray(getValue(object, "platforms"), e, &extractRectangle);
+	auto platformRectangles = extractArray(getValue(object, "platforms", e), e, &extractRectangle);
 	if(e.no) {err.what = e.what; return false;}
 	for(Rectangle &r : platformRectangles) {
 		createPlatform(stage, r);
 	}
-	Rectangle r = extractRectangle(getValue(object, "ship"), e);
+	Rectangle r = extractRectangle(getValue(object, "ship", e), e);
 	if(e.no) {err.what = e.what; return false;}
 	createShip(stage, r);
-	stage.rockSpawn = extractVec2(getValue(object, "rock_spawn"), e);
-	JSONObject jWinObject = getObject(getValue(object, "win"), e);
+	stage.rockSpawn = extractVec2(getValue(object, "rock_spawn", e), e);
+	JSONObject jWinObject = getObject(getValue(object, "win", e), e);
 	if(e.no) {err.what = e.what; return false;}
-	stage.win.timeToWin = getNumber(getValue(jWinObject, "time"), e);
-	stage.win.region = extractRectangle(getValue(jWinObject, "region"), e);
+	stage.win.timeToWin = getNumber(getValue(jWinObject, "time", e), e);
+	stage.win.region = extractRectangle(getValue(jWinObject, "region", e), e);
 	return true;
 }
 

@@ -89,10 +89,11 @@ float area(const Circle& circle) {
 // RECTANGLE
 
 float area(const Rectangle& rect) {
-	return rect.width * rect.height;
+	vec2 diag = rect.model[0] - rect.model[1];
+	return diag.x * diag.y;
 }
 
-Rectangle::Rectangle(vec2 p, float w, float h, float r) : Polygon(RECTANGLE_SIZE, p, r), width(w), height(h) {
+Rectangle::Rectangle(vec2 p, float w, float h, float r) : Polygon(RECTANGLE_SIZE, p, r) {
 	float halfWidth = w/2.f;
 	float halfHeight = h/2.f;
 	model[0] = {-halfWidth, halfHeight}; // top left
@@ -100,6 +101,19 @@ Rectangle::Rectangle(vec2 p, float w, float h, float r) : Polygon(RECTANGLE_SIZE
 	model[2] = {halfWidth, -halfHeight}; // bottom right
 	model[3] = {-halfWidth, -halfHeight}; // bottom left
 	update(*this); // update vertices from model
+}
+
+// Rectangle::Rectangle(const Rectangle& r) : Polygon(RECTANGLE_SIZE, r.position, r.rotation) {
+// 	model = r.model;
+// 	update(*this); // update vertices from model
+// }
+
+float Rectangle::width() {
+	return (model[0] - model[2]).x;
+}
+
+float Rectangle::height() {
+	return (model[0] - model[2]).y;
 }
 
 Rectangle makeRectangle(vec2 p, float w, float h, float rotation) {

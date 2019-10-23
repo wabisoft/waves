@@ -198,7 +198,7 @@ inline JSON getJSON(string_it& start, string_it& end, JSONError& e) {
 		case '0':
 		case '-':
 		case '.': // number;
-			return {JSON::NUMBER, start, getUntill(start, end, [](char c) { return isdigit(c) || c == '.' ;})};
+			return {JSON::NUMBER, start, getUntill(start, end, [](char c) { return isdigit(c) || c == '.' || c == '-' ;})};
 			break;
 	}
 	return {JSON::ERROR, start, end};
@@ -296,9 +296,11 @@ inline bool getBoolean(JSON j, JSONError& e) { return getBoolean(j.start, j.end,
 inline JSONArray getArray(JSON j, JSONError& e) { return getArray(j.start, j.end, e); }
 inline JSONObject getObject(JSON j, JSONError& e) { return getObject(j.start, j.end, e); }
 
-inline JSON getValue(JSONObject o, std::string key) {
+inline JSON getValue(JSONObject o, std::string key, JSONError& e) {
 	for(auto && pair : o) {
 		if(pair.first == key) { return pair.second;}
 	}
+	e.no = JSONError::INCORRECT;
+	e.what = "Object does not have key: " + key;
 	return {JSON::ERROR};
 }

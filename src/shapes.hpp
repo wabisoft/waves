@@ -75,9 +75,10 @@ const int RECTANGLE_SIZE = 4;
 struct Rectangle : Polygon {
 	Rectangle() : Polygon(RECTANGLE_SIZE) {}
 	Rectangle(glm::vec2 p, float w, float h, float r=0.f);
+	// Rectangle(const Rectangle& r);
 
-	float width = 0.f;
-	float height = 0.f;
+	float width();
+	float height();
 };
 
 float area(const Rectangle& rectangle);
