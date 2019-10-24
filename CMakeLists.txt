@@ -47,6 +47,9 @@ target_link_libraries(editor sfml-window sfml-system sfml-graphics sfml-audio Im
 target_link_libraries(game sfml-window sfml-system sfml-graphics sfml-audio)
 
 if(WIN32)
+	set_property(TARGET editor PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${PROJECT_DIR})
+	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT editor)
 	set_property(TARGET game PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${PROJECT_DIR})
 	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT game)
+
 endif(WIN32)

@@ -25,7 +25,7 @@ inline bool selectAFileForOpen(sf::WindowHandle windowHandle, std::string& filen
 	OPENFILENAME ofn;
 	char buffer[MAX_PATH];
 	if(!filename.empty()){
-		sprintf(buffer, "%s", filename.c_str());
+		sprintf_s(buffer, "%s", filename.c_str());
 	} else {
 		ZeroMemory( &buffer, sizeof( buffer ) );
     	GetModuleFileName( NULL, buffer, MAX_PATH );
@@ -50,7 +50,7 @@ inline bool selectAFileForSave(sf::WindowHandle windowHandle, std::string& filen
 	OPENFILENAME ofn;
 	char buffer[MAX_PATH];
 	if(!filename.empty()){
-		sprintf(buffer, "%s", filename.c_str());
+		sprintf_s(buffer, "%s", filename.c_str());
 	} else {
 		ZeroMemory( &buffer, sizeof( buffer ) );
     	GetModuleFileName( NULL, buffer, MAX_PATH );

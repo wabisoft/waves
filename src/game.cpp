@@ -12,43 +12,88 @@
 #include "stage.hpp"
 #include "system.hpp"
 
-inline void loadStage(Game& game) {
+void Game::loadStage(std::string aFilename) {
 	SerializeError e;
-	if (loadStageFromFile(exePath() + "\\assets\\levels\\level3.json", game.stage, e)) {
-		game.stage.state.type = StageState::RUNNING;
-		// createAABB(game.stage, AABB(game.stage.sea)); // TODO: make seas a list so there can be seas anywhere
+	if(aFilename.empty()) {aFilename = filename;}
+	if (loadStageFromFile(aFilename, stage, e)) {
+		filename = aFilename;
+		stage.state.type = StageState::RUNNING;
 		return;
 	} else {
 		throw e;
 	}
 }
 
-inline void unloadStage(Game& game) {
-	game.stage = {};
+void Game::unloadStage() {
+	stage = {};
 }
 
-inline void reloadStage(Game& game) {
-	unloadStage(game);
-	loadStage(game);
+void Game::reloadStage() {
+	unloadStage();
+	loadStage();
 }
 
-void start(Game& game) {
-	loadStage(game);
-}
-
-void update(Game& game) {
-	Stage& stage = game.stage;
-	float updateDelta = game.updateClock.getElapsedTime().asSeconds();
-	if (updateDelta >= FIXED_TIMESTEP * game.timeScale) {
-		update(stage, updateDelta);
-		game.updateClock.restart();
-		game.loopsPerUpdate = 0;
-		game.updateDelta = updateDelta;
-	} else { ++game.loopsPerUpdate; }
-	if (game.stage.state.type == StageState::FINISHED && !game.stage.state.finished.win) {
-		reloadStage(game);
+void Game::update() {
+	float updateDelta = updateClock.getElapsedTime().asSeconds();
+	if (updateDelta >= FIXED_TIMESTEP * timeScale) {
+		Stage::update(stage, std::min(updateDelta, FIXED_TIMESTEP)); // the min call is to prevent too large a time step from fucking up collision detection
+		updateClock.restart();
+		loopsPerUpdate = 0;
+		updateDelta = updateDelta;
+	} else { ++loopsPerUpdate; }
+	if (stage.state.type == StageState::FINISHED && !stage.state.finished.win) {
+		reloadStage();
 	}
 }
+
+void Game::onClosed(sf::Window& w) {
+	end = true;
+	w.close();
+}
+
+void Game::onMouseButtonPressed(sf::Window& window, Event::MouseButtonEvent mouseButton) {
+	processStartInput(stage, screen2GamePos(window, {mouseButton.x, mouseButton.y}));
+}
+
+void Game::onMouseButtonReleased(sf::Window& window, Event::MouseButtonEvent mouseButton) {
+	processEndInput(stage, screen2GamePos(window, {mouseButton.x, mouseButton.y}));
+}
+
+void Game::onMouseMoved(sf::Window& window, Event::MouseMoveEvent mouseMove) {
+	processContinuingInput(stage, screen2GamePos(window, {mouseMove.x, mouseMove.y}));
+}
+
+void Game::onKeyPressed(sf::Window& window, Event::KeyEvent key) {
+	switch (key.code) {
+		case sf::Keyboard::Key::P:
+			if (stage.state.type == StageState::PAUSED) {
+				stage.state.type = StageState::RUNNING;
+			} else {
+				stage.state.type = StageState::PAUSED;
+			}
+			break;
+		case sf::Keyboard::Key::Q: end = true; break;
+		case sf::Keyboard::Key::Num1: timeScale = 1.f; break;
+		case sf::Keyboard::Key::Num2: timeScale = 2.f; break;
+		case sf::Keyboard::Key::Num3: timeScale = 3.f; break;
+		case sf::Keyboard::Key::Num4: timeScale = 4.f; break;
+		case sf::Keyboard::Key::Num5: timeScale = 100.f; break;
+		case sf::Keyboard::Key::Num6: timeScale = 1000.f; break;
+		case sf::Keyboard::Key::R: 
+			if (key.control) {
+				reloadStage();
+			} else {
+				stage.rockKind = {Rock::RED};
+			}
+			break;
+		case sf::Keyboard::Key::G: stage.rockKind = {Rock::GREEN}; break;
+		case sf::Keyboard::Key::B: stage.rockKind = {Rock::BLUE}; break;
+		default: break;
+	}
+
+}
+
+
 
 void processEvent(Game& game, const sf::Event& event, const sf::RenderWindow& target) {
 	// TODO (owen): Factor the identical portions of mouse and touch input into functions or something
@@ -81,15 +126,11 @@ void keyEvent(Game& game, const sf::Event& event) {
 		case sf::Keyboard::Key::Num4: game.timeScale = 4.f; break;
 		case sf::Keyboard::Key::Num5: game.timeScale = 100.f; break;
 		case sf::Keyboard::Key::Num6: game.timeScale = 1000.f; break;
-		case sf::Keyboard::Key::R: game.stage.rockType = {RockType::RED}; break;
-		case sf::Keyboard::Key::G: game.stage.rockType = {RockType::GREEN}; break;
-		case sf::Keyboard::Key::B: game.stage.rockType = {RockType::BLUE}; break;
+		case sf::Keyboard::Key::R: game.stage.rockKind = {Rock::RED}; break;
+		case sf::Keyboard::Key::G: game.stage.rockKind = {Rock::GREEN}; break;
+		case sf::Keyboard::Key::B: game.stage.rockKind = {Rock::BLUE}; break;
 		default: break;
 	}
 }
-
-void stop(Game& game) {
-}
-
 
 

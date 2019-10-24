@@ -1,22 +1,19 @@
 #include <glm/gtx/matrix_transform_2d.hpp>
-#include "shapes.hpp"
 #include <glm/ext/matrix_common.hpp>
 #include <glm/ext/matrix_relational.hpp>
+
+#include "constants.hpp"
+#include "shapes.hpp"
 
 using namespace glm;
 
 namespace wabi {
+
 // POLYGON
-void update(Polygon& polygon, mat3 transform) {
-	// Since I don't feel like making a matrix struct and writing a bunch of other
-	// code to model matrix math, here is our rotation matrix
-	transform = glm::translate(transform, polygon.position);
+void update(Polygon& polygon, glm::vec2 position, mat3 transform) {
+	transform = glm::translate(transform, position);
 	transform = glm::rotate(transform, polygon.rotation);
-	// glm::vec2 xRotation = {std::cos(rotation), std::sinf(rotation)};
-	// glm::vec2 yRotation = {-std::sin(rotation), std::cosf(rotation)};
 	for(int i = 0; i < polygon.size; ++i) {
-		// rotation plus transformation
-		// vertices[i] = position + model[i].x * xRotation + model[i].y * yRotation;
 		polygon.vertices[i] = transform * polygon.model[i];
 	}
 }
@@ -60,64 +57,40 @@ bool pointInside(const glm::vec2 point, const Polygon& polygon) {
 	return true;
 }
 
+float area(const Polygon& polygon) {
+	float a = 0;
+	for (int i = 0; i < polygon.size; ++i) {
+		vec2 cur = polygon.model[i];
+		vec2 next= polygon.model[(i+1)%polygon.size];
+		a += (cur.y + next.y)/2 * (cur.x - next.x);
+	}
+	return std::fabs(a);
+}
 // CIRCLE
 
-Circle::Circle(vec2 pos, float rad, float rot) : Polygon(CIRCLE_SIZE, pos, rot), radius(rad) {
-	constexpr float step = 1.f / 20;
-	for(int i = 0 ; i < size; ++i) {
-		float theta = 2.f * PI * step * i;
+Polygon makeCircle(float radius, float rotation) {
+	Polygon p(CIRCLE_SIZE, rotation);
+	constexpr float step = (2.f * PI) / CIRCLE_SIZE;
+	for(int i = 0 ; i < p.size; ++i) {
+		float theta = step * i;
 		// NOTE: negative cos makes the circle parameterization clockwise, which is important for our collision checking routine
-		model[i] = vec2(-std::cos(theta), std::sin(theta)) * radius;
+		p.model[i] = vec2(-std::cos(theta), std::sin(theta)) * radius;
 	}
-	update(*this); // update vertices from model
-}
-
-// void update(Circle& circle, mat3 transform) {
-	// transform = glm::scale(transform, vec2(circle.radius, circle.radius));
-	// update(reinterpret_cast<Polygon&>(circle), transform);
-// }
-
-bool pointInside(const glm::vec2 point, const Circle& circle) {
-	glm::vec2 relpos = point - circle.position;
-	return glm::length(relpos) <= circle.radius;
-}
-
-float area(const Circle& circle) {
-	return circle.radius * circle.radius * PI;
+	return p;
 }
 
 // RECTANGLE
 
-float area(const Rectangle& rect) {
-	vec2 diag = rect.model[0] - rect.model[2];
-	return std::fabs(diag.x * diag.y);
-}
 
-Rectangle::Rectangle(vec2 p, float w, float h, float r) : Polygon(RECTANGLE_SIZE, p, r) {
-	float halfWidth = w/2.f;
-	float halfHeight = h/2.f;
-	model[0] = {-halfWidth, halfHeight}; // top left
-	model[1] = {halfWidth, halfHeight}; // top right
-	model[2] = {halfWidth, -halfHeight}; // bottom right
-	model[3] = {-halfWidth, -halfHeight}; // bottom left
-	update(*this); // update vertices from model
-}
-
-// Rectangle::Rectangle(const Rectangle& r) : Polygon(RECTANGLE_SIZE, r.position, r.rotation) {
-// 	model = r.model;
-// 	update(*this); // update vertices from model
-// }
-
-float Rectangle::width() {
-	return (model[0] - model[2]).x;
-}
-
-float Rectangle::height() {
-	return (model[0] - model[2]).y;
-}
-
-Rectangle makeRectangle(vec2 p, float w, float h, float rotation) {
-	return Rectangle(p, w, h, rotation);
+Polygon makeRectangle(float width, float height, float rotation) {
+	Polygon p = Polygon(RECTANGLE_SIZE, rotation);
+	float halfWidth = width/2.f;
+	float halfHeight = height/2.f;
+	p.model[0] = {-halfWidth, halfHeight}; // top left
+	p.model[1] = {halfWidth, halfHeight}; // top right
+	p.model[2] = {halfWidth, -halfHeight}; // bottom right
+	p.model[3] = {-halfWidth, -halfHeight}; // bottom left
+	return p;
 }
 
 } // namespace wabi

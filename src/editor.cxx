@@ -10,6 +10,7 @@
 #include "imgui-SFML.h"
 #include "imgui_stdlib.h"
 #include "editor.hpp"
+#include "game.hpp"
 #include "graphics.hpp"
 #include "logging.hpp"
 #include "serialize.hpp"
@@ -20,7 +21,7 @@
 static logging::Logger logger = logging::Logger("main");
 
 struct ImGuiEL : public EventListener {
-	ImGuiEL() { name = "ImGui"; }
+	ImGuiEL() { name = "ImGui";  _subscribedEvents = {Event::Count}; }
 	virtual void onAll(sf::Window& window, Event& event) override {
 		ImGui::SFML::ProcessEvent(event);
     	ImGuiIO& io = ImGui::GetIO();
@@ -35,8 +36,47 @@ struct ImGuiEL : public EventListener {
 	}
 };
 
+struct Loop{
+	Loop() {
+		sf::ContextSettings settings;
+		sf::VideoMode videoMode = {800, 450};
+		settings.antialiasingLevel = 100;
+		window.create(videoMode, "Waves: Editor", sf::Style::Default, settings);
+		window.setFramerateLimit(1.f/FRAME_RATE);
+		ImGui::SFML::Init(window);
+		ImGuiIO& io = ImGui::GetIO();
+		ImFont* pFont = io.Fonts->AddFontFromFileTTF((exePath() + "/assets/fonts/IBMPlexMono-Regular.ttf").c_str(), 15.f);
+		ImGui::SFML::UpdateFontTexture();
+	}
 
-inline void editorGuiMenuBar(sf::WindowHandle windowHandle, Editor& editor) {
+	~Loop() {
+		ImGui::SFML::Shutdown();
+	}
+
+	void startGame();
+	void runGame();
+	void stopGame();
+	void startEditor();
+	void runEditor();
+	void stopEditor();
+	void drawEditorGui();
+
+	bool bRunGame = false;
+
+	sf::RenderWindow window;
+	Clock updateClock;
+	Clock drawClock;
+	EventManager eventManager;
+	Editor editor;
+	Game game;
+	ImGuiEL imguiListener;
+	Graphics graphics;
+};
+
+
+void Loop::drawEditorGui() {
+	// MenuBar
+	sf::WindowHandle windowHandle = window.getSystemHandle();
 	if(ImGui::BeginMainMenuBar()) {
 		if (ImGui::BeginMenu("File")){
 			if(ImGui::MenuItem("Open", "Ctrl+O")) {
@@ -52,9 +92,7 @@ inline void editorGuiMenuBar(sf::WindowHandle windowHandle, Editor& editor) {
 		}
 		ImGui::EndMainMenuBar();
 	}
-}
-
-inline void editorGuiErrorPopups(Editor& editor) {
+	// Run Popups
 	for(std::vector<PopupState>::iterator it = editor.popups.begin(); it != editor.popups.end(); ++it) {
 		if(!ImGui::IsPopupOpen(it->popupId.c_str()) && ! it->opened){
 			ImGui::OpenPopup(it->popupId.c_str());
@@ -68,71 +106,105 @@ inline void editorGuiErrorPopups(Editor& editor) {
 			if(it == editor.popups.end()) {break;}
 		}
 	}
-}
-
-inline void editorGuiStage(Editor& editor) {
+	ImGui::Begin("Editor");
+	// Stage info
 	ImGui::BeginChild("Selection");
-	if(editor.selectedEntity.type != NONE) {
+	if(editor.selectedEntity) {
 		char buff[3];
-		ImGui::Text("ID: %s", itoa(editor.selectedEntity.id, buff, 10));
-		ImGui::Text("Type: %s", str(editor.selectedEntity.type).c_str());
-		if (ImGui::InputFloat2(" Position", reinterpret_cast<float*>(editor.selectedEntity.pPosition))) {
-			update(*editor.selectedEntity.pShape);
+		ImGui::Text("ID: %s", itoa(editor.selectedEntity->id, buff, 10));
+		ImGui::Text("Type: %s", str(editor.selectedEntity->type).c_str());
+		if (ImGui::InputFloat2(" Position", reinterpret_cast<float*>(&editor.selectedEntity->position))) {
+			update(editor.selectedEntity->shape, editor.selectedEntity->position);
 			updateAABBS(editor.stage);
 		}
 	}
-    ImGui::EndChild();
-}
-
-inline void drawEditorGui(sf::RenderWindow& window, Editor& editor) {
-	editorGuiMenuBar(window.getSystemHandle(), editor);
-	editorGuiErrorPopups(editor);
-	ImGui::Begin("Editor");
-	editorGuiStage(editor);
+	if(ImGui::Button("Play", {40, 20})) {
+		editor.end = true;
+		bRunGame = true;
+	}
+	ImGui::EndChild();
     ImGui::End();
 }
 
-int main() {
-	logger.setLoggerLevel("EventManager", logging::CRITICAL);
-	sf::RenderWindow window;
-	sf::ContextSettings settings;
-	sf::VideoMode videoMode = {800, 450};
-	settings.antialiasingLevel = 100;
-	window.create(videoMode, "Waves: Editor", sf::Style::Default, settings);
-	// TODO: Why doesn't the screen start at the top left corner?
-	window.setFramerateLimit(1.f/FRAME_RATE);
-	window.setVerticalSyncEnabled(true);
-	if (!font.loadFromFile("assets/fonts/IBMPlexMono-Regular.ttf")){
-	 	std::cout << "Couldn't load font" << std::endl;
+void Loop::startGame() {
+	if(editor.filename.empty()){
+		levelOpen(window.getSystemHandle(), editor);
 	}
+	game.loadStage(editor.filename);
+	game.subscribe(eventManager);
+	game.end = false;
+}
 
-    ImGui::SFML::Init(window);
-	ImGuiIO& io = ImGui::GetIO();
-	ImFont* pFont = io.Fonts->AddFontFromFileTTF((exePath() + "/assets/fonts/IBMPlexMono-Regular.ttf").c_str(), 15.f);
-	ImGui::SFML::UpdateFontTexture();
-	Clock drawClock;
-	EventManager eventManager;
-	Editor editor;
-	editor.subscribe(eventManager, {Event::Closed, Event::MouseButtonPressed, Event::MouseButtonReleased, Event::MouseMoved, Event::KeyPressed});
-	ImGuiEL imguiListener;
-	eventManager._subscribe(imguiListener, {Event::Count});
-    sf::Clock deltaClock;
-	levelOpen(editor, "D:/code/wabisoft/waves/assets/levels/level3.json");
-	while (window.isOpen()) {
+void Loop::runGame() {
+	startGame();
+	while(!game.end) {
+		eventManager.dispatchEvents(window);
+		game.update();
+		float drawDelta = drawClock.getElapsedTime().asSeconds();
+		if (drawDelta >= FRAME_RATE) {
+			graphics.drawStage(window, game.stage, true);
+			graphics.drawInfoText(window, game.stage, drawDelta, game.updateDelta, 0);
+			window.display();
+			drawClock.restart();
+		}
+	}
+	stopGame();
+}
+
+void Loop::stopGame() {
+	game.unsubscribe(eventManager);
+	bRunGame = false;
+}
+
+void Loop::startEditor() {
+	if(!editor.filename.empty()) {
+		levelOpen(editor, editor.filename);
+	}
+	editor.subscribe(eventManager);
+	imguiListener.subscribe(eventManager);
+	editor.end = false;
+}
+
+void Loop::runEditor() {
+	startEditor();
+	while (!editor.end) {
 		eventManager.dispatchEvents(window);
 		auto style = editor.actions.top()->getCursorStyle();
 		ImGui::SetMouseCursor(style);
-        ImGui::SFML::Update(window, deltaClock.restart());
-		// window.setMouseCursor(cursors[style]);
-        window.clear();
-		drawStage(window, editor.stage, true);
-		if(editor.selectedEntity.type != NONE) {
-			drawPolygon(window, *editor.selectedEntity.pShape, sf::Color(0, 255, 204), sf::Color::Red);
+        ImGui::SFML::Update(window, updateClock.restart());
+		float drawDelta = drawClock.getElapsedTime().asSeconds();
+		if (drawDelta >= FRAME_RATE) {
+			window.clear();
+			graphics.drawStage(window, editor.stage, true);
+			if(editor.selectedEntity) {
+				graphics.drawPolygon(window, editor.selectedEntity->shape, sf::Color(0, 255, 204), sf::Color::Red);
+			}
+			drawEditorGui();
+			ImGui::SFML::Render(window);
+			window.display();
 		}
-		drawEditorGui(window, editor);
-		ImGui::SFML::Render(window);
-		window.display();
     }
-    ImGui::SFML::Shutdown();
+	stopEditor();
+}
+
+void Loop::stopEditor() {
+	if(!editor.filename.empty()) {
+		levelSave(window.getSystemHandle(), editor);
+	}
+	editor.unsubscribe(eventManager);
+	imguiListener.unsubscribe(eventManager);
+}
+
+int main() {
+	logger.setLoggerLevel("EventManager", logging::INFO);
+    Loop loop;
+	loop.editor.filename = cwd() + "\\assets\\levels\\level3.json";
+    while (loop.window.isOpen()) {
+		if(loop.bRunGame) {
+			loop.runGame();
+		} else {
+			loop.runEditor();
+		}
+	}
 	return 0;
 }

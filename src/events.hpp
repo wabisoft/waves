@@ -40,19 +40,24 @@ struct EventListener {
 	virtual void onAll(sf::Window&, Event&) { }
 
 	virtual void subscribe(EventManager&, std::vector<Event::EventType>);
+	virtual void subscribe(EventManager&);
+	virtual void unsubscribe(EventManager&, std::vector<Event::EventType>);
+	virtual void unsubscribe(EventManager&);
 
 	const char * name = "anonymous";
 	std::vector<Event::EventType> _subscribedEvents;  // I don't believe in access specifiers
-	// but the order of this vector is managed by EventListener::subscribe method, use that
+	// but the order of this vector is managed by EventListener::subscribe method, so use that
 	// unless you feel confident ;)
 };
 
 // one event manager per sfml window
 struct EventManager {
+	EventManager();
 	std::vector<EventListener*> _listeners[Event::Count+1]; // an array of vectors of listeners
 	void _subscribe(EventListener& listener, Event::EventType eventType);
+	void _unsubscribe(EventListener& listenter, Event::EventType eventType);
 	void dispatchEvents(sf::Window& window);
-	static logging::Logger logger;
+	logging::Logger logger;
 };
 
 

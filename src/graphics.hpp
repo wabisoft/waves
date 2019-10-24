@@ -16,43 +16,33 @@
 /************************
  *  Game Graphics stuff *
  ************************/
+struct Graphics {
+	Graphics();
+	void drawText(sf::RenderWindow&, std::string, sf::Vector2f, int=15, bool=false);
 
-extern sf::Font font;
-void initGraphics();
-void drawStage(sf::RenderWindow&, Stage&, bool=false);
-inline void drawSeas(sf::RenderWindow&, const Stage&);
-inline void drawShip(sf::RenderWindow&, const Ship&);
-inline void drawRocks(sf::RenderWindow&, const Stage&);
-inline void drawPlatforms(sf::RenderWindow&, const Stage&);
-inline void drawPullParabola(sf::RenderWindow&, Stage&);
-inline void drawGrid(sf::RenderWindow&);
-void drawInfoText(sf::RenderWindow&, const Stage& , float, float, int);
 
-inline void drawPolygon(sf::RenderWindow&, const wabi::Polygon&, sf::Color, sf::Color verticesColor =sf::Color(0,0,0,0));
-inline void drawText(sf::RenderWindow&, std::string, sf::Vector2f, int=15, bool=false);
-inline void drawId(sf::RenderWindow&, int, sf::Vector2f);
-inline void drawId(sf::RenderWindow&, int, glm::vec2);
-inline void drawCircle(sf::RenderWindow&, const wabi::Circle&, sf::Color, bool fill=false);
-inline void drawLine(sf::RenderWindow&, glm::vec2, glm::vec2, sf::Color);
+// extern sf::Font font;
+	void drawStage(sf::RenderWindow&, Stage&, bool=false);
+	void drawSeas(sf::RenderWindow&, const Stage&);
+	void drawShip(sf::RenderWindow&, const Ship&);
+	void drawRocks(sf::RenderWindow&, const Stage&);
+	void drawPlatforms(sf::RenderWindow&, const Stage&);
+	void drawPullParabola(sf::RenderWindow&, Stage&);
+	void drawGrid(sf::RenderWindow&);
+	void drawInfoText(sf::RenderWindow&, const Stage& , float, float, int);
+	void drawPolygon(sf::RenderWindow&, const wabi::Polygon&, sf::Color, sf::Color verticesColor =sf::Color(0,0,0,0));
+	void drawId(sf::RenderWindow&, int, sf::Vector2f);
+	void drawId(sf::RenderWindow&, int, glm::vec2);
+	// void drawCircle(sf::RenderWindow&, const wabi::Circle&, sf::Color, bool fill=false);
+	void drawLine(sf::RenderWindow&, glm::vec2, glm::vec2, sf::Color);
 
+	sf::Font font;
+};
+
+inline float ppu(sf::Window&);
 inline sf::Vector2f game2ScreenPos(const sf::Window&, glm::vec2);
 inline glm::vec2 screen2GamePos(const sf::Window&, sf::Vector2i);
-float ppu(sf::Window&);
 
-inline void drawPolygon(sf::RenderWindow& target, const wabi::Polygon& polygon, sf::Color c, sf::Color verticesColor) {
-	static sf::CircleShape circ(2);
-	circ.setOrigin(1, 1);
-	circ.setFillColor(verticesColor);
-	sf::VertexArray sfVertices(sf::LineStrip, polygon.size+1);
-	for (int i = 0; i < polygon.size; ++i) {
-		sf::Vector2f screenPos = game2ScreenPos(target, polygon.vertices[i]);
-		sfVertices[i] = sf::Vertex(screenPos, c);
-		circ.setPosition(screenPos);
-		target.draw(circ);
-	}
-	sfVertices[polygon.size] = sfVertices[0];
-	target.draw(sfVertices);
-}
 
 inline glm::vec2 pixelsPerUnit(const sf::Window& target) {
 	// sf::Vector2f targetSize = target.getView().getSize();

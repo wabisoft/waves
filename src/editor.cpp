@@ -18,6 +18,7 @@ ResizeAction StaticActions::resize = ResizeAction();
 // Editor shit
 
 void Editor::onClosed(sf::Window& window) {
+	end = true;
 	window.close();
 }
 
@@ -68,13 +69,13 @@ void keyEvent(Editor& editor, sf::Event event) {
 }
 
 Action* Editor::getAction() {
-	if(selectedEntity.type == NONE || hotEntity.type == NONE || hotEntity.id != selectedEntity.id) {
+	if(selectedEntity == nullptr || hotEntity == nullptr || hotEntity->id != selectedEntity->id) {
 		return StaticActions::select();
 	} else {
 		// check closeness to edge and do either translate or resize pointers
 		int edgeIndex = 0;
 		bool onVert = false;
-		float distFromSelectedEntityEdge = minDistFromEdge(mouseState.prevPosition, *selectedEntity.pShape, edgeIndex, onVert);
+		float distFromSelectedEntityEdge = minDistFromEdge(mouseState.prevPosition, selectedEntity->shape, edgeIndex, onVert);
 		if(distFromSelectedEntityEdge <= 1) {
 			// RESIZE
 			return StaticActions::resize(edgeIndex, onVert);
@@ -85,8 +86,8 @@ Action* Editor::getAction() {
 	}
 }
 
-// Action shit
 
+// Action shit
 Action* Action::onMouseButtonPressed(sf::Window&, glm::vec2, Editor& editor) { return editor.getAction(); };
 Action* Action::onMouseButtonReleased(sf::Window&, glm::vec2, Editor& editor) {return editor.getAction(); };
 Action* Action::onMouseMoved(sf::Window&, glm::vec2, Editor& editor) { return editor.getAction(); };
@@ -101,11 +102,13 @@ Action* SelectAction::onMouseButtonPressed(sf::Window& window, glm::vec2 positio
 Action* MoveAction::onMouseMoved(sf::Window& window, glm::vec2 position, Editor& editor) {
 	if(editor.mouseState.down) {
 		vec2 delta = position - editor.mouseState.prevPosition;
-		*editor.selectedEntity.pPosition += delta;
-		update(*editor.selectedEntity.pShape);
+		editor.selectedEntity->position += delta;
+		update(editor.selectedEntity->shape, editor.selectedEntity->position);
 		updateAABBS(editor.stage);
+		return this;
+	} else {
+		return editor.getAction();
 	}
-	return editor.getAction();
 }
 
 Action* ResizeAction::onMouseMoved(sf::Window& window, glm::vec2 position, Editor& editor) {
@@ -113,7 +116,7 @@ Action* ResizeAction::onMouseMoved(sf::Window& window, glm::vec2 position, Edito
 	// so we may need to rethink this if we add other shapes
 	if(editor.mouseState.down) {
 		vec2 delta = position - editor.mouseState.prevPosition;
-		wabi::Polygon& polygon = *editor.selectedEntity.pShape;
+		wabi::Polygon& polygon = editor.selectedEntity->shape;
 		if(isDiagonal) {
 			glm::vec2& prev = edgeIndex == 0 ? polygon.model[polygon.size-1] : polygon.model[edgeIndex-1];
 			glm::vec2& next = polygon.model[(edgeIndex+1)%polygon.size];
@@ -141,7 +144,7 @@ Action* ResizeAction::onMouseMoved(sf::Window& window, glm::vec2 position, Edito
 				polygon.model[(edgeIndex+1)%polygon.size].y += delta.y;
 			}
 		}
-		update(polygon);
+		update(polygon, editor.selectedEntity->position);
 		updateAABBS(editor.stage);
 		return this;
 	} else {

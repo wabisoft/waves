@@ -2,26 +2,58 @@
 #include "events.hpp"
 #include "str.hpp"
 
-logging::Logger EventManager::logger = logging::Logger("EventManager");
 
 void EventListener::subscribe(EventManager& manager, std::vector<Event::EventType> eventTypes) {
 	for(Event::EventType eventType : eventTypes) {
 		auto search = std::lower_bound(_subscribedEvents.begin(), _subscribedEvents.end(), eventType);
 		if(search == _subscribedEvents.end() || *search != eventType) {
-			manager._subscribe(*this, eventType);
 			sorted_insert(_subscribedEvents, eventType);
 		}
+		manager._subscribe(*this, eventType);
 	}
 }
 
+void EventListener::subscribe(EventManager& manager) {
+	for(Event::EventType eventType : _subscribedEvents) {
+		manager._subscribe(*this, eventType);
+	}
+}
+
+void EventListener::unsubscribe(EventManager& manager, std::vector<Event::EventType> eventTypes) {
+	for(Event::EventType eventType : eventTypes) {
+		manager._unsubscribe(*this, eventType);
+	}
+}
+
+void EventListener::unsubscribe(EventManager& manager) {
+	for(Event::EventType eventType : _subscribedEvents) {
+		manager._unsubscribe(*this, eventType);
+	}
+}
+
+
+EventManager::EventManager() : logger(logging::Logger("EventManager")) { }
+
 void EventManager::_subscribe(EventListener& listener, Event::EventType eventType) {
-	std::vector<EventListener*> listeners = _listeners[eventType];
+	std::vector<EventListener*>& listeners = _listeners[eventType];
 	auto search = std::find(listeners.begin(), listeners.end(), &listener);
 	if(search != listeners.end()) {
-		logger.warning("%s subscribed to %s, but was already subscribed", listener.name, str(eventType).c_str());
+		logger.warning("%s subscribed to %s, but was already subscribed\n", listener.name, str(eventType).c_str());
 		return;
 	} else {
 		_listeners[eventType].push_back(&listener);
+		logger.info("%s subscribed to %s.\n", listener.name, str(eventType).c_str());
+	}
+}
+
+void EventManager::_unsubscribe(EventListener& listener, Event::EventType eventType) {
+	std::vector<EventListener*>& listeners = _listeners[eventType];
+	auto search = std::find(listeners.begin(), listeners.end(), &listener);
+	if(search != listeners.end()) {
+		listeners.erase(search);
+		logger.info("%s unsubscribed from %s.\n", listener.name, str(eventType).c_str());
+	} else {
+		logger.warning("%s unsubscribed from %s, but was never subscribed\n", listener.name, str(eventType).c_str());
 	}
 }
 
@@ -34,11 +66,14 @@ void EventManager::dispatchEvents(sf::Window& window){
 			listener = *it;
 			listener->onAll(window, event);
 			if (event.handled) {
+				if (event.type == Event::MouseButtonPressed) {
+					logger.debug("blah");
+				}
 				logger.debug("Event %s marked handled by: %s!\n", str(event.type).c_str(), listener->name);
 				goto OUTER;
 			}
 
-		}
+		}	
 		std::vector<EventListener*>& listeners  = _listeners[event.type];
 		if (listeners.empty()) {
 			logger.debug("Recieved Event %s with no listeners\n", str(event.type).c_str());

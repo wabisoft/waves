@@ -13,18 +13,22 @@
 void updateAABBS(Stage& stage) {
 	for(AABB& aabb : stage.aabbs) {
 		switch (aabb.type) {
-			case ROCK:
+			case Entity::ROCK:
 				aabb = AABB(*findRock(stage, aabb.id));
 				break;
-			case SHIP:
+			case Entity::SHIP:
 				aabb = AABB(stage.ship);
 				break;
-			case SEA:
+			case Entity::SEA:
 				aabb = AABB(*findSea(stage, aabb.id));
 				break;
-			case PLATFORM:
+			case Entity::PLATFORM:
 				aabb = AABB(*findPlatform(stage, aabb.id));
 				break;
+			case Entity::WIN:
+				aabb = AABB(stage.win);
+				break;
+
 			default:
 				break;
 		}
@@ -33,26 +37,26 @@ void updateAABBS(Stage& stage) {
 
 AABB::AABB(const Platform& platform) {
 	boundingPoints(platform.shape, lower, upper);
-	type = PLATFORM;
+	type = Entity::PLATFORM;
 	id = platform.id;
 }
 
 AABB::AABB(const Rock& rock) {
-	glm::vec2 diag = {rock.shape.radius, rock.shape.radius};
-	glm::vec2 lower0 = rock.shape.position - diag;
-	glm::vec2 upper0 = rock.shape.position + diag;
-	glm::vec2 futurePos = rock.shape.position + rock.velocity * FIXED_TIMESTEP;
+	glm::vec2 diag = {rock.radius, rock.radius};
+	glm::vec2 lower0 = rock.position - diag;
+	glm::vec2 upper0 = rock.position + diag;
+	glm::vec2 futurePos = rock.position + rock.velocity * FIXED_TIMESTEP;
 	glm::vec2 lower1 = futurePos - diag;
 	glm::vec2 upper1 = futurePos + diag;
 	lower = {std::min(lower0.x, lower1.x), std::min(lower0.y, lower1.y)};
 	upper = {std::max(upper0.x, upper1.x), std::max(upper0.y, upper1.y)};
-	type = ROCK;
+	type = Entity::ROCK;
 	id = rock.id;
 }
 
 AABB::AABB(const Ship& ship) {
 	boundingPoints(ship.shape, lower, upper);
-	type = SHIP;
+	type = Entity::SHIP;
 	id = ship.id;
 }
 
@@ -64,8 +68,14 @@ AABB::AABB(const Sea& sea) {
 		maxHeight = std::max(maxHeight, upper.y + wave.heightAtX(wave.position.x));
 	}
 	upper.y = maxHeight;
-	type = SEA;
+	type = Entity::SEA;
 	id = sea.id;
+}
+
+AABB::AABB (const Win& win) {
+	boundingPoints(win.shape, lower, upper);
+	type = Entity::WIN;
+	id = win.id;
 }
 
 uint8_t createAABB(Stage& stage, AABB aabb) {

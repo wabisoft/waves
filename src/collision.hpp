@@ -7,6 +7,7 @@
 #include "prelude.hpp"
 #include "shapes.hpp"
 #include "util.hpp"
+#include "win.hpp"
 
 void resolveCollisions(Stage& stage);
 void dispatchPotentialCollision(Stage& stage, const AABBPair& pair);
@@ -26,9 +27,11 @@ void collide(Rock& rock, Rock& other_rock);
 //  - Seas
 //  - Platforms
 //  - Rocks
+//	- Win
 void collide(Ship& ship, Sea& sea);
 void collide(Ship& ship, const Platform& platform); // a ship shouldn't alter a platform
 void collide(Ship& ship, Rock& rock);
+void collide(Ship& ship, Win& win);
 
 struct Collision {
 	bool collides = false;
@@ -39,8 +42,7 @@ struct Collision {
 	glm::vec2 surfaceEnd = {0, 0};
 };
 
-Collision collision(const wabi::Polygon& poly1, const wabi::Polygon& poly2);
-Collision collision(const wabi::Circle& circle, const wabi::Polygon& polygon);
-Collision collision(const wabi::Circle& c1, const wabi::Circle& c2);
+Collision collision(const glm::vec2 poly1Pos, const wabi::Polygon& poly1, const wabi::Polygon& poly2);
+// Collision collision(const wabi::Circle& circle, const wabi::Polygon& polygon);
+// Collision collision(const wabi::Circle& c1, const wabi::Circle& c2);
 
-#include "collision.inl"

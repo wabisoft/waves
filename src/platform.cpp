@@ -6,18 +6,14 @@ using namespace wabi;
 using namespace glm;
 
 uint8 createPlatform(Stage& stage, vec2 position, float width, float height) {
-	Platform platform;
-	platform.shape = makeRectangle(position, width, height);
-	platform.id = ++stage.id_src;
+	Platform platform = Platform(makeRectangle(width, height), position, ++stage.id_src);
 	stage.platforms.push_back(platform);
 	createAABB(stage, AABB(platform));
 	return platform.id;
 }
 
-uint8 createPlatform(Stage& stage, Rectangle rect) {
-	Platform platform;
-	platform.shape = rect;
-	platform.id = ++stage.id_src;
+uint8 createPlatform(Stage& stage, vec2 position, Polygon& polygon) {
+	Platform platform = Platform(polygon, position, ++stage.id_src);
 	stage.platforms.push_back(platform);
 	createAABB(stage, AABB(platform));
 	return platform.id;

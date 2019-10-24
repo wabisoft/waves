@@ -9,6 +9,30 @@ using namespace glm;
 
 uint8_t Sea::id_src = 0;
 
+float Sea::heightAtX(float x) const {
+	float height = upper(shape).y;
+	for (const Wave& wave : waves) {
+		height += wave.heightAtX(x);
+	}
+	return height;
+}
+
+vec2 Sea::velocityAtX(float x) const {
+	vec2 velocity = VEC2_ZERO;
+	for (const Wave& wave : waves) {
+		velocity += wave.velocityAtX(x);
+	}
+	return velocity;
+}
+
+float Sea::slopeAtX(float x) const {
+	float slope = 0;
+	for (const Wave& wave : waves) {
+		slope += wave.slopeAtX(x);
+	}
+	return slope;
+}
+
 void updateSeas(Stage& stage) {
 	for(Sea& sea : stage.seas) {
 		updateWaves(stage, sea);
@@ -16,21 +40,17 @@ void updateSeas(Stage& stage) {
 }
 
 uint8 createSea(Stage& stage, vec2 position, float width, float height) {
-	Sea new_sea;
-	new_sea.shape = makeRectangle(position, width, height);
-	new_sea.id = ++stage.id_src;
-	stage.seas.push_back(new_sea);
-	createAABB(stage, AABB(new_sea));
-	return new_sea.id;
+	Sea sea = Sea(makeRectangle(width, height), position, ++stage.id_src);
+	stage.seas.push_back(sea);
+	createAABB(stage, AABB(sea));
+	return sea.id;
 }
 
-uint8 createSea(Stage& stage, Rectangle rect) {
-	Sea new_sea;
-	new_sea.shape = rect;
-	new_sea.id = ++stage.id_src;
-	stage.seas.push_back(new_sea);
-	createAABB(stage, AABB(new_sea));
-	return new_sea.id;
+uint8 createSea(Stage& stage, glm::vec2 position, Polygon& polygon) {
+	Sea sea = Sea(polygon, position, ++stage.id_src);
+	stage.seas.push_back(sea);
+	createAABB(stage, AABB(sea));
+	return sea.id;
 }
 
 SeaIt deleteSea(Stage& stage, SeaIt seaIt) {

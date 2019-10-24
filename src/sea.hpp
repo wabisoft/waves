@@ -12,27 +12,29 @@
 #include "wave.hpp"
 
 
-struct Sea{
-	// Wave waves[MAX_WAVES];
-	// short numWaves = 0;
-	wabi::Rectangle shape;
+struct Sea : Entity {
+	// ctors & dtors
+	Sea() {}
+	Sea(wabi::Polygon shape, glm::vec2 position, uint8 id) : Entity(Entity::SEA, shape, position, id) { }
+
+	// methods
+	float heightAtX(float x) const; // return the y height of a sea at x
+	glm::vec2 velocityAtX(float x) const; // return the velocity of all the waves at this poisition
+	float slopeAtX(float x) const; // return the slope of the sea at x
+
+
+	// members
 	std::vector<Wave> waves;
-	// float level = 0;
-	uint8 id = 0;
+	// statics
 	static uint8 id_src;
 
-	inline float heightAtX(float x) const; // return the y height of a sea at x
-	inline glm::vec2 velocityAtX(float x) const; // return the velocity of all the waves at this poisition
-	inline float slopeAtX(float x) const; // return the slope of the sea at x
 };
 
 typedef std::vector<Sea>::iterator SeaIt;
 
-#include "sea.inl"
-
 void updateSeas(Stage& stage);
 uint8 createSea(Stage& stage, glm::vec2 position, float width, float height);
-uint8 createSea(Stage& stage, wabi::Rectangle rectangle);
+uint8 createSea(Stage& stage, glm::vec2 position, wabi::Polygon&);
 SeaIt deleteSea(Stage& stage, SeaIt seaIt);
 SeaIt deleteSea(Stage& stage, uint8 seaId);
 SeaIt findSea(Stage& stage, uint8 seaId);

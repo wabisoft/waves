@@ -8,7 +8,7 @@
 #include "events.hpp"
 #include "stage.hpp"
 
-std::string str(EntityType type);
+std::string str(Entity::Type type);
 std::string str(Event::EventType type);
 std::string str(Selection::State s);
 std::string str(glm::vec2 v);

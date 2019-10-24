@@ -105,23 +105,28 @@ struct Editor : public EventListener {
 	Editor() {
 		name = "Editor";
 		actions.push(StaticActions::select());
+		_subscribedEvents = {Event::Closed, Event::MouseButtonPressed, Event::MouseButtonReleased, Event::MouseMoved, Event::KeyPressed};
 	 }
 	virtual void onClosed(sf::Window&)											override;
 	virtual void onMouseButtonPressed(sf::Window&, Event::MouseButtonEvent)		override;
 	virtual void onMouseButtonReleased(sf::Window&, Event::MouseButtonEvent)	override;
 	virtual void onMouseMoved(sf::Window&, Event::MouseMoveEvent)				override;
 	virtual void onKeyPressed(sf::Window&, Event::KeyEvent)						override;
-	virtual void onKeyReleased(sf::Window&, Event::KeyEvent)						override;
+	virtual void onKeyReleased(sf::Window&, Event::KeyEvent)					override;
 
 	Action* Editor::getAction();
+	void start();
+	void stop();
+
 	std::string filename;
 	Stage stage;
 	MouseState mouseState;
-	EntityHandle selectedEntity;
-	EntityHandle hotEntity;
+	Entity* selectedEntity = nullptr;
+	Entity* hotEntity = nullptr;
 	std::vector<PopupState> popups;
 	Stack<Action*> actions;
 	std::vector<sf::Keyboard::Key> keysDown;
+	bool end = false;
 };
 
 // Cursor::Type getCursorStyle(sf::Window&, Editor&);
