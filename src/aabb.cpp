@@ -64,10 +64,13 @@ AABB::AABB(const Sea& sea) {
 	lower = lowerBound(sea.shape);
 	upper = upperBound(sea.shape);
 	float maxHeight = upper.y;
+	float minHeight = lower.y;
 	for (const Wave& wave : sea.waves) {
 		maxHeight = std::max(maxHeight, upper.y + wave.heightAtX(wave.position.x));
+		minHeight = std::min(minHeight, upper.y + wave.heightAtX(wave.position.x));
 	}
 	upper.y = maxHeight;
+	lower.y = minHeight;
 	type = Entity::SEA;
 	id = sea.id;
 }

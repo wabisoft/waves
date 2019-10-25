@@ -61,11 +61,13 @@ void Graphics::drawStage(sf::RenderWindow& target, Stage& stage,  bool showGrid)
 	}
 	drawPolygon(target, stage.win.shape, sf::Color(0, 204, 102));
 	drawPullParabola(target, stage);
-	// for (AABB aabb : stage.aabbs) {
-	// 	vec2 diff = aabb.upper - aabb.lower;
-	// 	vec2 pos = { aabb.lower.x + 0.5f * diff.x, aabb.lower.y + 0.5f * diff.y };
-	// 	drawPolygon(target, makeRectangle(pos, diff.x, diff.y), sf::Color::Yellow);
-	// }
+	for (AABB aabb : stage.aabbs) {
+		vec2 diff = aabb.upper - aabb.lower;
+		vec2 pos = { aabb.lower.x + 0.5f * diff.x, aabb.lower.y + 0.5f * diff.y };
+		auto poly = makeRectangle(diff.x, diff.y);
+		update(poly, pos);
+		drawPolygon(target, poly, sf::Color::Yellow);
+	}
 }
 
 

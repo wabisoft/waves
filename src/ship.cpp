@@ -18,6 +18,7 @@ inline void updateFallingShip(Ship& ship) {
 inline void updateStandingShip(Stage& stage, float deltaTime) {
 	Ship& ship = stage.ship;
 	assert(ship.state.type == Ship::State::STANDING);
+
 	ship.velocity *= 0.75;
 	ship.velocity += GRAVITY * FIXED_TIMESTEP;
 	ship.position += ship.velocity;
@@ -39,6 +40,9 @@ inline void updateStandingShip(Stage& stage, float deltaTime) {
 	bool staysInContact = bound && anchorOnSurface;
 	if (!staysInContact) {
 		ship.state = {Ship::State::FALLING, {}};
+	}
+	if(ship.inWin) {
+		stage.win.timeInArea += deltaTime;
 	}
 	// bool inWinRegion = true;
 	// for(int i = 0; i < ship.shape.size; ++i) {

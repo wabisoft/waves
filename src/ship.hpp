@@ -37,6 +37,7 @@ struct Ship : Entity {
 
 	glm::vec2 velocity = glm::vec2(0);
 	State state = {Ship::State::FALLING, {}};
+	bool inWin;
 };
 
 inline float mass(const Ship& ship) {

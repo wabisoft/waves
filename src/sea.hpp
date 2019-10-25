@@ -22,12 +22,10 @@ struct Sea : Entity {
 	glm::vec2 velocityAtX(float x) const; // return the velocity of all the waves at this poisition
 	float slopeAtX(float x) const; // return the slope of the sea at x
 
-
 	// members
 	std::vector<Wave> waves;
 	// statics
 	static uint8 id_src;
-
 };
 
 typedef std::vector<Sea>::iterator SeaIt;

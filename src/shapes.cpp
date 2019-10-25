@@ -4,6 +4,7 @@
 
 #include "constants.hpp"
 #include "shapes.hpp"
+#include "util.hpp"
 
 using namespace glm;
 

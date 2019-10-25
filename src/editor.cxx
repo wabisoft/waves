@@ -128,10 +128,11 @@ void Loop::drawEditorGui() {
 }
 
 void Loop::startGame() {
-	if(editor.filename.empty()){
-		levelOpen(window.getSystemHandle(), editor);
-	}
+	// if(editor.filename.empty()){
+	// 	levelOpen(window.getSystemHandle(), editor);
+	// }
 	game.loadStage(editor.filename);
+	game.stage = editor.stage;
 	game.subscribe(eventManager);
 	game.end = false;
 }
@@ -158,6 +159,7 @@ void Loop::stopGame() {
 }
 
 void Loop::startEditor() {
+	editor.stage = {};
 	if(!editor.filename.empty()) {
 		levelOpen(editor, editor.filename);
 	}
@@ -180,8 +182,6 @@ void Loop::runEditor() {
 			if(editor.selectedEntity) {
 				graphics.drawPolygon(window, editor.selectedEntity->shape, sf::Color(0, 255, 204), sf::Color::Red);
 			}
-			wabi::Polygon c = clip(editor.stage.ship.shape, editor.stage.win.shape);
-			graphics.drawPolygon(window, c, sf::Color(255, 153, 204), sf::Color::Green);
 			drawEditorGui();
 			ImGui::SFML::Render(window);
 			window.display();

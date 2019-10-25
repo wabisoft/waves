@@ -126,6 +126,7 @@ inline Entity extractEntity(JSON j, JSONError& err) {
 }
 
 bool loadStageFromString(std::string data, Stage& stage, SerializeError& err) {
+	stage = {};
 	JSONError e;
 	string_it litStart = data.begin();
 	string_it litEnd = data.end();

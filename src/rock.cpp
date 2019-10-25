@@ -64,7 +64,7 @@ inline RockIt updateFloatingRock(Stage& stage, RockIt rockIt, float deltaTime) {
 	if(rock.state.floating.time > ROCK_MAX_FLOAT_TIME) {
 		Sea& sea = *findSea(stage, rock.state.floating.seaId);
 		createWave(sea, rock.position, 2* rock.radius * rock.radius * PI, (short)sign(rock.velocity.x), 1);
-		if (stage.selection.entity->id == rock.id) {
+		if (stage.selection.entity && stage.selection.entity->id == rock.id) {
 			// if this rock is selected we need to clear it
 			clearSelection(stage);
 		}
@@ -99,7 +99,7 @@ void updateRocks(Stage& stage, float deltaTime) {
 		Rock& rock = *rockIt;
 		clamp(rock.velocity, ROCK_MAX_SPEED); // clamp the rock speed
 		if (rock.position.x < 0 || rock.position.x > STAGE_WIDTH || rock.position.y < 0) {
-			// remove our aabb from the stage aabb array	
+			// remove our aabb from the stage aabb array
 			rockIt = deleteRock(stage, rockIt);
 		} else {
 			switch (rock.state.type) {

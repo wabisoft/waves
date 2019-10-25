@@ -131,6 +131,7 @@ bool lineSegmentIntersection(vec2 a, vec2 b, vec2 c, vec2 d, vec2 & intersection
 	}
 }
 
+
 vec2 findNormal(vec2 a, vec2 b, vec2 c) {
 	// Returns the normal of the vector from a to b (b-a) in the direction of c
 	vec2 u = b - a;

@@ -35,7 +35,7 @@ struct Polygon {
 	Polygon() { _reserve(); }
 	Polygon(int size): size(size), rotation(0) { _reserve(); }
 	Polygon(int size, float rotation) : size(size), rotation(rotation) { _reserve(); }
-	Polygon(std::vector<glm::vec2> model, float rotation) : vertices(model), model(model), rotation(rotation), size(model.size()) { }
+	Polygon(std::vector<glm::vec2> model, float rotation) : vertices(model), model(model), rotation(rotation), size((int)model.size()) { }
 
 	std::vector<glm::vec2> vertices;
 	std::vector<glm::vec2> model;
