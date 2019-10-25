@@ -27,3 +27,6 @@ bool lineSegmentIntersection(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 d,
 glm::vec2 findNormal(glm::vec2 a, glm::vec2 b, glm::vec2 c);
 glm::vec2& clamp(glm::vec2& v, float s); // clamp this vector to a scalar magnitude
 
+glm::vec2 centroid(const std::vector<glm::vec2>& points);
+bool isClockwise(glm::vec2 center, glm::vec2 a, glm::vec2 b);
+

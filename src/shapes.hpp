@@ -54,6 +54,8 @@ const int RECTANGLE_SIZE = 4;
 Polygon makeCircle(float radius, float rotation=0.f);
 Polygon makeRectangle(float width, float height, float rotation=0.f);
 
+std::vector<glm::vec2> pointsOfIntersection(const wabi::Polygon p1, const wabi::Polygon& p2);
+
 inline glm::vec2 lower(const Polygon& polygon); // gets the bottom left point of a polygon in relation to x, y axis
 inline glm::vec2 upper(const Polygon& polygon); // gets the top right point of a polygon in raltion to x, y axis
 inline void boundingPoints(const Polygon& polygon, glm::vec2 & lower, glm::vec2 & upper);

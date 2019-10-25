@@ -43,6 +43,7 @@ struct Collision {
 };
 
 Collision collision(const glm::vec2 poly1Pos, const wabi::Polygon& poly1, const wabi::Polygon& poly2);
+wabi::Polygon clip(const wabi::Polygon& a, const wabi::Polygon& b);
 // Collision collision(const wabi::Circle& circle, const wabi::Polygon& polygon);
 // Collision collision(const wabi::Circle& c1, const wabi::Circle& c2);
 

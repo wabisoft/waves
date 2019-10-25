@@ -1,3 +1,5 @@
+#include <cassert>
+#include <algorithm>
 #include "maths.hpp"
 
 using namespace glm;
@@ -32,6 +34,49 @@ inline float cross(glm::vec2 a, glm::vec2 b) {
 	 * point is on among other things							*
 	************************************************************/
 }
+
+vec2 centroid(const std::vector<vec2>& points) {
+	vec2 centroidPoint = vec2(0);
+	for(vec2 point : points) {
+		centroidPoint += point;
+	}
+	return centroidPoint / (float)points.size();
+}
+
+// center is the center of a polygon of which a and b are vertices
+bool isClockwise(vec2 center, vec2 a, vec2 b) {
+    if (a.x - center.x >= 0 && b.x - center.x < 0)
+        return true;
+    if (a.x - center.x < 0 && b.x - center.x >= 0)
+        return false;
+    if (a.x - center.x == 0 && b.x - center.x == 0) {
+        if (a.y - center.y >= 0 || b.y - center.y >= 0)
+            return a.y > b.y;
+        return b.y > a.y;
+    }
+    // compute the cross product of vectors (center -> a) x (center -> b)
+    int det = (a.x - center.x) * (b.y - center.y) - (b.x - center.x) * (a.y - center.y);
+    if (det < 0)
+        return true;
+    if (det > 0)
+        return false;
+    // points a and b are on the same line from the center
+    // check which point is closer to the center
+    int d1 = (a.x - center.x) * (a.x - center.x) + (a.y - center.y) * (a.y - center.y);
+    int d2 = (b.x - center.x) * (b.x - center.x) + (b.y - center.y) * (b.y - center.y);
+    return d1 > d2;
+}
+
+// bool isClockwise(vec2 center, vec2 a, vec2 b) {
+// 	auto diffA = a - center;
+// 	auto diffB = b - center;
+// 	auto product = cross(diffA, diffB);
+// 	if(product == 0) {
+// 		return (std::min(a.x, b.x) <= center.x && std::max(a.x, b.x) >= center.x) || (std::min(a.y, b.y) <= center.y && std::max(a.y, b.y) >= center.y);
+// 	} else {
+// 		return product < 0;
+// 	}
+// }
 
 float sideProduct(glm::vec2 a, glm::vec2 b, glm::vec2 point) {
 	// returns mag of a perpendicular vector
@@ -71,7 +116,7 @@ bool lineSegmentIntersection(vec2 a, vec2 b, vec2 c, vec2 d, vec2 & intersection
 	// otherwise return depth of intersection and update intersection param
 	// See line segment intersection in owen's notebook or online
 	// http://www.cs.swan.ac.uk/~cssimon/line_intersection.html
-	float h = (d.x - c.x) * (a.y - b.y) - (a.x - b.x) * (d.y - c.y);
+	float h = (d.x - c.x) * (a.y - b.y) - (a.x - b.x) * (d.y - c.y); // this is dc x ab
 	if (h == 0){
 		return false; // h is zero when the lines are colinear
 	}

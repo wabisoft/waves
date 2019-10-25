@@ -235,6 +235,9 @@ void Graphics::drawPolygon(sf::RenderWindow& target, const wabi::Polygon& polygo
 	}
 	sfVertices[polygon.size] = sfVertices[0];
 	target.draw(sfVertices);
+	auto cent = game2ScreenPos(target, centroid(polygon.vertices));
+	circ.setPosition(cent);
+	target.draw(circ);
 }
 
 

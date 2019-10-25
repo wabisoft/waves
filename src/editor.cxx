@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <glm/vec2.hpp>
 
+#include "collision.hpp"
 #include "imgui.h"
 #include "imgui-SFML.h"
 #include "imgui_stdlib.h"
@@ -179,6 +180,8 @@ void Loop::runEditor() {
 			if(editor.selectedEntity) {
 				graphics.drawPolygon(window, editor.selectedEntity->shape, sf::Color(0, 255, 204), sf::Color::Red);
 			}
+			wabi::Polygon c = clip(editor.stage.ship.shape, editor.stage.win.shape);
+			graphics.drawPolygon(window, c, sf::Color(255, 153, 204), sf::Color::Green);
 			drawEditorGui();
 			ImGui::SFML::Render(window);
 			window.display();

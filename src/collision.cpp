@@ -335,6 +335,32 @@ void collide(Ship& ship, Rock& rock) {
 void collide(Ship& ship, Win& win) {
 }
 
+
+Polygon clip(const wabi::Polygon& a, const Polygon& b) {
+	auto I = pointsOfIntersection(a, b);
+	for(vec2 p : a.vertices) {
+		if(pointInside(p, b)) {
+			auto search = std::find(I.begin(), I.end(), p);
+			if(search == I.end()) {
+				I.push_back(p);
+			}
+		}
+	}
+	for(vec2 p : b.vertices) {
+		if(pointInside(p, a)) {
+			auto search = std::find(I.begin(), I.end(), p);
+			if(search == I.end()) {
+				I.push_back(p);
+			}
+		}
+	}
+	vec2 cent = centroid(I);
+	std::sort(I.begin(), I.end(), [&cent](const vec2& v1, const vec2& v2) {
+		return isClockwise(cent, v1, v2);
+	});
+	return Polygon(I, 0);
+}
+
 // Thanks javidx9!
 // NOTE: this only determines if poly1 is specifically overlaping poly2
 // Also NOTE: poly1 and poly2 must be CONVEX

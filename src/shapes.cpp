@@ -10,15 +10,15 @@ using namespace glm;
 namespace wabi {
 
 // POLYGON
-void update(Polygon& polygon, glm::vec2 position, mat3 transform) {
-	transform = glm::translate(transform, position);
-	transform = glm::rotate(transform, polygon.rotation);
+void update(Polygon& polygon, vec2 position, mat3 transform) {
+	transform = translate(transform, position);
+	transform = rotate(transform, polygon.rotation);
 	for(int i = 0; i < polygon.size; ++i) {
 		polygon.vertices[i] = transform * polygon.model[i];
 	}
 }
 
-float minDistFromEdge(const glm::vec2 point, const Polygon& polygon, int& edgeStartIndex, bool& onVertex, float onVertexTolerance) {
+float minDistFromEdge(const vec2 point, const Polygon& polygon, int& edgeStartIndex, bool& onVertex, float onVertexTolerance) {
 	float min = INF;
 	for (int i = 0; i < polygon.size; ++i) {
 		vec2 a = polygon.vertices[i];
@@ -44,10 +44,10 @@ float minDistFromEdge(const glm::vec2 point, const Polygon& polygon, int& edgeSt
 	return min;
 }
 
-bool pointInside(const glm::vec2 point, const Polygon& polygon) {
+bool pointInside(const vec2 point, const Polygon& polygon) {
 	for (int i = 0; i < polygon.size; ++i) {
-		glm::vec2 a = polygon.vertices[i];
-		glm::vec2 b = polygon.vertices[(i+1) % polygon.size];
+		vec2 a = polygon.vertices[i];
+		vec2 b = polygon.vertices[(i+1) % polygon.size];
 		float sign = sideSign(a, b, point);
 		// If the point is on the right (remeber we are going clock wise) then return false
 		if (sign > 0) { // the > 0 here means that points on an edge are considered inside the polygon
@@ -91,6 +91,23 @@ Polygon makeRectangle(float width, float height, float rotation) {
 	p.model[2] = {halfWidth, -halfHeight}; // bottom right
 	p.model[3] = {-halfWidth, -halfHeight}; // bottom left
 	return p;
+}
+
+std::vector<vec2> pointsOfIntersection(const wabi::Polygon p1, const wabi::Polygon& p2) {
+	std::vector<vec2> intersectionPoints;
+	for(int i = 0; i < p1.size; ++i) {
+		auto a = p1.vertices[i];
+		auto b = p1.vertices[(i+1)%p1.size];
+		for(int j = 0; j < p2.size; ++j) {
+			auto c = p2.vertices[j];
+			auto d = p2.vertices[(j+1)%p2.size];
+			vec2 i(0);
+			if(lineSegmentIntersection(a, b, c, d, i)){
+				intersectionPoints.push_back(i);
+			}
+		}
+	}
+	return intersectionPoints;
 }
 
 } // namespace wabi

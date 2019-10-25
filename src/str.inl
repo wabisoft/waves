@@ -1,6 +1,5 @@
 // str.hpp
 
-
 inline std::string str(Entity::Type type) {
 	const char * names[] = {
 		"", 								// 00000000
