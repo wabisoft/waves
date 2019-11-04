@@ -17,7 +17,7 @@
 using namespace glm;
 
 
-void update(Stage& stage, float deltaTime){
+void Stage::update(Stage& stage, float deltaTime){
 	assert(stage.id_src < (uint8)(-1)); // 255
 	switch(stage.state.type) {
 		case StageState::PAUSED:
@@ -29,7 +29,7 @@ void update(Stage& stage, float deltaTime){
 		case StageState::FINISHED: break;
 	}
 	if(stage.rocks.size() < 1) {
-		createRock(stage, stage.rockSpawn, ROCK_MAX_RADIUS - 1, stage.rockType);
+		createRock(stage, stage.rockSpawn, ROCK_MAX_RADIUS - 1, stage.rockKind);
 	}
 	resolveCollisions(stage);
 	updateRocks(stage, deltaTime);
@@ -41,16 +41,12 @@ void update(Stage& stage, float deltaTime){
 	}
 }
 
-Entity makeSelectionAtPosition(Stage& stage, vec2 position) {
+Entity* makeSelectionAtPosition(Stage& stage, vec2 position) {
 	// For now we only select rocks so let's find our rock
 	stage.selection.entity = findEntityAtPosition(stage, position);
-	if(stage.selection.entity.type != NONE) {stage.selection.active = true;}
-	// RockIt rockIt = findRockAtPosition(stage, position);
-	// if (rockIt != stage.rocks.end()) {
-	// 	stage.selection.entity = { rockIt->id, ROCK };
-	// 	stage.selection.active = true;
-	// 	stage.selection.entityPosition = rockIt->shape.position;
-	// }
+	if (stage.selection.entity && stage.selection.entity->type == Entity::ROCK) {
+		stage.selection.active = true;
+	}
 	return stage.selection.entity;
 }
 
@@ -60,15 +56,15 @@ void clearSelection(Stage& stage) {
 
 inline bool validateAndSetPullPosition(Stage& stage,  vec2 position) {
 	assert(stage.selection.active);
-	Rock& rock = *findRock(stage, stage.selection.entity.id);
-	vec2 pull = rock.shape.position - position;
+	Rock& rock = *findRock(stage, stage.selection.entity->id);
+	vec2 pull = rock.position - position;
 	float squaredPullLength = dot(pull, pull);
 	if(squaredPullLength < STAGE_MAX_PULL_LENGTH_SQUARED) {
 		stage.selection.pull.pullPosition = position;
 		return true;
 	} else {
-		vec2 relPos = normalize(position - rock.shape.position);
-		stage.selection.pull.pullPosition = rock.shape.position + relPos * STAGE_MAX_PULL_LENGTH;
+		vec2 relPos = normalize(position - rock.position);
+		stage.selection.pull.pullPosition = rock.position + relPos * STAGE_MAX_PULL_LENGTH;
 		return true;
 	}
 }
@@ -118,14 +114,14 @@ void processEndInput(Stage& stage, vec2 position) {
 	case Selection::PULL: { // if we're throwing
 		assert(stage.selection.active); // I think we should always have a selection in this phase
 		validateAndSetPullPosition(stage, position);
-		Rock& rock = *findRock(stage, stage.selection.entity.id);
-		vec2 pull = rock.shape.position - stage.selection.pull.pullPosition;
+		Rock& rock = *findRock(stage, stage.selection.entity->id);
+		vec2 pull = rock.position - stage.selection.pull.pullPosition;
 		float pullLength = std::abs(length(pull));
 		float throwMag = (pullLength / STAGE_MAX_PULL_LENGTH) * ROCK_MAX_SPEED;
-		rock.shape.position += 0.01f * pull; // If you dont so this then to collision get all weird and bad things happen
+		rock.position += 0.01f * pull; // If you dont so this then to collision get all weird and bad things happen
 		vec2 force = (pull/pullLength) * throwMag;
 		rock.velocity += force;
-		rock.state = {RockState::FALLING, {}};
+		rock.state = {Rock::State::FALLING, Rock::State::Falling{}};
 		stage.selection = Selection{};
 		// stage.selection.pull.pullPosition = VECTOR2_ZERO;
 		clearSelection(stage);
@@ -136,8 +132,8 @@ void processEndInput(Stage& stage, vec2 position) {
 
 vec2 getPullForce(Stage& stage) {
 	assert(stage.selection.active && stage.selection.state == Selection::PULL);
-	Rock& rock = *findRock(stage, stage.selection.entity.id);
-	vec2 pull = rock.shape.position - stage.selection.pull.pullPosition;
+	Rock& rock = *findRock(stage, stage.selection.entity->id);
+	vec2 pull = rock.position - stage.selection.pull.pullPosition;
 	float pullLength = std::abs(length(pull));
 	float throwMag = (pullLength / STAGE_MAX_PULL_LENGTH) * ROCK_MAX_SPEED;
 	return (pull/pullLength) * throwMag;
@@ -147,9 +143,9 @@ vec2 getPullForce(Stage& stage) {
 std::vector<vec2> pullParabola(Stage& stage) {
 	assert(stage.selection.active && stage.selection.state == Selection::PULL);
 	std::vector<vec2> parabola;
-	Rock& rock = *findRock(stage, stage.selection.entity.id);
+	Rock& rock = *findRock(stage, stage.selection.entity->id);
 	vec2 f = rock.velocity + getPullForce(stage);
-	vec2 wouldBePosition = rock.shape.position;
+	vec2 wouldBePosition = rock.position;
 	const int stepsize = 10;
 	const float step = stepsize*FIXED_TIMESTEP; // look at the projectile would be position every 10 updates
 	const float t = 1.5; // (seconds)

@@ -24,8 +24,8 @@ void updateWaves(Stage& stage, Sea& sea){
 		else if ((wave.decay <= 0.f && !wave.grow) || wave.minimumX() > STAGE_WIDTH)
 		{
 			// delete this wave
-			if (stage.ship.state.type == ShipState::SURFING && stage.ship.state.surfing.waveId == wave.id) {
-				stage.ship.state = {ShipState::FALLING, {}};
+			if (stage.ship.state.type == Ship::State::SURFING && stage.ship.state.surfing.waveId == wave.id) {
+				stage.ship.state = {Ship::State::FALLING, {}};
 				stage.ship.velocity = wave.velocity;
 			}
 			waveIt = deleteWave(sea, waveIt);
@@ -53,7 +53,7 @@ uint8 createWave(Sea& sea, vec2 position, float amplitude, int direction, int si
 	new_wave.position = position;
 	new_wave.amplitude = amplitude;
 	new_wave.active = true;
-	assert(direction == -1 || direction == 1);
+	if (direction != -1 && direction != 1) { direction = 1;}
 	new_wave.direction = direction;
 	assert(sign == -1 || sign == 1);
 	new_wave.sign = sign;

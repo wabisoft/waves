@@ -6,14 +6,14 @@
 #include <string>
 #include <SFML/Window/WindowHandle.hpp>
 
-inline std::string ExePath() {
+inline std::string exePath() {
     char buffer[MAX_PATH];
     GetModuleFileName( NULL, buffer, MAX_PATH );
     std::string::size_type pos = std::string( buffer ).find_last_of( "\\/" );
     return std::string( buffer ).substr( 0, pos);
 }
 
-inline std::string CurrentWorkingDir() {
+inline std::string cwd() {
 	char buff[FILENAME_MAX];
   	_getcwd( buff, FILENAME_MAX );
   	std::string currentWorkingDir(buff);
@@ -25,7 +25,7 @@ inline bool selectAFileForOpen(sf::WindowHandle windowHandle, std::string& filen
 	OPENFILENAME ofn;
 	char buffer[MAX_PATH];
 	if(!filename.empty()){
-		sprintf(buffer, "%s", filename.c_str());
+		sprintf_s(buffer, "%s", filename.c_str());
 	} else {
 		ZeroMemory( &buffer, sizeof( buffer ) );
     	GetModuleFileName( NULL, buffer, MAX_PATH );
@@ -50,7 +50,7 @@ inline bool selectAFileForSave(sf::WindowHandle windowHandle, std::string& filen
 	OPENFILENAME ofn;
 	char buffer[MAX_PATH];
 	if(!filename.empty()){
-		sprintf(buffer, "%s", filename.c_str());
+		sprintf_s(buffer, "%s", filename.c_str());
 	} else {
 		ZeroMemory( &buffer, sizeof( buffer ) );
     	GetModuleFileName( NULL, buffer, MAX_PATH );

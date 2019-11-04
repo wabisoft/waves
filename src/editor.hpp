@@ -1,57 +1,97 @@
 #pragma once
 
 #include <vector>
+#include <stack>
 #include <string>
 
+#include "SFML/Window/WindowHandle.hpp"
+#include "SFML/Graphics.hpp"
+#include "imgui.h"
+#include "imgui-SFML.h"
+#include "imgui_stdlib.h"
+
 #include "clock.hpp"
+#include "editor_action.hpp"
+#include "editor_imgui.hpp"
+#include "level_io.hpp"
 #include "events.hpp"
+#include "game.hpp"
+#include "graphics.hpp"
 #include "json.hpp"
 #include "prelude.hpp"
 #include "stage.hpp"
-#include "SFML/Window/WindowHandle.hpp"
-#include "SFML/Graphics.hpp"
-
-
-// TODO: Write an editor
-struct ErrorPopupState {
-	std::string popupId;
-	std::string message;
-	bool opened = false;
-};
+#include "util.hpp"
 
 struct MouseState {
 	bool down = false;
 	glm::vec2 downPosition;
+	glm::vec2 prevPosition;
 };
 
-struct Ghost {
-	Entity entity;
+struct ImGuiListener : public EventListener {
+	ImGuiListener() : EventListener("ImGui") { _subscribedEvents = {Event::Count}; }
+	virtual void onAll(sf::Window& window, Event& event) override {
+		ImGui::SFML::ProcessEvent(event);
+    	ImGuiIO& io = ImGui::GetIO();
+		bool keyHandled = (event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased) && io.WantCaptureKeyboard;
+		bool mouseHandled = (
+			event.type == sf::Event::MouseButtonPressed
+			|| event.type == sf::Event::MouseButtonReleased
+			|| event.type == sf::Event::MouseEntered
+			|| event.type == sf::Event::MouseLeft
+			|| event.type == sf::Event::MouseMoved) && io.WantCaptureMouse;
+		event.handled = keyHandled || mouseHandled;
+	}
 };
 
-class Editor : public EventListener {
-public:
+struct Editor : public EventListener {
+	enum { EDIT, PLAY };
+
+	Editor(sf::RenderWindow* p_Window) : EventListener("Editor"), window(p_Window) {
+		actions.push(StaticActions::select());
+		_subscribedEvents = {Event::Closed, Event::MouseButtonPressed, Event::MouseButtonReleased, Event::MouseMoved, Event::KeyPressed};
+		enterMode(EDIT);
+	 }
 	virtual void onClosed(sf::Window&)											override;
 	virtual void onMouseButtonPressed(sf::Window&, Event::MouseButtonEvent)		override;
 	virtual void onMouseButtonReleased(sf::Window&, Event::MouseButtonEvent)	override;
 	virtual void onMouseMoved(sf::Window&, Event::MouseMoveEvent)				override;
+	virtual void onKeyPressed(sf::Window&, Event::KeyEvent)						override;
 
-	std::string filename;
+
+	void start();
+	void run();
+	void stop();
+	void update(sf::Time deltaTime);
+	void render(sf::Time deltaTime);
+
+	void enterMode(int mode);
+	void exitMode(int mode);
+	void setMode(int mode);
+
+	Action* popAction();
+	void pushAction(Action* action);
+	Action* Editor::getAction();
+	void drawImGui();
+
+	LevelIO level;
 	Stage stage;
+	Stage playStage;
 	MouseState mouseState;
-	Entity selectedEntity;
-	std::vector<ErrorPopupState> errorPopups;
+	Entity* selectedEntity = nullptr;
+	Entity* hotEntity = nullptr;
+	std::vector<Popup> popups;
+	Stack<Action*> actions;
+
+	int mode_ = -1;
+	float loopsPerUpdate = 0;
+	float renderDelta = 0;
+	float updateDelta = 0;
+
+	sf::RenderWindow* window = nullptr;
+	ImGuiListener imguiListener;
+	Graphics graphics;
+	EventManager eventManager;
 };
 
-void initEditor(Editor& editor);
-// void handleEvents(Editor& editor, sf::RenderWindow& window);
-void processEvent(Editor& editor, const sf::Event& event, const sf::RenderWindow& window);
-void keyEvent(Editor&, sf::Event);
-void startMouseInput(Editor&, glm::vec2 );
-void continueMouseInput(Editor&, glm::vec2 );
-void endMouseInput(Editor&, glm::vec2 );
 
-void levelOpen(Editor& editor, std::string filename);
-void levelOpen(sf::WindowHandle windowHandle, Editor& editor);
-void validateSaveToFile(Editor& editor);
-void levelSave(sf::WindowHandle windowHandle, Editor& editor);
-void levelSaveAs(sf::WindowHandle windowHandle, Editor& editor);

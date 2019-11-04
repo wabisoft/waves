@@ -12,6 +12,10 @@ const float STAGE_HEIGHT = 	72.f; // meters
 const float FIXED_TIMESTEP = 	1.f/480.f; // seconds (480 Hz)
 const float FRAME_RATE = 		1.f/120.f; // seconds (60 Hz)
 
+const float WOOD_DENSITY = 112.f;
+const float WATER_DENSITY = 998.f;
+const float AIR_DENSITY = 1.225f;
+
 
 // Physics constants
 // const float GRAVITATIONAL_CONSTANT = 9.8f;

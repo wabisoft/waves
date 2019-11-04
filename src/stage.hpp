@@ -13,6 +13,7 @@
 #include "shapes.hpp"
 #include "ship.hpp"
 #include "typedefs.hpp"
+#include "win.hpp"
 
 struct Selection {
 	enum State : uint8 {
@@ -28,21 +29,13 @@ struct Selection {
 	};
 
 	State state = SELECT;
-	Entity entity;
-	glm::vec2 entityPosition;
+	Entity* entity;
 
 	PullState pull;
 	RepositionState reposition;
 
 	bool active = false;
 };
-
-inline const char * str(Selection::State s) {
-	const char * names[] = {
-		"SELECT", "PULL"
-	};
-	return names[s];
-}
 
 struct StageState {
 	struct Paused {
@@ -67,15 +60,11 @@ struct StageState {
 	Finished finished;
 };
 
-struct Win {
-	float timeInArea = 0;
-	float timeToWin = 0.25;
-	wabi::Rectangle region;
-};
 
 struct Stage{
 	// Sea sea;
 	Ship ship;
+	Win win;
 	std::vector<Sea> seas;
 	std::vector<Rock> rocks;
 	std::vector<Platform> platforms;
@@ -86,14 +75,16 @@ struct Stage{
 
 	glm::vec2 rockSpawn;
 	Selection selection;
-	Win win;
 	StageState state;
 	uint8 id_src = 0;
-	RockType rockType = {RockType::RED};
+	Rock::Kind rockKind = {Rock::RED};
+
+	static void update(Stage& stage, float deltaTime);
+
 };
 
-void update(Stage& stage, float deltaTime);
-Entity makeSelectionAtPosition(Stage& stage, glm::vec2 position);
+// void update(Stage& stage, float deltaTime);
+Entity* makeSelectionAtPosition(Stage& stage, glm::vec2 position);
 void clearSelection(Stage& stage);
 void processStartInput(Stage& stage, glm::vec2 position);
 void processContinuingInput(Stage& stage, glm::vec2 position);

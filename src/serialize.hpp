@@ -11,13 +11,12 @@
 #include "json.hpp"
 
 // Serialize
-std::string serialize(const Stage& stage);
-std::string serialize(const std::vector<Sea> seas);
-std::string serialize(const std::vector<Wave> waves);
-std::string serialize(const std::vector<Platform> platforms);
-std::string serialize(const wabi::Rectangle& rectangle);
-std::string serialize(const glm::vec2 v);
-std::string serialize(const Win w);
+std::string serializeStage(const Stage& stage);
+// std::string serialize(const wabi::Polygon& rectangle);
+// std::string serialize(const Entity& entity, std::vector<std::string> extra = {});
+// std::string serialize(const glm::vec2 v);
+// std::string serialize(const Win w);
+
 
 struct SerializeError {
 	std::string what;

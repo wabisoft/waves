@@ -2,51 +2,53 @@
 
 #include <glm/vec2.hpp>
 
+#include "entity.hpp"
 #include "prelude.hpp"
 #include "maths.hpp"
 #include "typedefs.hpp"
 #include "shapes.hpp"
 
-struct ShipState {
-	struct FallingState { };
-	struct StandingState{
-		glm::vec2 surfaceStart;
-		glm::vec2 surfaceEnd;
+struct Ship : Entity {
+	struct State {
+		struct Falling {};
+		struct Standing{
+			glm::vec2 surfaceStart;
+			glm::vec2 surfaceEnd;
+		};
+		struct Surfing {
+			uint8 waveId;
+			uint8 seaId;
+			int waveDirection = 0;
+		};
+		enum Type : uint8_t {
+			FALLING = 1 << 0,
+			STANDING = 1 << 1,
+			SURFING = 1 << 2,
+		};
+		State::Type type;
+		union {
+			Falling falling;
+			Standing standing;
+			Surfing surfing;
+		};
 	};
-	struct SurfingState {
-		uint8 waveId;
-		uint8 seaId;
-		int waveDirection = 0;
-	};
+	Ship() { }
+	Ship(wabi::Polygon& polygon, glm::vec2 position, uint8 id) : Entity(Entity::SHIP, polygon, position, id) { }
 
-	enum StateType : uint8_t {
-		FALLING = 1 << 0,
-		STANDING = 1 << 1,
-		SURFING = 1 << 2,
-	};
-
-	StateType type;
-	union {
-		StandingState standing;
-		FallingState falling;
-		SurfingState surfing;
-	};
-};
-
-struct Ship {
-	wabi::Rectangle shape;
-	glm::vec2 velocity;
-	ShipState state = {ShipState::FALLING, {}};
-	uint8_t id = 0;
-	bool active = false;
+	glm::vec2 velocity = glm::vec2(0);
+	float omega = 0; // rotational velocity
+	float alpha = 0; // rotational acceleration
+	State state = {Ship::State::FALLING, {}};
+	bool inWin = false;
 };
 
 inline float mass(const Ship& ship) {
-	return area(ship.shape) * SHIP_AREA_MASS_RATIO;
+	// return area(ship.shape) * SHIP_AREA_MASS_RATIO;
+	return area(ship.shape) * 112;
 }
 
 void updateShip(Stage& stage, float deltaTime);
 uint8_t createShip(Stage& stage, glm::vec2 position, float width, float height);
-uint8_t createShip(Stage& stage, wabi::Rectangle rect);
+uint8_t createShip(Stage& stage, glm::vec2 position, wabi::Polygon shape);
 
 

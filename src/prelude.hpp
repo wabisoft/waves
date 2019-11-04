@@ -11,7 +11,5 @@ struct Sea;
 struct Ship;
 struct Stage;
 struct Wave;
-
-
-
+struct Win;
 

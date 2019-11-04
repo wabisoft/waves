@@ -10,13 +10,15 @@
 
 struct AABB{
 	inline AABB() {};
+	explicit AABB(const Entity&);
 	explicit AABB (const Rock&);
 	explicit AABB (const Platform&);
 	explicit AABB (const Ship&);
 	explicit AABB (const Sea&);
+	explicit AABB (const Win&);
 	glm::vec2 lower = {0.f,0.f};
 	glm::vec2 upper = {0.f,0.f};
-	EntityType type = NONE;
+	Entity::Type type = Entity::NONE;
 	uint8 id = 0;
 };
 
