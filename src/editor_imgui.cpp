@@ -11,13 +11,28 @@ void Editor::drawImGui() {
 	if(ImGui::BeginMainMenuBar()) {
 		if (ImGui::BeginMenu("File")){
 			if(ImGui::MenuItem("Open", "Ctrl+O")) {
-				level.open(windowHandle);
-    		}
+				std::string message;
+				if(level.open(windowHandle, stage, message)) {
+					popups.push_back({"level-open-success", message, GREEN});
+				} else {
+					popups.push_back({"level-open-error", message, RED});
+				}
+			}
 			if(ImGui::MenuItem("Save", "Ctrl+S")) {
-				level.save(windowHandle, stage);
+				std::string message;
+				if(level.save(windowHandle, stage, message)) {
+					popups.push_back({"level-save-success", message, GREEN});
+				} else {
+					popups.push_back({"level-save-error", message, RED});
+				}
 			}
 			if(ImGui::MenuItem("Save As...", "Ctrl+Shift+S")) {
-				level.saveAs(windowHandle, stage);
+				std::string message;
+				if(level.saveAs(windowHandle, stage, message)) {
+					popups.push_back({"level-save-as-success", message, GREEN});
+				} else {
+					popups.push_back({"level-save-as-error", message, RED});
+				}
 			}
 			ImGui::EndMenu();
 		}

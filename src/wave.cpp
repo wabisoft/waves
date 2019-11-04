@@ -53,7 +53,7 @@ uint8 createWave(Sea& sea, vec2 position, float amplitude, int direction, int si
 	new_wave.position = position;
 	new_wave.amplitude = amplitude;
 	new_wave.active = true;
-	assert(direction == -1 || direction == 1);
+	if (direction != -1 && direction != 1) { direction = 1;}
 	new_wave.direction = direction;
 	assert(sign == -1 || sign == 1);
 	new_wave.sign = sign;

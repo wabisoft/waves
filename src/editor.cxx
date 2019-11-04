@@ -1,22 +1,8 @@
 
 #include <SFML/Graphics.hpp>
-#include <iostream>
-#include <string>
-#include <cstdio>
-#include <cstdlib>
-#include <glm/vec2.hpp>
 
-#include "collision.hpp"
-#include "imgui.h"
-#include "imgui-SFML.h"
-#include "imgui_stdlib.h"
 #include "editor.hpp"
-#include "game.hpp"
-#include "graphics.hpp"
-#include "logging.hpp"
-#include "serialize.hpp"
-#include "str.hpp"
-#include "win32_file.hpp"
+#include "system.hpp"
 
 
 int main() {

@@ -1,95 +1,77 @@
 #include <iostream>
-#include <fstream>
 
-#include "clock.hpp"
-#include "constants.hpp"
 #include "game.hpp"
-#include "graphics.hpp"
-#include "maths.hpp"
-#include "rock.hpp"
-#include "util.hpp"
-#include "serialize.hpp"
-#include "stage.hpp"
-#include "system.hpp"
 
-void Game::loadStage(std::string aFilename) {
-	SerializeError e;
-	if(aFilename.empty()) {aFilename = filename;}
-	if (loadStageFromFile(aFilename, stage, e)) {
-		filename = aFilename;
-		stage.state.type = StageState::RUNNING;
-		return;
-	} else {
-		throw e;
-	}
-}
+using namespace glm;
 
-void Game::unloadStage() {
-	stage = {};
-}
-
-void Game::reloadStage() {
-	unloadStage();
-	loadStage();
-}
-
-void Game::update() {
-	float updateDelta = updateClock.getElapsedTime().asSeconds();
-	if (updateDelta >= FIXED_TIMESTEP * timeScale) {
-		Stage::update(stage, std::min(updateDelta, FIXED_TIMESTEP)); // the min call is to prevent too large a time step from fucking up collision detection
-		updateClock.restart();
-		loopsPerUpdate = 0;
-		updateDelta = updateDelta;
-	} else { ++loopsPerUpdate; }
-	if (stage.state.type == StageState::FINISHED && !stage.state.finished.win) {
-		reloadStage();
-	}
-}
-
-void Game::onClosed(sf::Window& w) {
-	end = true;
-	w.close();
+void Game::onClosed(sf::Window& window) {
+	window.close();
 }
 
 void Game::onMouseButtonPressed(sf::Window& window, Event::MouseButtonEvent mouseButton) {
-	processStartInput(stage, screen2GamePos(window, {mouseButton.x, mouseButton.y}));
+	vec2 position = screen2GamePos(window, {mouseButton.x, mouseButton.y});
+	processStartInput(stage, position);
 }
 
 void Game::onMouseButtonReleased(sf::Window& window, Event::MouseButtonEvent mouseButton) {
-	processEndInput(stage, screen2GamePos(window, {mouseButton.x, mouseButton.y}));
+	vec2 position = screen2GamePos(window, {mouseButton.x, mouseButton.y});
+	processEndInput(stage, position);
 }
 
 void Game::onMouseMoved(sf::Window& window, Event::MouseMoveEvent mouseMove) {
-	processContinuingInput(stage, screen2GamePos(window, {mouseMove.x, mouseMove.y}));
+	vec2 position = screen2GamePos(window, {mouseMove.x, mouseMove.y});
+	processContinuingInput(stage, position);
 }
 
-void Game::onKeyPressed(sf::Window& window, Event::KeyEvent key) {
-	switch (key.code) {
-		case sf::Keyboard::Key::P:
-			if (stage.state.type == StageState::PAUSED) {
-				stage.state.type = StageState::RUNNING;
-			} else {
-				stage.state.type = StageState::PAUSED;
-			}
-			break;
-		case sf::Keyboard::Key::Q: end = true; break;
-		case sf::Keyboard::Key::Num1: timeScale = 1.f; break;
-		case sf::Keyboard::Key::Num2: timeScale = 2.f; break;
-		case sf::Keyboard::Key::Num3: timeScale = 3.f; break;
-		case sf::Keyboard::Key::Num4: timeScale = 4.f; break;
-		case sf::Keyboard::Key::Num5: timeScale = 100.f; break;
-		case sf::Keyboard::Key::Num6: timeScale = 1000.f; break;
-		case sf::Keyboard::Key::R:
-			if (key.control) {
-				reloadStage();
-			} else {
-				stage.rockKind = {Rock::RED};
-			}
-			break;
-		case sf::Keyboard::Key::G: stage.rockKind = {Rock::GREEN}; break;
-		case sf::Keyboard::Key::B: stage.rockKind = {Rock::BLUE}; break;
-		default: break;
+void Game::onKeyPressed(sf::Window&, Event::KeyEvent) {
+
+}
+
+void Game::start() {
+	stage = {};
+	if(!levelIO.filename.empty()) {
+		std::string message;
+		levelIO.open(stage, message);
+		std::cout << message << std::endl;
 	}
-
+	subscribe(eventManager);
+	logging::Logger::setLoggerLevel("EventManager", logging::INFO);
 }
+
+void Game::run() {
+	Clock updateClock;
+	Clock renderClock;
+	while (window->isOpen()) {
+		eventManager.dispatchEvents(*window);
+		updateDelta = updateClock.getElapsedTime().asSeconds();
+		if(updateDelta >= FIXED_TIMESTEP) {
+			update(updateClock.restart());
+		}
+		renderDelta = renderClock.getElapsedTime().asSeconds();
+		if (renderDelta >= FRAME_RATE) {
+			render(renderClock.restart());
+		}
+	}
+}
+
+void Game::stop() {
+	unsubscribe(eventManager);
+}
+
+void Game::update(sf::Time deltaTime) {
+	Stage::update(stage, std::min(deltaTime.asSeconds(), FIXED_TIMESTEP));
+	if(stage.state.type == StageState::FINISHED && !stage.state.finished.win) {
+		std::string message;
+		levelIO.open(stage, message); // reload the stage
+		std::cout << message << std::endl;
+	}
+}
+
+void Game::render(sf::Time deltaTime) {
+	graphics.drawStage(*window, stage, false);
+	wabi::Polygon c = clip(stage.ship.shape, stage.seas[0].shape);
+	graphics.drawPolygon(*window, c, sf::Color(255, 153, 153), sf::Color::Green);
+	window->display();
+}
+
 

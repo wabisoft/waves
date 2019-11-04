@@ -13,7 +13,7 @@
 #include "clock.hpp"
 #include "editor_action.hpp"
 #include "editor_imgui.hpp"
-#include "editor_level.hpp"
+#include "level_io.hpp"
 #include "events.hpp"
 #include "game.hpp"
 #include "graphics.hpp"
@@ -47,7 +47,7 @@ struct ImGuiListener : public EventListener {
 struct Editor : public EventListener {
 	enum { EDIT, PLAY };
 
-	Editor(sf::RenderWindow* p_Window) : EventListener("Editor"), window(p_Window), level(this) {
+	Editor(sf::RenderWindow* p_Window) : EventListener("Editor"), window(p_Window) {
 		actions.push(StaticActions::select());
 		_subscribedEvents = {Event::Closed, Event::MouseButtonPressed, Event::MouseButtonReleased, Event::MouseMoved, Event::KeyPressed};
 		enterMode(EDIT);
@@ -58,29 +58,23 @@ struct Editor : public EventListener {
 	virtual void onMouseMoved(sf::Window&, Event::MouseMoveEvent)				override;
 	virtual void onKeyPressed(sf::Window&, Event::KeyEvent)						override;
 
-	Action* Editor::getAction();
-	void start();
-	void stop();
-	void run();
-	void drawImGui();
 
-	void enterMode(int mode);
-	void exitMode(int mode);
-	void setMode(int mode) {
-		exitMode(mode_);
-		enterMode(mode);
-	}
+	void start();
+	void run();
+	void stop();
 	void update(sf::Time deltaTime);
 	void render(sf::Time deltaTime);
 
-	Action* popAction() {
-		return actions.rpop();
-	}
-	void pushAction(Action* action) {
-		actions.push(action);
-	}
+	void enterMode(int mode);
+	void exitMode(int mode);
+	void setMode(int mode);
 
-	Level level;
+	Action* popAction();
+	void pushAction(Action* action);
+	Action* Editor::getAction();
+	void drawImGui();
+
+	LevelIO level;
 	Stage stage;
 	Stage playStage;
 	MouseState mouseState;
@@ -95,7 +89,6 @@ struct Editor : public EventListener {
 	float updateDelta = 0;
 
 	sf::RenderWindow* window = nullptr;
-	Game game;
 	ImGuiListener imguiListener;
 	Graphics graphics;
 	EventManager eventManager;

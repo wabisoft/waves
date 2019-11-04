@@ -415,3 +415,4 @@ Collision collision(const vec2 p1Pos, const vec2 p2Pos, const Polygon& p1, const
 	return Collision();
 }
 
+

@@ -5,6 +5,8 @@
 #include <algorithm>
 #include "constants.hpp"
 
+#define WABI_NOT_USED(x) ((void)(x))
+
 
 /**************
  * Algorithms *
