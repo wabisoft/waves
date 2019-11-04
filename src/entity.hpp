@@ -30,14 +30,6 @@ struct Entity {
 	Type type = NONE;
 };
 
-// struct EntityHandle {
-// 	glm::vec2* pPosition;
-// 	wabi::Polygon* pShape;
-// 	Entity::Type type = NONE;
-// 	uint8 id = 0;  // non-zero if refers to valid entity
-// };
-
-
 // bool pointOnEntity(Stage stage, glm::vec2 point, Entity entity);
 Entity* findEntityAtPosition(Stage& stage, glm::vec2 position);
 Entity* getEntity(Stage& stage, uint8 id, Entity::Type type);

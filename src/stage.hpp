@@ -80,6 +80,7 @@ struct Stage{
 	Rock::Kind rockKind = {Rock::RED};
 
 	static void update(Stage& stage, float deltaTime);
+
 };
 
 // void update(Stage& stage, float deltaTime);

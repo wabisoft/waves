@@ -36,12 +36,15 @@ struct Ship : Entity {
 	Ship(wabi::Polygon& polygon, glm::vec2 position, uint8 id) : Entity(Entity::SHIP, polygon, position, id) { }
 
 	glm::vec2 velocity = glm::vec2(0);
+	float omega = 0; // rotational velocity
+	float alpha = 0; // rotational acceleration
 	State state = {Ship::State::FALLING, {}};
-	bool inWin;
+	bool inWin = false;
 };
 
 inline float mass(const Ship& ship) {
-	return area(ship.shape) * SHIP_AREA_MASS_RATIO;
+	// return area(ship.shape) * SHIP_AREA_MASS_RATIO;
+	return area(ship.shape) * 112;
 }
 
 void updateShip(Stage& stage, float deltaTime);

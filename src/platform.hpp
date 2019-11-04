@@ -22,5 +22,6 @@ uint8 createPlatform(Stage& stage, glm::vec2 position, wabi::Polygon&);
 PlatformIt findPlatform(Stage& stage, uint8 platform_id);
 
 inline float mass(const Platform& platform) {
-	return area(platform.shape) * PLATFORM_AREA_MASS_RATIO;
+	// return area(platform.shape) * PLATFORM_AREA_MASS_RATIO;
+	return area(platform.shape) * 112;
 }

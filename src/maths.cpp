@@ -4,6 +4,18 @@
 
 using namespace glm;
 
+vec2 vectorProjection(vec2 a, vec2 b) {
+	return (dot(a, b)/dot(b,b)) * b;
+}
+
+glm::vec2 vectorRejection(glm::vec2 a, glm::vec2 b) {
+	return a - vectorProjection(a, b);
+}
+
+float squaredLength(glm::vec2 v) {
+	return dot(v, v);
+}
+
 glm::vec2 operator*(const glm::mat3& m, const glm::vec2& v) {
 	assert(m[2][2] == 1);
 	glm::vec3 temp(v, 1);
@@ -35,51 +47,11 @@ inline float cross(glm::vec2 a, glm::vec2 b) {
 	************************************************************/
 }
 
-vec2 centroid(const std::vector<vec2>& points) {
-	vec2 centroidPoint = vec2(0);
-	for(vec2 point : points) {
-		centroidPoint += point;
-	}
-	return centroidPoint / (float)points.size();
-}
-
-// center is the center of a polygon of which a and b are vertices
-bool isClockwise(vec2 center, vec2 a, vec2 b) {
-    if (a.x - center.x >= 0 && b.x - center.x < 0)
-        return true;
-    if (a.x - center.x < 0 && b.x - center.x >= 0)
-        return false;
-    if (a.x - center.x == 0 && b.x - center.x == 0) {
-        if (a.y - center.y >= 0 || b.y - center.y >= 0)
-            return a.y > b.y;
-        return b.y > a.y;
-    }
-    // compute the cross product of vectors (center -> a) x (center -> b)
-    int det = (a.x - center.x) * (b.y - center.y) - (b.x - center.x) * (a.y - center.y);
-    if (det < 0)
-        return true;
-    if (det > 0)
-        return false;
-    // points a and b are on the same line from the center
-    // check which point is closer to the center
-    int d1 = (a.x - center.x) * (a.x - center.x) + (a.y - center.y) * (a.y - center.y);
-    int d2 = (b.x - center.x) * (b.x - center.x) + (b.y - center.y) * (b.y - center.y);
-    return d1 > d2;
-}
-
-// bool isClockwise(vec2 center, vec2 a, vec2 b) {
-// 	auto diffA = a - center;
-// 	auto diffB = b - center;
-// 	auto product = cross(diffA, diffB);
-// 	if(product == 0) {
-// 		return (std::min(a.x, b.x) <= center.x && std::max(a.x, b.x) >= center.x) || (std::min(a.y, b.y) <= center.y && std::max(a.y, b.y) >= center.y);
-// 	} else {
-// 		return product < 0;
-// 	}
-// }
-
 float sideProduct(glm::vec2 a, glm::vec2 b, glm::vec2 point) {
-	// returns mag of a perpendicular vector
+	// returns (b-a) x (point-a)
+	// if point is on left of b-a then result is positive
+	// if point is on right of b-a then result is negative
+	// if point is colinear with a and b then result is zero
 	vec2 u = b - a;
 	vec2 v = point - a;
 	return cross(u, v);
@@ -131,6 +103,11 @@ bool lineSegmentIntersection(vec2 a, vec2 b, vec2 c, vec2 d, vec2 & intersection
 	}
 }
 
+bool lineSegmentIntersection(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 d) {
+	vec2 i(0);
+	return lineSegmentIntersection(a, b, c, d, i);
+}
+
 
 vec2 findNormal(vec2 a, vec2 b, vec2 c) {
 	// Returns the normal of the vector from a to b (b-a) in the direction of c
@@ -157,4 +134,83 @@ vec2 & clamp(vec2& v, float s) {
 	}
 	return v;
 }
+
+vec2 centroid(const std::vector<vec2>& points) {
+	vec2 centroidPoint = vec2(0);
+	for(vec2 point : points) {
+		centroidPoint += point;
+	}
+	return centroidPoint / (float)points.size();
+}
+
+// center is the center of a polygon of which a and b are vertices
+bool isClockwise(vec2 center, vec2 a, vec2 b) {
+    if (a.x - center.x >= 0 && b.x - center.x < 0)
+        return true;
+    if (a.x - center.x < 0 && b.x - center.x >= 0)
+        return false;
+    if (a.x - center.x == 0 && b.x - center.x == 0) {
+        if (a.y - center.y >= 0 || b.y - center.y >= 0)
+            return a.y > b.y;
+        return b.y > a.y;
+    }
+    // compute the cross product of vectors (center -> a) x (center -> b)
+    // int det = (a.x - center.x) * (b.y - center.y) - (b.x - center.x) * (a.y - center.y);
+    int det = sideSign(a, center, b);
+    if (det < 0)
+        return true;
+    if (det > 0)
+        return false;
+    // points a and b are on the same line from the center
+    // check which point is closer to the center
+    int d1 = (a.x - center.x) * (a.x - center.x) + (a.y - center.y) * (a.y - center.y);
+    int d2 = (b.x - center.x) * (b.x - center.x) + (b.y - center.y) * (b.y - center.y);
+    return d1 > d2;
+}
+
+// 2 times the signed area of the triangle abc, + if triangle is CCW and - if triangle is CW
+// 0 if points collinear
+float signed2DTriangleArea(vec2 a, vec2 b, vec2 c) {
+	return cross(a-c, b-c);
+}
+
+bool lineSegmentIntersectionUsingAreas(vec2 a, vec2 b, vec2 c, vec2 d, float& t, vec2& p) {
+	vec2 ABlower = {std::min(a.x, b.x), std::min(a.y, b.y)};
+	vec2 ABupper = {std::max(a.x, b.x), std::max(a.y, b.y)};
+	vec2 CDlower = {std::min(c.x, d.x), std::min(c.y, d.y)};
+	vec2 CDupper = {std::max(c.x, d.x), std::max(c.y, d.y)};
+	if (ABlower.x > CDupper.x || ABlower.y > CDupper.y || CDlower.x > ABupper.x || CDlower.y > ABupper.y) {
+		return false; // separating axis
+	}
+	// sign of areas correspond to which sides of ab points c and d are one
+	// if the segments intersect then the areas must have opposite signs
+	float a1 = signed2DTriangleArea(a, b, d);
+	float a2 = signed2DTriangleArea(a, b, c);
+	if(a1 != 0.f && a2 != 0.f && a1 * a2 < 0.f) { // signs differ
+		float a3 = signed2DTriangleArea(c, d, a);
+		//  a----------d
+		//  |\     	  /|
+		//  | a3     a1|
+		//  |  \    /  |
+		//  |   \  /   |
+		//  |    \/    |   a1 - a2 == a3 - a4
+		//  |    /\    |   a4 == a3 + a2 - a1
+		//  |   /  \   |
+		//  |  /    \  |
+		//  | a2     a4|
+		//  |/        \|
+		//  b----------c
+		float a4 = a3 + a2 - a1;
+		if(a1 != 0.f && a2 != 0.f && a3 * a4 < 0.f) { // signs differ and segments intersect
+			t = a3/(a3-a4); // <- I don't understand why this is true. See Real-Time Collision Detection[Ericson153]
+			p = a + t*(b-a);
+			return true;
+		} else {
+			return false;
+		}
+	} else {
+		return false;
+	}
+}
+
 

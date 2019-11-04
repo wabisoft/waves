@@ -14,6 +14,7 @@ struct Event : sf::Event {
 struct EventManager;
 
 struct EventListener {
+	EventListener(const char * n) : name(n) {}
 	virtual void onClosed(sf::Window&) { }
 	virtual void onResized(sf::Window&, Event::SizeEvent sizeEvent) { }
 	virtual void onLostFocus(sf::Window&) { }
@@ -52,7 +53,7 @@ struct EventListener {
 
 // one event manager per sfml window
 struct EventManager {
-	EventManager();
+	EventManager() : logger(logging::Logger("EventManager")) { }
 	std::vector<EventListener*> _listeners[Event::Count+1]; // an array of vectors of listeners
 	void _subscribe(EventListener& listener, Event::EventType eventType);
 	void _unsubscribe(EventListener& listenter, Event::EventType eventType);

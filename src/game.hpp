@@ -11,8 +11,7 @@
 
 
 struct Game : EventListener{
-	Game() {
-		name = "Game";
+	Game() : EventListener("Game") {
 		_subscribedEvents = {Event::Closed, Event::MouseButtonPressed, Event::MouseButtonReleased, Event::MouseMoved, Event::KeyPressed};
 	}
 

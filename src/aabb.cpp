@@ -35,6 +35,12 @@ void updateAABBS(Stage& stage) {
 	}
 }
 
+AABB::AABB(const Entity& entity) {
+	boundingPoints(entity.shape, lower, upper);
+	type = entity.type;
+	id = entity.id;
+}
+
 AABB::AABB(const Platform& platform) {
 	boundingPoints(platform.shape, lower, upper);
 	type = Entity::PLATFORM;
@@ -61,16 +67,17 @@ AABB::AABB(const Ship& ship) {
 }
 
 AABB::AABB(const Sea& sea) {
-	lower = lowerBound(sea.shape);
-	upper = upperBound(sea.shape);
-	float maxHeight = upper.y;
-	float minHeight = lower.y;
-	for (const Wave& wave : sea.waves) {
-		maxHeight = std::max(maxHeight, upper.y + wave.heightAtX(wave.position.x));
-		minHeight = std::min(minHeight, upper.y + wave.heightAtX(wave.position.x));
-	}
-	upper.y = maxHeight;
-	lower.y = minHeight;
+	// lower = lowerBound(sea.shape);
+	// upper = upperBound(sea.shape);
+	// float maxHeight = upper.y;
+	// float minHeight = lower.y;
+	// for (const Wave& wave : sea.waves) {
+	// 	maxHeight = std::max(maxHeight, upper.y + wave.heightAtX(wave.position.x));
+	// 	minHeight = std::min(minHeight, upper.y + wave.heightAtX(wave.position.x));
+	// }
+	// upper.y = maxHeight;
+	// lower.y = minHeight;
+	boundingPoints(sea.shape, lower, upper);
 	type = Entity::SEA;
 	id = sea.id;
 }

@@ -2,6 +2,7 @@
 
 #include "entity.hpp"
 #include "aabb.hpp"
+#include "collision.hpp"
 #include "stage.hpp"
 #include "sea.hpp"
 #include "rock.hpp"
@@ -45,6 +46,8 @@ Entity* getEntity(Stage& stage, uint8 id, Entity::Type type) {
 Entity* findEntityAtPosition(Stage& stage, vec2 position) {
 	// Adaptation of sweep and prune
 	// takes advantage of the sortedness of the two lists used in our collision detection routine
+	updateBroadPhase(stage);
+	float bump = 0.5f;
 	struct Candidate{
 		Axis axis = NO_AXIS;
 		Entity* pEntity;
@@ -63,7 +66,7 @@ Entity* findEntityAtPosition(Stage& stage, vec2 position) {
 		}
 		for(int i = 0; i < axisOrder.size(); ++i) {
 			AABB aabb = *findAABB(stage, axisOrder[i]);
-			if(aabb.lower[a] <= position[a] && aabb.upper[a] >= position[a]) {
+			if(aabb.lower[a] - bump <= position[a] && aabb.upper[a]+bump >= position[a]) {
 				auto pred = [&aabb](Candidate c) -> bool {
 					return c.pEntity->id == aabb.id;
 				};

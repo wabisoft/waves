@@ -21,8 +21,8 @@ namespace wabi {
 //      	*---------------------*
 //      index 3					 index 2
 
-
 struct Polygon {
+
 	void _reserve() {
 		model.reserve(size);
 		vertices.reserve(size);
@@ -33,15 +33,15 @@ struct Polygon {
 	}
 
 	Polygon() { _reserve(); }
-	Polygon(int size): size(size), rotation(0) { _reserve(); }
-	Polygon(int size, float rotation) : size(size), rotation(rotation) { _reserve(); }
-	Polygon(std::vector<glm::vec2> model, float rotation) : vertices(model), model(model), rotation(rotation), size((int)model.size()) { }
+	Polygon(int size, bool isChain=false): size(size), rotation(0), isChain(isChain) { _reserve(); }
+	Polygon(int size, float rotation, bool isChain=false) : size(size), rotation(rotation), isChain(isChain) { _reserve(); }
+	Polygon(std::vector<glm::vec2> model, float rotation, bool isChain=false) : vertices(model), model(model), rotation(rotation), size((int)model.size()), isChain(isChain) { }
 
 	std::vector<glm::vec2> vertices;
 	std::vector<glm::vec2> model;
 	float rotation = 0.f;
 	int size = 0;
-
+	bool isChain = false;
 };
 
 void update(Polygon& polygon, glm::vec2 position, glm::mat3 transform = glm::mat3(1));
@@ -53,8 +53,11 @@ const int CIRCLE_SIZE = 20;
 const int RECTANGLE_SIZE = 4;
 Polygon makeCircle(float radius, float rotation=0.f);
 Polygon makeRectangle(float width, float height, float rotation=0.f);
+Polygon makeChain(int size, glm::vec2 start, glm::vec2 end, float rotation = 0.f);
 
 std::vector<glm::vec2> pointsOfIntersection(const wabi::Polygon p1, const wabi::Polygon& p2);
+std::vector<glm::vec2> pointsOfIntersection(const glm::vec2 lineStart, const glm::vec2 lineEnd, const wabi::Polygon& p2);
+wabi::Polygon clip(const wabi::Polygon& a, const wabi::Polygon& b);
 
 inline glm::vec2 lower(const Polygon& polygon); // gets the bottom left point of a polygon in relation to x, y axis
 inline glm::vec2 upper(const Polygon& polygon); // gets the top right point of a polygon in raltion to x, y axis
@@ -105,5 +108,7 @@ inline void boundingPoints(const Polygon& polygon, glm::vec2 & lower, glm::vec2 
 	lower = {minX, minY};
 	upper = {maxX, maxY};
 }
+
+
 
 } // namespace wabi

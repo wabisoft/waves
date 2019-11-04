@@ -25,6 +25,7 @@ include_directories(${SFML_INCLUDE_DIR})
 set(ImGui-SFML_DIR "${ImGui-SFML_DIR}/lib/cmake/ImGui-SFML")
 find_package(ImGui-SFML REQUIRED)
 
+message("${PROJECT_DIR}")
 find_package(GLM REQUIRED)
 include_directories(${GLM_INCLUDE_DIR})
 
@@ -35,7 +36,7 @@ file(GLOB_RECURSE wavesSource
 	"src/*.cpp"
 )
 
-message("${PROJECT_DIR}")
+list(REMOVE_ITEM wavesSource "${PROJECT_DIR}/src/main.cpp")
 add_executable(editor src/editor.cxx ${wavesSource})
 list(REMOVE_ITEM wavesSource "${PROJECT_DIR}/src/editor.hpp" "${PROJECT_DIR}/src/editor.cpp")
 add_executable(game src/game.cxx ${wavesSource})

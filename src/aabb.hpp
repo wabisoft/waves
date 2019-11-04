@@ -10,6 +10,7 @@
 
 struct AABB{
 	inline AABB() {};
+	explicit AABB(const Entity&);
 	explicit AABB (const Rock&);
 	explicit AABB (const Platform&);
 	explicit AABB (const Ship&);

@@ -9,17 +9,134 @@
 #include "win32_file.hpp"
 
 using namespace glm;
+using namespace wabi;
 
-// Static shit
-SelectAction StaticActions::select = SelectAction();
-MoveAction StaticActions::move = MoveAction();
-ResizeAction StaticActions::resize = ResizeAction();
 
 // Editor shit
 
-void Editor::onClosed(sf::Window& window) {
-	end = true;
-	window.close();
+void Editor::start() {
+	stage = {};
+	if(!level.filename.empty()) {
+		level.open();
+	}
+	subscribe(eventManager);
+	imguiListener.subscribe(eventManager);
+	ImGui::SFML::Init(*window);
+	ImGuiIO& io = ImGui::GetIO();
+	ImFont* pFont = io.Fonts->AddFontFromFileTTF((cwd() + "/assets/fonts/IBMPlexMono-Regular.ttf").c_str(), 15.f);
+	ImGui::SFML::UpdateFontTexture();
+	logging::Logger::setLoggerLevel("EventManager", logging::INFO);
+}
+
+void Editor::run() {
+	Clock updateClock;
+	Clock renderClock;
+	// createWave(stage.seas[0], stage.seas[0].position - vec2(10, 0), 20, 1, 1);
+	// createWave(stage.seas[0], stage.seas[0].position + vec2(20, 0), 20, 1, 1);
+	// for(int i = 0; i < 80; i++){
+	// 	updateSeas(stage);
+	// 	// Stage::update(stage, FIXED_TIMESTEP);
+	// }
+	while (window->isOpen()) {
+		eventManager.dispatchEvents(*window);
+		auto style = actions.top()->getCursorStyle();
+		ImGui::SetMouseCursor(style);
+		updateDelta = updateClock.getElapsedTime().asSeconds();
+		if(updateDelta >= FIXED_TIMESTEP) {
+			update(updateClock.restart());
+			loopsPerUpdate = 0;
+		} else {loopsPerUpdate++;}
+		renderDelta = renderClock.getElapsedTime().asSeconds();
+		if (renderDelta >= FRAME_RATE) {
+			render(renderClock.restart());
+		}
+	}
+}
+
+void Editor::enterMode(int mode) {
+	if(mode == EDIT) {
+		// subscribe(eventManager);
+		imguiListener.subscribe(eventManager);
+	} else if (mode == PLAY) {
+		playStage = stage;
+		pushAction(StaticActions::play());
+	} else { assert(false); }
+	mode_ = mode;
+}
+
+void Editor::exitMode(int mode) {
+	if(mode == EDIT) {
+		// editor->unsubscribe(eventManager);
+		// imguiListener.unsubscribe(eventManager);
+	} else if (mode == PLAY) {
+		popAction();
+	} else { assert(false); }
+}
+
+void Editor::update(sf::Time deltaTime) {
+	if(mode_ == EDIT) {
+		// no simulation in edit mode
+	} else if (mode_ == PLAY ) {
+		Stage::update(playStage, std::min(deltaTime.asSeconds(), FIXED_TIMESTEP));
+		if(playStage.state.type == StageState::FINISHED && !playStage.state.finished.win) {
+			playStage = stage; // reload the stage
+		}
+	} else { assert(false); }
+}
+
+void Editor::render(sf::Time deltaTime) {
+	if(mode_ == EDIT) {
+		window->clear();
+		ImGui::SFML::Update(*window, deltaTime);
+		graphics.drawStage(*window, stage, true);
+		if(selectedEntity) {
+			graphics.drawPolygon(*window, selectedEntity->shape, sf::Color(0, 255, 204), sf::Color::Red);
+		}
+		auto intersections = pointsOfIntersection(stage.ship.shape, stage.seas[0].shape);
+		if(intersections.size() > 1) {
+			auto vertices = intersections;
+			// auto cent = centroid(vertices);
+			// std::sort(vertices.begin(), vertices.end(), [&cent](const vec2& v1, const vec2& v2) {
+			// 	bool res = isClockwise(cent, v1, v2);
+			// 	return res;
+			// });
+			wabi::Polygon p = wabi::Polygon(vertices, 0, true);
+			graphics.drawPolygon(*window, p, sf::Color(255, 153, 153), sf::Color::Green);
+		}
+		drawImGui();
+		ImGui::SFML::Render(*window);
+		window->display();
+	} else if (mode_ == PLAY) {
+		graphics.drawStage(*window, playStage, false);
+		// graphics.drawInfoText(*window, playStage, renderDelta, updateDelta, loopsPerUpdate);
+		ImGui::SFML::Update(*window, deltaTime);
+		ImGui::Begin("PlayMode");
+		ImGui::Text("Draw delta: %f", 1/renderDelta);
+		ImGui::Text("Update delta: %f", 1/updateDelta);
+		ImGui::Text("loops/update: %f", loopsPerUpdate);
+		ImGui::End();
+		wabi::Polygon c = clip(playStage.ship.shape, playStage.seas[0].shape);
+		graphics.drawPolygon(*window, c, sf::Color(255, 153, 153), sf::Color::Green);
+		ImGui::SFML::Render(*window);
+		window->display();
+	} else { assert(false); }
+
+}
+
+
+void Editor::stop() {
+ 	if(!level.filename.empty()) {
+		level.save(window->getSystemHandle(), stage);
+	}
+	unsubscribe(eventManager);
+	imguiListener.unsubscribe(eventManager);
+	ImGui::SFML::Shutdown();
+	// selectedEntity = hotEntity = nullptr;
+}
+
+void Editor::onClosed(sf::Window& aWindow) {
+	setMode(EDIT);
+	aWindow.close();
 }
 
 void Editor::onMouseButtonPressed(sf::Window& window, Event::MouseButtonEvent mouseButton)	{
@@ -28,45 +145,80 @@ void Editor::onMouseButtonPressed(sf::Window& window, Event::MouseButtonEvent mo
 	mouseState.down = true;
 	mouseState.downPosition = position;
 	mouseState.prevPosition = position;
-	actions.push(actions.rpop()->onMouseButtonPressed(window, position, *this));
+	pushAction(popAction()->onMouseButtonPressed(window, position, *this));
 }
 
 void Editor::onMouseButtonReleased(sf::Window& window, Event::MouseButtonEvent mouseButton) {
 	// TODO: Not sure yet...
 	vec2 position = screen2GamePos(window, {mouseButton.x, mouseButton.y});
 	mouseState.down = false;
-	actions.push(actions.rpop()->onMouseButtonReleased(window, position, *this));
+	pushAction(popAction()->onMouseButtonReleased(window, position, *this));
 }
 
 void Editor::onMouseMoved(sf::Window& window, Event::MouseMoveEvent mouseMove) {
 	vec2 position = screen2GamePos(window, {mouseMove.x, mouseMove.y});
 	hotEntity = findEntityAtPosition(stage, position);
-	actions.push(actions.rpop()->onMouseMoved(window, position, *this));
+	pushAction(popAction()->onMouseMoved(window, position, *this));
 	mouseState.prevPosition = position;
 }
 
 void Editor::onKeyPressed(sf::Window& window, Event::KeyEvent key) {
 	using Key = sf::Keyboard;
-	switch(key.code) {
-		case Key::S:
-			if(key.control && key.shift) {
-				levelSaveAs(window.getSystemHandle(), *this);
-			} else if (key.control) {
-				levelSave(window.getSystemHandle(), *this);
-			}
-			break;
-		case Key::O:
-			break;
+	if(mode_ == EDIT) {
+		switch(key.code) {
+			case Key::S:
+				if(key.control && key.shift) {
+					level.saveAs(window.getSystemHandle(), stage);
+				} else if (key.control) {
+					level.save(window.getSystemHandle(), stage);
+				}
+				break;
+			case Key::O:
+				if (key.control) {
+					level.open(window.getSystemHandle());
+				}
+				break;
+			case Key::Tilde: // fall through
+			case Key::P:
+				if(key.control) {
+					setMode(PLAY);
+					// game.stage = stage;
+					// game.run();
+				}
+			default: break;
+		}
+	} else if (mode_ == PLAY) {
+		switch (key.code) {
+			case Key::P:
+				if (stage.state.type == StageState::PAUSED) {
+					stage.state.type = StageState::RUNNING;
+				} else {
+					stage.state.type = StageState::PAUSED;
+				}
+				break;
+			case Key::Escape: // fall through
+			case Key::Q: setMode(EDIT); break;
+			// case Key::Num1: timeScale = 1.f; break;
+			// case Key::Num2: timeScale = 2.f; break;
+			// case Key::Num3: timeScale = 3.f; break;
+			// case Key::Num4: timeScale = 4.f; break;
+			// case Key::Num5: timeScale = 100.f; break;
+			// case Key::Num6: timeScale = 1000.f; break;
+			case Key::R:
+				if (key.control) {
+					playStage = stage;
+					// reloadStage();
+				} else {
+					stage.rockKind = {Rock::RED};
+				}
+				break;
+			case Key::G: stage.rockKind = {Rock::GREEN}; break;
+			case Key::B: stage.rockKind = {Rock::BLUE}; break;
 		default: break;
-	}
-	// sorted_insert(keysDown, keyEvent.code);
+		}
+	} else { assert(false); }
 }
 
-void Editor::onKeyReleased(sf::Window&, Event::KeyEvent) { }
-
-void keyEvent(Editor& editor, sf::Event event) {
-
-}
 
 Action* Editor::getAction() {
 	if(selectedEntity == nullptr || hotEntity == nullptr || hotEntity->id != selectedEntity->id) {
@@ -87,129 +239,3 @@ Action* Editor::getAction() {
 }
 
 
-// Action shit
-Action* Action::onMouseButtonPressed(sf::Window&, glm::vec2, Editor& editor) { return editor.getAction(); };
-Action* Action::onMouseButtonReleased(sf::Window&, glm::vec2, Editor& editor) {return editor.getAction(); };
-Action* Action::onMouseMoved(sf::Window&, glm::vec2, Editor& editor) { return editor.getAction(); };
-
-
-
-Action* SelectAction::onMouseButtonPressed(sf::Window& window, glm::vec2 position, Editor& editor) {
-	editor.selectedEntity = editor.hotEntity;
-	return editor.getAction();
-}
-
-Action* MoveAction::onMouseMoved(sf::Window& window, glm::vec2 position, Editor& editor) {
-	if(editor.mouseState.down) {
-		vec2 delta = position - editor.mouseState.prevPosition;
-		editor.selectedEntity->position += delta;
-		update(editor.selectedEntity->shape, editor.selectedEntity->position);
-		updateAABBS(editor.stage);
-		return this;
-	} else {
-		return editor.getAction();
-	}
-}
-
-Action* ResizeAction::onMouseMoved(sf::Window& window, glm::vec2 position, Editor& editor) {
-	// NOTE: I'm pretty sure this is only gonna work on rectangles
-	// so we may need to rethink this if we add other shapes
-	if(editor.mouseState.down) {
-		vec2 delta = position - editor.mouseState.prevPosition;
-		wabi::Polygon& polygon = editor.selectedEntity->shape;
-		if(isDiagonal) {
-			glm::vec2& prev = edgeIndex == 0 ? polygon.model[polygon.size-1] : polygon.model[edgeIndex-1];
-			glm::vec2& next = polygon.model[(edgeIndex+1)%polygon.size];
-			polygon.model[edgeIndex] += delta;
-			if(edgeIndex % 2) {
-				prev.y += delta.y;
-				next.x += delta.x;
-			} else {
-				prev.x += delta.x;
-				next.y += delta.y;
-			}
-		} else {
-			// Todo don't allow a resize to cross itself
-			// (i.e. so you can't pull edge 1to the left of edge 3 or edge 0 below edge 2 (etc)
-			// 				0 (vertical)
-			//				 -------
-			// 3(horizontal |		| 1 (horizontal)
-			// 				 -------
-			// 				2 (vertical)
-			if(edgeIndex%2) { // horizontal
-				polygon.model[edgeIndex].x += delta.x;
-				polygon.model[(edgeIndex+1)%polygon.size].x += delta.x;
-			} else { // vertical
-				polygon.model[edgeIndex].y += delta.y;
-				polygon.model[(edgeIndex+1)%polygon.size].y += delta.y;
-			}
-		}
-		update(polygon, editor.selectedEntity->position);
-		updateAABBS(editor.stage);
-		return this;
-	} else {
-		return editor.getAction();
-	}
-}
-
-
-// File menu shit
-
-void levelOpen(Editor& editor, std::string filename) {
-	Stage s = {};
-	SerializeError e;
-	if(!loadStageFromFile(filename, s, e)) {
-		PopupState es = {"load-failed", "Failed to load file: " + filename + ".\nError: " + e.what, RED};
-		editor.popups.push_back(es);
-		std::cout << es.message << std::endl;
-		return;
-	} else {
-		PopupState p = {"load-successful", "Opened file: " + filename + ".", GREEN};
-		editor.popups.push_back(p);
-		editor.filename = filename;
-		s.state = editor.stage.state;
-		editor.stage = s;
-	}
-}
-
-void levelOpen(sf::WindowHandle windowHandle, Editor& editor) {
-	std::string filename = "";
-	if(selectAFileForOpen(windowHandle, filename, "Select a level to edit", "JSON Files\0*.json\0\0")) {
-		levelOpen(editor, filename);
-	} else {
-		// I don't, this is probably fine
-	}
-}
-
-void validateSaveToFile(Editor& editor) {
-	SerializeError e;
-	if (! dumpStageToFile(editor.filename, editor.stage, e)) {
-		PopupState es = {"dump-failed", "Failed to save stage to file.\nError: " + e.what, RED};
-		editor.popups.push_back(es);
-		std::cout << es.message << std::endl;
-		return;
-	}
-	PopupState p = {"save-successful", "Save successful!", GREEN};
-	editor.popups.push_back(p);
-
-}
-
-void levelSave(sf::WindowHandle windowHandle, Editor& editor) {
-	if(editor.filename.empty()) {
-		if(selectAFileForSave(windowHandle, editor.filename, "Select a file to save level", "JSON Files\0*.json\0\0")) {
-			validateSaveToFile(editor);
-		}
-	} else {
-		validateSaveToFile(editor);
-	}
-
-}
-
-void levelSaveAs(sf::WindowHandle windowHandle, Editor& editor) {
-   	SerializeError e;
-	std::string filename;
-	if(selectAFileForSave(windowHandle, filename, "Select file to save level as", "JSON Files\0*.json\0\0")) {
-		editor.filename = filename;
-		validateSaveToFile(editor);
-	}
-}

@@ -9,9 +9,9 @@
 #include "system.hpp"
 
 
-static logging::Logger logger = logging::Logger("main");
 
 int main() {
+	logging::Logger logger = logging::Logger("main");
 
 	logger.setLoggerLevel("EventManager", logging::INFO);
 	sf::RenderWindow window;

@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cstdio>
 #include <fstream>
+#include <iomanip>
+
 #include "serialize.hpp"
 #include "json.hpp"
 
@@ -8,9 +10,13 @@ using namespace std;
 using namespace wabi;
 using namespace glm;
 
+std::string serializeBool(const bool b) {
+	return b ? "true" : "false";
+}
+
 std::string serializeVec2(const vec2& v) {
 	stringstream stream;
-	stream << "[" << v.x << "," << v.y << "]";
+	stream << "[" << std::fixed << v.x << "," << v.y << "]";
 	return stream.str();
 }
 
@@ -30,7 +36,8 @@ std::string serializePolygon(const Polygon& polygon) {
 	stringstream stream;
 	stream << "{" <<
 		"\"rotation\"" << ":" << polygon.rotation << "," <<
-		"\"model\"" << ":" << serializeArray(polygon.model, &serializeVec2) <<
+		"\"model\"" << ":" << serializeArray(polygon.model, &serializeVec2) << "," <<
+		"\"isChain\"" << ":" << serializeBool(polygon.isChain) <<
 	"}";
 	return stream.str();
 }
@@ -109,7 +116,8 @@ inline Polygon extractPolygon(JSON j, JSONError& e) {
 	if(e.no) { return Polygon(0, rotation);}
 	auto model = extractArray(getValue(object, "model", e), e, &extractVec2);
 	if(e.no) { return Polygon(model, rotation); }
-	return Polygon(model, rotation);
+	auto isChain = getBoolean(getValue(object, "isChain", e), e);
+	return Polygon(model, rotation, isChain);
 }
 
 inline Entity extractEntity(JSON j, JSONError& err) {

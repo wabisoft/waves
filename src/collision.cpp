@@ -20,9 +20,7 @@
 using namespace wabi;
 using namespace glm;
 
-void resolveCollisions(Stage& stage) {
-	// NOTE (owen): if it starts to get slow this is definately a place we can optimize
-	if (stage.aabbs.size() == 0) return;
+void updateBroadPhase(Stage& stage) {
 	auto aabbSortPredicate = [](AABB a, AABB b) { return a.lower.x < b.lower.x; };
 	// update the AABBs
 	updateAABBS(stage);
@@ -43,6 +41,12 @@ void resolveCollisions(Stage& stage) {
 	};
 	insertion_sort<AABB>(stage.xAxisOrder.begin(), stage.xAxisOrder.end(), xSortPredicate);
 	insertion_sort<AABB>(stage.yAxisOrder.begin(), stage.yAxisOrder.end(), ySortPredicate);
+}
+
+void resolveCollisions(Stage& stage) {
+	// NOTE (owen): if it starts to get slow this is definately a place we can optimize
+	if (stage.aabbs.size() == 0) return;
+	updateBroadPhase(stage);
 
 	std::vector<AABBPair> pairs;
 	pairs.reserve(2 * stage.aabbs.size()); // optimistic reserve TODO: cache the pairs
@@ -262,7 +266,7 @@ void collide(Rock& rock, Sea& sea) {
 
 void collide(Rock& rock, const Platform& platform) {
 	// FIXME: still need to figure out tunneling for really fast and small shit // need to make a polygon for the 4 dimensional position of the circle and do something clever with that
-	Collision col = collision(rock.position, rock.shape, platform.shape);
+	Collision col = collision(rock.position, platform.position, rock.shape, platform.shape);
 	if (col.collides) {
 		if(rock.state.type == Rock::State::FALLING && col.normal == VEC2_UP) {
 			rock.state.type = Rock::State::STANDING;
@@ -275,7 +279,7 @@ void collide(Rock& rock, const Platform& platform) {
 }
 
 void collide(Rock& rock, Rock& other_rock) {
-	Collision col = collision(rock.position, rock.shape, other_rock.shape);
+	Collision col = collision(rock.position, other_rock.position, rock.shape, other_rock.shape);
 	// FIXME: This is makeing some weird behavior, I think it's something to do with the order of collision resolution
 	if (col.collides) {
 		rock.position += col.normal * col.penetration;
@@ -290,20 +294,15 @@ void collide(Rock& rock, Ship& ship) {
 }
 
 void collide(Ship& ship, Sea& sea) {
-	float seaHeight = sea.heightAtX(ship.position.x);
-	vec2 lower, upper;
-	boundingPoints(ship.shape, lower, upper);
-	if ( seaHeight < lower.y) {
-		// we say this is no collision
+	Polygon c = clip(ship.shape, sea.shape);
+	float displacedWater = area(c);
+	if (displacedWater == 0) {
 		return;
-	}
-	float displacedWater = area(ship.shape);
-	if (upper.y > seaHeight) {
-		displacedWater = (seaHeight - lower.y);
 	}
 	ship.velocity += VEC2_UP * displacedWater * GRAVITATIONAL_CONSTANT * FIXED_TIMESTEP;
 	ship.velocity += sea.velocityAtX(ship.position.x) * FIXED_TIMESTEP;
-	auto drag = dragForce(ship.velocity, 600.f, mass(ship) * SHIP_AREA_MASS_RATIO);
+	//auto drag = dragForce(ship.velocity, WATER_DENSITY, mass(ship));
+	auto drag = dragForce(ship.velocity, WATER_DENSITY, WATER_DENSITY*displacedWater);
 	ship.velocity += drag * FIXED_TIMESTEP;
 
 	if (sea.waves.size() < 0) { return; } // nothing to do for no waves
@@ -323,7 +322,7 @@ void collide(Ship& ship, Sea& sea) {
 }
 
 void collide(Ship& ship, const Platform& platform) {
-	Collision col = collision(ship.position, ship.shape, platform.shape);
+	Collision col = collision(ship.position, platform.position, ship.shape, platform.shape);
 	if(col.collides) {
 		if(ship.state.type != Ship::State::STANDING) {
 			if (col.normal == VEC2_UP) {
@@ -335,7 +334,19 @@ void collide(Ship& ship, const Platform& platform) {
 		}
 		ship.position += col.normal * col.penetration;
 		float j = linearImpulse(ship.velocity, VEC2_ZERO, mass(ship), mass(platform), SHIP_RESTITUTION);
-		ship.velocity += (j/mass(ship)) * col.normal;
+		float adjusted_j = j/mass(ship);
+		ship.velocity += adjusted_j * col.normal;
+		// vec2 contact = (col.surfaceStart + col.surfaceEnd) / 2.f;
+		// vec2 relpos = contact - ship.position;
+		// float l = length(vectorRejection(relpos, col.normal));
+		// float b = length(vectorProjection(relpos, col.normal));
+		// vec2 dims = ship.shape.model[1] - ship.shape.model[3];
+		// float h = dims.y;
+		// float w = dims.x;
+		// float alpha_numerator = (GRAVITATIONAL_CONSTANT * l);
+		// float alpha_denominator = (1/12 * (h*h + w*w) + std::sqrt(l*l + b*b));
+		// float alpha = alpha_numerator / alpha_denominator;
+		// ship.alpha += alpha;
 	}
 }
 
@@ -353,71 +364,54 @@ void collide(Ship& ship, Win& win) {
 	}
 }
 
-
-Polygon clip(const wabi::Polygon& a, const Polygon& b) {
-	auto I = pointsOfIntersection(a, b);
-	for(vec2 p : a.vertices) {
-		if(pointInside(p, b)) {
-			auto search = std::find(I.begin(), I.end(), p);
-			if(search == I.end()) {
-				I.push_back(p);
-			}
-		}
-	}
-	for(vec2 p : b.vertices) {
-		if(pointInside(p, a)) {
-			auto search = std::find(I.begin(), I.end(), p);
-			if(search == I.end()) {
-				I.push_back(p);
-			}
-		}
-	}
-	vec2 cent = centroid(I);
-	std::sort(I.begin(), I.end(), [&cent](const vec2& v1, const vec2& v2) {
-		return isClockwise(cent, v1, v2);
-	});
-	return Polygon(I, 0);
-}
-
 // Thanks javidx9!
 // NOTE: this only determines if poly1 is specifically overlaping poly2
 // Also NOTE: poly1 and poly2 must be CONVEX
-Collision collision(vec2 poly1Pos, const Polygon& poly1, const Polygon& poly2) {
+Collision collision(const vec2 p1Pos, const vec2 p2Pos, const Polygon& p1, const Polygon& p2) {
 	// check the diagonals of one polygon ...
 	std::vector<Collision> collisions;
-	for (int i = 0; i < poly1.size; ++i) {
-		glm::vec2 a = poly1Pos;
-		glm::vec2 b = poly1.vertices[i];
-		// ...against the edges of the other
-		for (int j = 0; j < poly2.size; ++j) {
-			glm::vec2 c = poly2.vertices[j];
-			glm::vec2 d = poly2.vertices[(j+1) % poly2.size];
-			Collision col;
-			if(lineSegmentIntersection(a,b,c,d,col.intersection)) {
-				col.collides = true;
-				col.penetration = glm::length(b-col.intersection);
-				col.normal = glm::normalize(findNormal(c, d, a));
-				col.surfaceStart = c;
-				col.surfaceEnd = d;
-				collisions.push_back(col);
+	for(int a = 0; a < 2; a++) {
+		Polygon poly1 = p1;
+		Polygon poly2 = p2;
+		vec2 poly1Pos = p1Pos;
+		if(a > 0) {
+			poly1 = p2;
+			poly2 = p1;
+			vec2 poly1Pos = p2Pos;
+		}
+		for (int i = 0; i < poly1.size; ++i) {
+			glm::vec2 a = poly1Pos;
+			glm::vec2 b = poly1.vertices[i];
+			// ...against the edges of the other
+			for (int j = 0; j < poly2.size; ++j) {
+				glm::vec2 c = poly2.vertices[j];
+				glm::vec2 d = poly2.vertices[(j+1) % poly2.size];
+				Collision col;
+				if(lineSegmentIntersection(a,b,c,d,col.intersection)) {
+					col.collides = true;
+					col.penetration = glm::length(b-col.intersection);
+					col.normal = glm::normalize(findNormal(c, d, a));
+					col.surfaceStart = c;
+					col.surfaceEnd = d;
+					collisions.push_back(col);
+				}
 			}
 		}
-	}
-	if (!collisions.empty()) {
-		Collision col = collisions[0];
-		glm::vec2 rel = poly1Pos - col.intersection;
-		float min = glm::dot(rel, rel);
-		for(int i = 1; i < collisions.size(); ++i) {
-			glm::vec2 rel_i = poly1Pos - collisions[i].intersection;
-			float sqrDst = glm::dot(rel_i, rel_i);
-			if (sqrDst < min) {
-				col = collisions[i];
-				min = sqrDst;
+		if (!collisions.empty()) {
+			Collision col = collisions[0];
+			glm::vec2 rel = poly1Pos - col.intersection;
+			float min = glm::dot(rel, rel);
+			for(int i = 1; i < collisions.size(); ++i) {
+				glm::vec2 rel_i = poly1Pos - collisions[i].intersection;
+				float sqrDst = glm::dot(rel_i, rel_i);
+				if (sqrDst < min) {
+					col = collisions[i];
+					min = sqrDst;
+				}
 			}
+			return col;
 		}
-		return col;
-	} else {
-		return Collision();
 	}
+	return Collision();
 }
 

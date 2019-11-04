@@ -4,10 +4,19 @@
 
 #include "constants.hpp"
 #include "maths.hpp"
+#include "shapes.hpp"
 
 const glm::vec2 GRAVITY = {0.f, -GRAVITATIONAL_CONSTANT};
 const glm::vec2 GRAVITY_PER_FRAME = {0.f, -GRAVITATIONAL_CONSTANT * FIXED_TIMESTEP};
 const float TERMINAL_VELOCITY = std::sqrt(SQUARED_TERMINAL_VELOCITY);
+
+// TODO: revisit the idea of encapsulating physics data into a body class
+struct Body {
+	glm::vec2 velocity = glm::vec2(0);
+	glm::vec2 acceleration = glm::vec2(0);
+	wabi::Polygon* pShape = nullptr;
+	glm::vec2* position = nullptr;
+};
 
 
 inline glm::vec2 dragForce(glm::vec2 velocity, float fluidDensity, float mass) {

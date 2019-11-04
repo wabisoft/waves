@@ -32,8 +32,6 @@ void EventListener::unsubscribe(EventManager& manager) {
 }
 
 
-EventManager::EventManager() : logger(logging::Logger("EventManager")) { }
-
 void EventManager::_subscribe(EventListener& listener, Event::EventType eventType) {
 	std::vector<EventListener*>& listeners = _listeners[eventType];
 	auto search = std::find(listeners.begin(), listeners.end(), &listener);

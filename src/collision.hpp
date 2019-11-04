@@ -9,6 +9,7 @@
 #include "util.hpp"
 #include "win.hpp"
 
+void updateBroadPhase(Stage& stage);
 void resolveCollisions(Stage& stage);
 void dispatchPotentialCollision(Stage& stage, const AABBPair& pair);
 
@@ -33,6 +34,7 @@ void collide(Ship& ship, const Platform& platform); // a ship shouldn't alter a 
 void collide(Ship& ship, Rock& rock);
 void collide(Ship& ship, Win& win);
 
+
 struct Collision {
 	bool collides = false;
 	float penetration;
@@ -42,8 +44,7 @@ struct Collision {
 	glm::vec2 surfaceEnd = {0, 0};
 };
 
-Collision collision(const glm::vec2 poly1Pos, const wabi::Polygon& poly1, const wabi::Polygon& poly2);
-wabi::Polygon clip(const wabi::Polygon& a, const wabi::Polygon& b);
-// Collision collision(const wabi::Circle& circle, const wabi::Polygon& polygon);
-// Collision collision(const wabi::Circle& c1, const wabi::Circle& c2);
+Collision collision(const glm::vec2 p1Pos, const glm::vec2 p2Pos, const wabi::Polygon& p1, const wabi::Polygon& p2);
 
+// special clips
+wabi::Polygon clip(const Entity&, const Sea&);

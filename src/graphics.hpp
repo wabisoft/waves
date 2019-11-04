@@ -21,7 +21,6 @@ struct Graphics {
 	void drawText(sf::RenderWindow&, std::string, sf::Vector2f, int=15, bool=false);
 
 
-// extern sf::Font font;
 	void drawStage(sf::RenderWindow&, Stage&, bool=false);
 	void drawSeas(sf::RenderWindow&, const Stage&);
 	void drawShip(sf::RenderWindow&, const Ship&);
@@ -33,7 +32,6 @@ struct Graphics {
 	void drawPolygon(sf::RenderWindow&, const wabi::Polygon&, sf::Color, sf::Color verticesColor =sf::Color(0,0,0,0));
 	void drawId(sf::RenderWindow&, int, sf::Vector2f);
 	void drawId(sf::RenderWindow&, int, glm::vec2);
-	// void drawCircle(sf::RenderWindow&, const wabi::Circle&, sf::Color, bool fill=false);
 	void drawLine(sf::RenderWindow&, glm::vec2, glm::vec2, sf::Color);
 
 	sf::Font font;

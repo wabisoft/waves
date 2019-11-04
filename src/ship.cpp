@@ -10,9 +10,16 @@ using namespace glm;
 
 inline void updateFallingShip(Ship& ship) {
 	ship.velocity += GRAVITY * FIXED_TIMESTEP;
-	auto drag = dragForce(ship.velocity, 1.225f, mass(ship) * SHIP_AREA_MASS_RATIO);
+	// auto drag = dragForce(ship.velocity, 1.225f, mass(ship) * SHIP_AREA_MASS_RATIO);
+	auto dims = ship.shape.model[1] - ship.shape.model[3];
+	auto drag = dragForce(ship.velocity, 1.225f, std::max(dims.x, dims.y));
+	// auto drag = dragForce(ship.velocity, 1.225f, mass(ship));
 	ship.velocity += drag * FIXED_TIMESTEP;
 	ship.position += ship.velocity;
+	ship.omega += ship.alpha * FIXED_TIMESTEP;
+	ship.shape.rotation += ship.omega * FIXED_TIMESTEP;
+	ship.alpha = 0;
+	// ship.omega *= 0.98;
 }
 
 inline void updateStandingShip(Stage& stage, float deltaTime) {
@@ -22,6 +29,11 @@ inline void updateStandingShip(Stage& stage, float deltaTime) {
 	ship.velocity *= 0.75;
 	ship.velocity += GRAVITY * FIXED_TIMESTEP;
 	ship.position += ship.velocity;
+
+	ship.omega += ship.alpha * FIXED_TIMESTEP;
+	ship.shape.rotation += ship.omega * FIXED_TIMESTEP;
+	ship.alpha = 0;
+	// ship.omega *= 0.98;
 
 	vec2 futurePos = ship.position + ship.velocity;
 	vec2 & start = ship.state.standing.surfaceStart;
@@ -41,6 +53,7 @@ inline void updateStandingShip(Stage& stage, float deltaTime) {
 	if (!staysInContact) {
 		ship.state = {Ship::State::FALLING, {}};
 	}
+
 	if(ship.inWin) {
 		stage.win.timeInArea += deltaTime;
 	}

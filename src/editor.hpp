@@ -6,27 +6,21 @@
 
 #include "SFML/Window/WindowHandle.hpp"
 #include "SFML/Graphics.hpp"
-
+#include "imgui.h"
+#include "imgui-SFML.h"
+#include "imgui_stdlib.h"
 
 #include "clock.hpp"
+#include "editor_action.hpp"
+#include "editor_imgui.hpp"
+#include "editor_level.hpp"
 #include "events.hpp"
+#include "game.hpp"
+#include "graphics.hpp"
 #include "json.hpp"
 #include "prelude.hpp"
 #include "stage.hpp"
 #include "util.hpp"
-
-#include "imgui.h"
-
-const ImVec4 WHITE = {1, 1, 1, 1};
-const ImVec4 RED = {1, 0, 0, 1};
-const ImVec4 GREEN = {0, 1, 0, 1};
-
-struct PopupState {
-	std::string popupId;
-	std::string message;
-	ImVec4 color = WHITE;
-	bool opened = false;
-};
 
 struct MouseState {
 	bool down = false;
@@ -34,106 +28,77 @@ struct MouseState {
 	glm::vec2 prevPosition;
 };
 
-namespace Cursor {
-	enum Style{
-	    Arrow = 0,
-	    TextInput,
-	    ResizeAll,
-	    ResizeNS,
-	    ResizeEW,
-	    ResizeNESW,
-	    ResizeNWSE,
-	    Hand,
-	    COUNT
-	};
-};
-
-struct Editor;
-
-struct Action {
-	enum Type {
-		SELECT,
-		MOVE,
-		RESIZE,
-		COUNT
-	};
-	virtual Action* onMouseButtonPressed(sf::Window&, glm::vec2, Editor& editor);
-	virtual Action* onMouseButtonReleased(sf::Window&, glm::vec2, Editor& editor);
-	virtual Action* onMouseMoved(sf::Window&, glm::vec2, Editor& editor);
-	virtual Cursor::Style getCursorStyle() { return Cursor::Arrow; }
-};
-
-struct SelectAction : Action {
-	Action* operator()() { return this; }
-	virtual Action* onMouseButtonPressed(sf::Window&, glm::vec2, Editor& editor) override;
-	virtual Cursor::Style getCursorStyle() override { return Cursor::Arrow; }
-};
-
-struct MoveAction : Action {
-	Action* operator()() { return this; }
-	virtual Action* onMouseMoved(sf::Window&, glm::vec2, Editor& editor) override;
-	virtual Cursor::Style getCursorStyle() override { return Cursor::ResizeAll; }
-};
-
-struct ResizeAction : Action {
-	Action* operator()(int edgeIdx, bool isDiag) { edgeIndex = edgeIdx; isDiagonal = isDiag; return this;}
-	virtual Action* onMouseMoved(sf::Window&, glm::vec2, Editor& editor) override;
-	virtual Cursor::Style getCursorStyle() override {
-		Cursor::Style straight[]= {
-			Cursor::ResizeNS,
-			Cursor::ResizeEW
-		};
-		Cursor::Style diagonal[]= {
-			Cursor::ResizeNWSE,
-			Cursor::ResizeNESW
-		};
-	 	return isDiagonal ? diagonal[edgeIndex%2] : straight[edgeIndex%2];
+struct ImGuiListener : public EventListener {
+	ImGuiListener() : EventListener("ImGui") { _subscribedEvents = {Event::Count}; }
+	virtual void onAll(sf::Window& window, Event& event) override {
+		ImGui::SFML::ProcessEvent(event);
+    	ImGuiIO& io = ImGui::GetIO();
+		bool keyHandled = (event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased) && io.WantCaptureKeyboard;
+		bool mouseHandled = (
+			event.type == sf::Event::MouseButtonPressed
+			|| event.type == sf::Event::MouseButtonReleased
+			|| event.type == sf::Event::MouseEntered
+			|| event.type == sf::Event::MouseLeft
+			|| event.type == sf::Event::MouseMoved) && io.WantCaptureMouse;
+		event.handled = keyHandled || mouseHandled;
 	}
-
-	int edgeIndex;
-	bool isDiagonal;
-
-};
-
-struct StaticActions {
-	static SelectAction select;
-	static MoveAction move;
-	static ResizeAction resize;
 };
 
 struct Editor : public EventListener {
-	Editor() {
-		name = "Editor";
+	enum { EDIT, PLAY };
+
+	Editor(sf::RenderWindow* p_Window) : EventListener("Editor"), window(p_Window), level(this) {
 		actions.push(StaticActions::select());
 		_subscribedEvents = {Event::Closed, Event::MouseButtonPressed, Event::MouseButtonReleased, Event::MouseMoved, Event::KeyPressed};
+		enterMode(EDIT);
 	 }
 	virtual void onClosed(sf::Window&)											override;
 	virtual void onMouseButtonPressed(sf::Window&, Event::MouseButtonEvent)		override;
 	virtual void onMouseButtonReleased(sf::Window&, Event::MouseButtonEvent)	override;
 	virtual void onMouseMoved(sf::Window&, Event::MouseMoveEvent)				override;
 	virtual void onKeyPressed(sf::Window&, Event::KeyEvent)						override;
-	virtual void onKeyReleased(sf::Window&, Event::KeyEvent)					override;
 
 	Action* Editor::getAction();
 	void start();
 	void stop();
+	void run();
+	void drawImGui();
 
-	std::string filename;
+	void enterMode(int mode);
+	void exitMode(int mode);
+	void setMode(int mode) {
+		exitMode(mode_);
+		enterMode(mode);
+	}
+	void update(sf::Time deltaTime);
+	void render(sf::Time deltaTime);
+
+	Action* popAction() {
+		return actions.rpop();
+	}
+	void pushAction(Action* action) {
+		actions.push(action);
+	}
+
+	Level level;
 	Stage stage;
+	Stage playStage;
 	MouseState mouseState;
 	Entity* selectedEntity = nullptr;
 	Entity* hotEntity = nullptr;
-	std::vector<PopupState> popups;
+	std::vector<Popup> popups;
 	Stack<Action*> actions;
-	std::vector<sf::Keyboard::Key> keysDown;
-	bool end = false;
+
+	int mode_ = -1;
+	float loopsPerUpdate = 0;
+	float renderDelta = 0;
+	float updateDelta = 0;
+
+	sf::RenderWindow* window = nullptr;
+	Game game;
+	ImGuiListener imguiListener;
+	Graphics graphics;
+	EventManager eventManager;
 };
 
-// Cursor::Type getCursorStyle(sf::Window&, Editor&);
-void keyEvent(Editor&, sf::Event);
 
-void levelOpen(Editor& editor, std::string filename);
-void levelOpen(sf::WindowHandle windowHandle, Editor& editor);
-void validateSaveToFile(Editor& editor);
-void levelSave(sf::WindowHandle windowHandle, Editor& editor);
-void levelSaveAs(sf::WindowHandle windowHandle, Editor& editor);

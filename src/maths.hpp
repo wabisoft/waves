@@ -18,15 +18,23 @@ const glm::vec2 VEC2_RIGHT {1.f, 0.f};
 const glm::vec2 VEC2_ZERO {0.f, 0.f};
 const glm::mat3 MAT3_IDENTITY(1);
 
+glm::vec2 vectorProjection(glm::vec2 a, glm::vec2 b);
+glm::vec2 vectorRejection(glm::vec2 a, glm::vec2 b);
+
+float squaredLength(glm::vec2 v);
+
 glm::vec2 operator*(const glm::mat3& m, const glm::vec2& v);
 float cross(glm::vec2 a, glm::vec2 b);
 float sideProduct(glm::vec2 a, glm::vec2 b, glm::vec2 point);
 float sideSign(glm::vec2 a, glm::vec2 b, glm::vec2 point);
 bool bounded(glm::vec2 a, glm::vec2 b, glm::vec2 point);
 bool lineSegmentIntersection(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 d, glm::vec2 & intersection);
+bool lineSegmentIntersection(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 d);
 glm::vec2 findNormal(glm::vec2 a, glm::vec2 b, glm::vec2 c);
 glm::vec2& clamp(glm::vec2& v, float s); // clamp this vector to a scalar magnitude
 
 glm::vec2 centroid(const std::vector<glm::vec2>& points);
 bool isClockwise(glm::vec2 center, glm::vec2 a, glm::vec2 b);
 
+float signed2DTriangleArea(glm::vec2 a, glm::vec2 b, glm::vec2 c);
+bool lineSegmentIntersectionUsingAreas(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 d, float& t, glm::vec2& p);
