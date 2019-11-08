@@ -156,15 +156,15 @@ bool isClockwise(vec2 center, vec2 a, vec2 b) {
     }
     // compute the cross product of vectors (center -> a) x (center -> b)
     // int det = (a.x - center.x) * (b.y - center.y) - (b.x - center.x) * (a.y - center.y);
-    int det = sideSign(a, center, b);
+    float det = sideSign(a, center, b);
     if (det < 0)
         return true;
     if (det > 0)
         return false;
     // points a and b are on the same line from the center
     // check which point is closer to the center
-    int d1 = (a.x - center.x) * (a.x - center.x) + (a.y - center.y) * (a.y - center.y);
-    int d2 = (b.x - center.x) * (b.x - center.x) + (b.y - center.y) * (b.y - center.y);
+    float d1 = (a.x - center.x) * (a.x - center.x) + (a.y - center.y) * (a.y - center.y);
+    float d2 = (b.x - center.x) * (b.x - center.x) + (b.y - center.y) * (b.y - center.y);
     return d1 > d2;
 }
 

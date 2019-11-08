@@ -6,13 +6,11 @@
 #include <glm/vec2.hpp>
 
 #include "aabb.hpp"
-#include "constants.hpp"
+#include "settings.hpp"
 #include "maths.hpp"
 #include "prelude.hpp"
 #include "shapes.hpp"
-#include "typedefs.hpp"
 #include "util.hpp"
-
 
 
 struct Rock : Entity {
@@ -24,12 +22,12 @@ struct Rock : Entity {
 		};
 		struct Floating {
 			float time = 0.f;
-			uint8 seaId = 0;
+			u8 seaId = 0;
 		};
 		struct Sinking {
 			float time = 0.f;
 		};
-		enum Type : uint8 {
+		enum Type : u8 {
 			FALLING = 1 << 0,
 			STANDING = 1 << 1,
 			FLOATING = 1 << 2,
@@ -50,7 +48,7 @@ struct Rock : Entity {
 	};
 
 	Rock() { }
-	Rock(wabi::Polygon shape, glm::vec2 position, uint8 id, float radius, Rock::Kind kind)
+	Rock(wabi::Polygon shape, glm::vec2 position, u8 id, float radius, Rock::Kind kind)
 		: Entity(Entity::ROCK, shape, position, id), radius(radius), kind(kind) {}
 
 	glm::vec2 velocity = glm::vec2(0);
@@ -66,11 +64,11 @@ inline float mass(Rock& rock) {
 }
 
 void updateRocks(Stage& stage, float deltaTime);
-uint8 createRock(Stage& stage, glm::vec2 position, float radius, Rock::Kind kind);
-uint8 createRock(Stage& stage, const wabi::Polygon& polygon, glm::vec2 position, float radius, Rock::Kind kind);
+u8 createRock(Stage& stage, glm::vec2 position, float radius, Rock::Kind kind);
+u8 createRock(Stage& stage, const wabi::Polygon& polygon, glm::vec2 position, float radius, Rock::Kind kind);
 RockIt deleteRock(Stage& stage, RockIt rockIt);
-RockIt deleteRock(Stage& stage, uint8 rockId);
-RockIt findRock(Stage& stage, uint8 rock_id);
+RockIt deleteRock(Stage& stage, u8 rockId);
+RockIt findRock(Stage& stage, u8 rock_id);
 RockIt findRockAtPosition(Stage& stage, glm::vec2 position);
 // void resizeRock(Stage& stage, int rockId, glm::vec2 position);
 

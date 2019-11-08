@@ -1,5 +1,5 @@
 #include "aabb.hpp"
-#include "constants.hpp"
+#include "settings.hpp"
 #include "entity.hpp"
 #include "physics.hpp"
 #include "ship.hpp"
@@ -12,7 +12,7 @@ inline void updateFallingShip(Ship& ship) {
 	ship.velocity += GRAVITY * FIXED_TIMESTEP;
 	// auto drag = dragForce(ship.velocity, 1.225f, mass(ship) * SHIP_AREA_MASS_RATIO);
 	auto dims = ship.shape.model[1] - ship.shape.model[3];
-	auto drag = dragForce(ship.velocity, 1.225f, std::max(dims.x, dims.y));
+	auto drag = dragForce(ship.velocity, AIR_DENSITY, std::max(dims.x, dims.y));
 	// auto drag = dragForce(ship.velocity, 1.225f, mass(ship));
 	ship.velocity += drag * FIXED_TIMESTEP;
 	ship.position += ship.velocity;
@@ -98,13 +98,13 @@ void updateShip(Stage& stage, float deltaTime){
 }
 
 
-uint8_t createShip(Stage& stage, vec2 position, float width, float height) {
+u8 createShip(Stage& stage, vec2 position, float width, float height) {
 	stage.ship = Ship(makeRectangle(width, height), position, ++stage.id_src);
 	createAABB(stage, AABB(stage.ship));
 	return stage.ship.id;
 }
 
-uint8_t createShip(Stage& stage, glm::vec2 position, Polygon shape) {
+u8 createShip(Stage& stage, glm::vec2 position, Polygon shape) {
 	stage.ship = Ship(shape, position, ++stage.id_src);
 	createAABB(stage, AABB(stage.ship));
 	return stage.ship.id;

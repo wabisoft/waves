@@ -11,6 +11,8 @@
 #include <glm/geometric.hpp>
 #include <glm/mat3x3.hpp>
 
+#include "settings.hpp"
+
 const glm::vec2 VEC2_UP {0.f, 1.f};
 const glm::vec2 VEC2_DOWN {0.f, -1.f};
 const glm::vec2 VEC2_LEFT {-1.f, 0.f};
@@ -38,3 +40,4 @@ bool isClockwise(glm::vec2 center, glm::vec2 a, glm::vec2 b);
 
 float signed2DTriangleArea(glm::vec2 a, glm::vec2 b, glm::vec2 c);
 bool lineSegmentIntersectionUsingAreas(glm::vec2 a, glm::vec2 b, glm::vec2 c, glm::vec2 d, float& t, glm::vec2& p);
+

@@ -1,4 +1,6 @@
 #include <iostream>
+
+#include "algorithms.hpp"
 #include "events.hpp"
 #include "str.hpp"
 

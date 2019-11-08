@@ -4,15 +4,17 @@
 
 #include <glm/vec2.hpp>
 
+
 #include "aabb.hpp"
+#include "algorithms.hpp"
 #include "entity.hpp"
 #include "collision.hpp"
-#include "constants.hpp"
 #include "maths.hpp"
 #include "physics.hpp"
 #include "platform.hpp"
 #include "printing.hpp"
 #include "rock.hpp"
+#include "settings.hpp"
 #include "shapes.hpp"
 #include "stage.hpp"
 #include "util.hpp"
@@ -54,7 +56,7 @@ void resolveCollisions(Stage& stage) {
 	for (int a = 0; a< 2; ++a) {
 		// do the x axis on the fist pass
 		Axis axis = X_AXIS;
-		std::vector<uint8> axisOrder = stage.xAxisOrder;
+		std::vector<u8> axisOrder = stage.xAxisOrder;
 		auto check = [&axis](vec2 point) -> float {
 			return (axis == X_AXIS) ? point.x : point.y;
 		};
@@ -294,16 +296,31 @@ void collide(Rock& rock, Ship& ship) {
 }
 
 void collide(Ship& ship, Sea& sea) {
-	Polygon c = clip(ship.shape, sea.shape);
-	float displacedWater = area(c);
+	float seaHeight = sea.heightAtX(ship.position.x) + sea.position.y;
+	vec2 lowest(0);
+	vec2 uppest(0);
+	boundingPoints(ship.shape, lowest, uppest);
+	if(lowest.y > seaHeight) { return;}
+	auto dims = uppest - lowest;
+	float displacedWater = dims.y * dims.x;
+	if(uppest.y > seaHeight) {
+		displacedWater = (seaHeight - lowest.y) * dims.x;
+	}
 	if (displacedWater == 0) {
 		return;
 	}
-	ship.velocity += VEC2_UP * displacedWater * GRAVITATIONAL_CONSTANT * FIXED_TIMESTEP;
-	ship.velocity += sea.velocityAtX(ship.position.x) * FIXED_TIMESTEP;
-	//auto drag = dragForce(ship.velocity, WATER_DENSITY, mass(ship));
-	auto drag = dragForce(ship.velocity, WATER_DENSITY, WATER_DENSITY*displacedWater);
-	ship.velocity += drag * FIXED_TIMESTEP;
+	vec2 seaNormal = {0.f, 1.f};
+	auto normalDot = dot(seaNormal, ship.velocity);
+	if(normalDot <= 0) {
+		ship.velocity += VEC2_UP * displacedWater * GRAVITATIONAL_CONSTANT * FIXED_TIMESTEP;
+		ship.velocity += sea.velocityAtX(ship.position.x) * FIXED_TIMESTEP;
+		//auto drag = dragForce(ship.velocity, WATER_DENSITY, mass(ship));
+		auto drag = dragForce(ship.velocity, WATER_DENSITY, WATER_DENSITY*displacedWater);
+		ship.velocity += drag * FIXED_TIMESTEP;
+
+	}
+	// auto intersections = pointsOfIntersection(ship.shape, sea.shape);
+	// TODO: rotation ship using intersection points
 
 	if (sea.waves.size() < 0) { return; } // nothing to do for no waves
 	WaveIt closestWaveIt = findWaveAtPosition(sea, ship.position);

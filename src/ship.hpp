@@ -5,7 +5,6 @@
 #include "entity.hpp"
 #include "prelude.hpp"
 #include "maths.hpp"
-#include "typedefs.hpp"
 #include "shapes.hpp"
 
 struct Ship : Entity {
@@ -16,11 +15,11 @@ struct Ship : Entity {
 			glm::vec2 surfaceEnd;
 		};
 		struct Surfing {
-			uint8 waveId;
-			uint8 seaId;
+			u8 waveId;
+			u8 seaId;
 			int waveDirection = 0;
 		};
-		enum Type : uint8_t {
+		enum Type : u8 {
 			FALLING = 1 << 0,
 			STANDING = 1 << 1,
 			SURFING = 1 << 2,
@@ -33,7 +32,7 @@ struct Ship : Entity {
 		};
 	};
 	Ship() { }
-	Ship(wabi::Polygon& polygon, glm::vec2 position, uint8 id) : Entity(Entity::SHIP, polygon, position, id) { }
+	Ship(wabi::Polygon& polygon, glm::vec2 position, u8 id) : Entity(Entity::SHIP, polygon, position, id) { }
 
 	glm::vec2 velocity = glm::vec2(0);
 	float omega = 0; // rotational velocity
@@ -48,7 +47,7 @@ inline float mass(const Ship& ship) {
 }
 
 void updateShip(Stage& stage, float deltaTime);
-uint8_t createShip(Stage& stage, glm::vec2 position, float width, float height);
-uint8_t createShip(Stage& stage, glm::vec2 position, wabi::Polygon shape);
+u8 createShip(Stage& stage, glm::vec2 position, float width, float height);
+u8 createShip(Stage& stage, glm::vec2 position, wabi::Polygon shape);
 
 

@@ -10,7 +10,7 @@
 #include <SFML/Graphics/VertexArray.hpp>
 #include <glm/vec2.hpp>
 
-#include "constants.hpp"
+#include "settings.hpp"
 #include "graphics.hpp"
 #include "physics.hpp"
 #include "maths.hpp"
