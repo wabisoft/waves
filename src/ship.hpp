@@ -34,6 +34,7 @@ struct Ship : Entity {
 	};
 	Ship() { }
 	Ship(wabi::Polygon& polygon, glm::vec2 position, uint8 id) : Entity(Entity::SHIP, polygon, position, id) { }
+	Ship(wabi::Polygon&& polygon, glm::vec2 position, uint8 id) : Entity(Entity::SHIP, polygon, position, id) { }
 
 	glm::vec2 velocity = glm::vec2(0);
 	float omega = 0; // rotational velocity

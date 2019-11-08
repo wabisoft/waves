@@ -22,13 +22,13 @@ void insertion_sort(Iter begin, Iter end, Pred predicate) {
 template <typename T, typename Pred>
 typename std::vector<T>::iterator sorted_insert(std::vector<T>& v, T item, Pred predicate) {
 #ifdef _DEBUG
-	auto it = std::upper_bound<std::vector<T>::iterator, T>(v.begin(), v.end(), item, predicate);
+	auto it = std::upper_bound<typename std::vector<T>::iterator, T>(v.begin(), v.end(), item, predicate);
 #endif
 	return v.insert(
 #ifdef _DEBUG
 		it,
 #else
-		std::upper_bound<std::vector<T>::iterator, T>(v.begin(), v.end(), item, predicate),
+		std::upper_bound<typename std::vector<T>::iterator, T>(v.begin(), v.end(), item, predicate),
 #endif
 		item
 	);
@@ -135,12 +135,19 @@ inline int binary_find_where(U search, const T* const t, const int count, Prop p
 }
 
 
+// template <typename T>
+// T rpop(std::stack<T> stk) {
+// 	T t = stk.top();
+// 	stk.pop();
+// 	return t;
+// }
+
 // Data Structures
 template <typename T>
-struct Stack : std::stack<T> {
+struct Stack : std::stack<T, std::vector<T>> {
 	T rpop() {
-		T t = top();
-		pop();
+		T t = this->top();
+		this->pop();
 		return t;
 	}
 };

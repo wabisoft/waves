@@ -54,6 +54,9 @@ bool LevelIO::save(sf::WindowHandle windowHandle, Stage& stage, std::string& mes
 		if(selectAFileForSave(windowHandle, filename, "Select a file to save level", "JSON Files\0*.json\0\0")) {
 			return saveAndValidate(stage, message);
 		}
+		else {
+			return false;
+		}
 	} else {
 		return saveAndValidate(stage, message);
 	}
@@ -66,4 +69,5 @@ bool LevelIO::saveAs(sf::WindowHandle windowHandle, Stage& stage, std::string& m
 		filename = fname;
 		return saveAndValidate(stage, message);
 	}
+	return false;
 }

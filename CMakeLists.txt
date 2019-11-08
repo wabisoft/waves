@@ -22,8 +22,8 @@ include_directories(${SFML_INCLUDE_DIR})
 
 
 # ImGui-SFML
-set(ImGui-SFML_DIR "${ImGui-SFML_DIR}/lib/cmake/ImGui-SFML")
-find_package(ImGui-SFML REQUIRED)
+# set(ImGui-SFML_DIR "${ImGui-SFML_DIR}/lib/cmake/ImGui-SFML")
+# find_package(ImGui-SFML REQUIRED)
 
 find_package(GLM REQUIRED)
 include_directories(${GLM_INCLUDE_DIR})
@@ -35,15 +35,14 @@ file(GLOB_RECURSE wavesSource
 )
 
 list(REMOVE_ITEM wavesSource "${PROJECT_DIR}/src/main.cpp")
-add_executable(editor src/editor.cxx ${wavesSource})
+# add_executable(editor src/editor.cxx ${wavesSource})
 list(REMOVE_ITEM wavesSource "${PROJECT_DIR}/src/editor.hpp" "${PROJECT_DIR}/src/editor.cpp" "${PROJECT_DIR}/src/editor_action.hpp" "${PROJECT_DIR}/src/editor_action.cpp" "${PROJECT_DIR}/src/editor_imgui.hpp" "${PROJECT_DIR}/src/editor_imgui.cpp")
-message("${wavesSource}")
 add_executable(game src/game.cxx ${wavesSource})
 
-target_compile_definitions(editor PRIVATE SFML_STATIC)
+# target_compile_definitions(editor PRIVATE SFML_STATIC)
 target_compile_definitions(game PRIVATE SFML_STATIC)
 
-target_link_libraries(editor sfml-window sfml-system sfml-graphics sfml-audio ImGui-SFML::ImGui-SFML)
+# target_link_libraries(editor sfml-window sfml-system sfml-graphics sfml-audio ImGui-SFML::ImGui-SFML)
 target_link_libraries(game sfml-window sfml-system sfml-graphics sfml-audio)
 
 if(WIN32)

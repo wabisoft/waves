@@ -60,6 +60,7 @@ void EventManager::dispatchEvents(sf::Window& window){
 	while (window.pollEvent(event)) {
 		EventListener * listener;
 		std::vector<EventListener*>& _power_listeners = _listeners[Event::Count];
+		std::vector<EventListener*>& listeners  = _listeners[event.type];
 		for(auto it = _power_listeners.begin(); it != _power_listeners.end(); ++it) {
 			listener = *it;
 			listener->onAll(window, event);
@@ -71,8 +72,7 @@ void EventManager::dispatchEvents(sf::Window& window){
 				goto OUTER;
 			}
 
-		}	
-		std::vector<EventListener*>& listeners  = _listeners[event.type];
+		}
 		if (listeners.empty()) {
 			logger.debug("Recieved Event %s with no listeners\n", str(event.type).c_str());
 			continue;

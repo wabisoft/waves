@@ -3,7 +3,7 @@
 #include <limits>
 
 const float E =		2.71828182845904523536f; // exponential constant
-const float PI =  	3.14159265358979323846f; // mmmmm pie
+constexpr float PI =  	3.14159265358979323846f; // mmmmm pie
 const float INF = 	std::numeric_limits<float>::infinity();
 
 const float STAGE_WIDTH = 	128.f; // meters

@@ -11,7 +11,7 @@ int main() {
 	window.create(videoMode, "Waves: Editor", sf::Style::Default, settings);
 	window.setFramerateLimit(1.f/FRAME_RATE);
 	Game game(&window);
-	game.levelIO.filename = cwd() + "\\assets\\levels\\level3.json";
+	game.levelIO.filename = cwd() + "/assets/levels/level3.json";
 	game.start();
 	game.run();
 	game.stop();

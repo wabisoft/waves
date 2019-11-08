@@ -218,7 +218,7 @@ inline void collideGreen(Rock& rock, Sea& sea) {
 		rock.state.type = Rock::State::FLOATING;
 		rock.state.floating = { 0.f, sea.id};
 	}
-	if (sea.waves.size() < 0) { return; } // nothing to do for no waves
+	if (sea.waves.size() == 0) { return; } // nothing to do for no waves
 	WaveIt closestWaveIt = findWaveAtPosition(sea, rock.position);
 	if (closestWaveIt == sea.waves.end()) {
 		if (sea.waves.size() > 0) assert(false);
@@ -305,7 +305,7 @@ void collide(Ship& ship, Sea& sea) {
 	auto drag = dragForce(ship.velocity, WATER_DENSITY, WATER_DENSITY*displacedWater);
 	ship.velocity += drag * FIXED_TIMESTEP;
 
-	if (sea.waves.size() < 0) { return; } // nothing to do for no waves
+	if (sea.waves.size() == 0) { return; } // nothing to do for no waves
 	WaveIt closestWaveIt = findWaveAtPosition(sea, ship.position);
 	if (closestWaveIt == sea.waves.end()) {
 		if (sea.waves.size() > 0) assert(false);

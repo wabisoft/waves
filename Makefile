@@ -1,31 +1,19 @@
 .PHONY: cmake clean debug release tags commands
 
-cmake-debug:
+cmake:
 	mkdir -p build
 	cd build && cmake .. -DCMAKE_BUILD_TYPE=Debug
-
-cmake-release:
-	mkdir -p build
-	cd build && cmake .. -DCMAKE_BUILD_TYPE=Release
 
 clean:
 	rm -rf build
 
-game: cmake-debug
+game: cmake
 	cd build && make game
-	cp build/game ./
-	./game
+	./build/game
 
-game-release: cmake-release
-	cd build && make game
-	cp build/game ./
-	./game
-
-
-release: cmake-release
-	cd build && make
-	cp build/waves ./
-	./waves
+editor: cmake
+	cd build && make editor
+	./build/editor
 
 tags:
 	@echo "updating tags"
