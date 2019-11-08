@@ -6,10 +6,9 @@
 #include <glm/vec2.hpp>
 
 #include "aabb.hpp"
-#include "constants.hpp"
+#include "settings.hpp"
 #include "prelude.hpp"
 #include "maths.hpp"
-#include "typedefs.hpp"
 #include "util.hpp"
 
 
@@ -19,11 +18,11 @@ struct Wave {
 	float amplitude = 0.f;
 	float decay = 0.f;
 	float time = 0.f;
-	int8 direction = 1;
-	int8 sign = 1;
+	i8 direction = 1;
+	i8 sign = 1;
 	bool active = false;
 	bool grow = true;
-	uint8 id = 0;
+	u8 id = 0;
 
 	inline float heightAtX(float x) const;
 	inline glm::vec2 velocityAtX(float x) const;
@@ -37,8 +36,8 @@ struct Wave {
 typedef std::vector<Wave>::iterator WaveIt;
 
 void updateWaves(Stage& stage, Sea& sea);
-uint8 createWave(Sea& sea, glm::vec2 position, float amplitude, int direction, int sign);
+u8 createWave(Sea& sea, glm::vec2 position, float amplitude, int direction, int sign);
 WaveIt deleteWave(Sea& sea, WaveIt waveIt);
-WaveIt deleteWave(Sea& sea, uint8 waveId);
-WaveIt findWave(Sea& sea, uint8 waveId);
+WaveIt deleteWave(Sea& sea, u8 waveId);
+WaveIt findWave(Sea& sea, u8 waveId);
 WaveIt findWaveAtPosition(Sea& sea, glm::vec2 position);

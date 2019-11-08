@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "constants.hpp"
+#include "settings.hpp"
 #include "maths.hpp"
 
 namespace wabi {

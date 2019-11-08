@@ -7,7 +7,7 @@
 using namespace wabi;
 using namespace glm;
 
-uint8_t Sea::id_src = 0;
+u8 Sea::id_src = 0;
 
 float Sea::heightAtX(float x) const {
 	// float height = upper(shape).y;
@@ -48,7 +48,7 @@ void updateSeas(Stage& stage) {
 // but...
 const int SEA_CHAIN_SIZE = 20; // let's use this constant for now
 
-uint8 createSea(Stage& stage, vec2 position, float width, float height) {
+u8 createSea(Stage& stage, vec2 position, float width, float height) {
 	vec2 start = vec2(-(width/2), (height/2));
 	vec2 end = vec2((width/2), -(height/2));
 	Polygon shape = makeChain(SEA_CHAIN_SIZE, start, end);
@@ -59,7 +59,7 @@ uint8 createSea(Stage& stage, vec2 position, float width, float height) {
 	return sea.id;
 }
 
-uint8 createSea(Stage& stage, glm::vec2 position, Polygon& polygon) {
+u8 createSea(Stage& stage, glm::vec2 position, Polygon& polygon) {
 	// float width = polygon.model[1].x - polygon.model[0].x;
 	// return createSea(stage, position, width, 0.f);
 	Sea sea = Sea(polygon, position, ++stage.id_src);
@@ -73,12 +73,12 @@ SeaIt deleteSea(Stage& stage, SeaIt seaIt) {
 	return stage.seas.erase(seaIt);
 }
 
-SeaIt deleteSea(Stage& stage, uint8 seaId) {
+SeaIt deleteSea(Stage& stage, u8 seaId) {
 	return deleteSea(stage, findSea(stage, seaId));
 }
 
-SeaIt findSea(Stage& stage, uint8 seaId) {
-	SeaIt seaIt = std::lower_bound(stage.seas.begin(), stage.seas.end(), seaId, [](const Sea& s, uint8 id) -> bool { return s.id < id; });
+SeaIt findSea(Stage& stage, u8 seaId) {
+	SeaIt seaIt = std::lower_bound(stage.seas.begin(), stage.seas.end(), seaId, [](const Sea& s, u8 id) -> bool { return s.id < id; });
 	assert(seaIt != stage.seas.end());
 	return seaIt;
 }

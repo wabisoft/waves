@@ -2,7 +2,7 @@
 
 #include <glm/vec2.hpp>
 
-#include "constants.hpp"
+#include "settings.hpp"
 #include "maths.hpp"
 #include "shapes.hpp"
 

@@ -45,7 +45,11 @@ void Game::run() {
 		eventManager.dispatchEvents(*window);
 		updateDelta = updateClock.getElapsedTime().asSeconds();
 		if(updateDelta >= FIXED_TIMESTEP) {
+			Timer timer;
 			update(updateClock.restart());
+			auto res = timer.elapsed();
+			update_total += res;
+			update_count++;
 		}
 		renderDelta = renderClock.getElapsedTime().asSeconds();
 		if (renderDelta >= FRAME_RATE) {
@@ -69,8 +73,23 @@ void Game::update(sf::Time deltaTime) {
 
 void Game::render(sf::Time deltaTime) {
 	graphics.drawStage(*window, stage, false);
-	wabi::Polygon c = clip(stage.ship.shape, stage.seas[0].shape);
-	graphics.drawPolygon(*window, c, sf::Color(255, 153, 153), sf::Color::Green);
+	std::string t = std::to_string(update_total/update_count);
+	graphics.drawText(*window, t, game2ScreenPos(*window, {STAGE_WIDTH-10, 10}), 15, true);
+	auto s = sizeof(stage);
+	if(stage.rocks.size()) {
+		s += stage.rocks.size() * sizeof(stage.rocks[0]);
+	}
+	if(stage.platforms.size()) {
+		s += stage.platforms.size() * sizeof(stage.platforms[0]);
+	}
+	for(auto & sea : stage.seas) {
+		if(sea.waves.size()) {
+			s += sea.waves.size() * sizeof(sea.waves[0]);
+		}
+	}
+	t = std::to_string(s);
+	graphics.drawText(*window, t, game2ScreenPos(*window, {STAGE_WIDTH-10, 50}), 15, true);
+
 	window->display();
 }
 

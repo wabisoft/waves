@@ -1,3 +1,5 @@
+
+#include "algorithms.hpp"
 #include "logging.hpp"
 #include "util.hpp"
 

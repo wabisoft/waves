@@ -1,9 +1,8 @@
 #include <iostream>
 
-#include "typedefs.hpp"
 #include "aabb.hpp"
 #include "collision.hpp"
-#include "constants.hpp"
+#include "settings.hpp"
 #include "entity.hpp"
 #include "physics.hpp"
 #include "rock.hpp"
@@ -114,7 +113,7 @@ void updateRocks(Stage& stage, float deltaTime) {
 	}
 }
 
-uint8 createRock(Stage& stage, vec2 position, float radius, Rock::Kind kind){
+u8 createRock(Stage& stage, vec2 position, float radius, Rock::Kind kind){
 	// NOTE (!!!): The implementation of the routine must keep rocks in order of id so that the array can be
 	// binary searched in findRock
 	Rock new_rock(makeCircle(radius), position, ++stage.id_src, radius, kind);
@@ -123,7 +122,7 @@ uint8 createRock(Stage& stage, vec2 position, float radius, Rock::Kind kind){
 	return new_rock.id;
 }
 
-uint8 createRock(Stage& stage, const Polygon& polygon, vec2 position, float radius, Rock::Kind kind){
+u8 createRock(Stage& stage, const Polygon& polygon, vec2 position, float radius, Rock::Kind kind){
 	// NOTE (!!!): The implementation of the routine must keep rocks in order of id so that the array can be
 	// binary searched in findRock
 	Rock new_rock(polygon, position, ++stage.id_src, radius, kind);
@@ -142,12 +141,12 @@ RockIt deleteRock(Stage& stage, RockIt rockIt) {
 	return stage.rocks.erase(rockIt);
 }
 
-RockIt deleteRock(Stage& stage, uint8 rockId) {
+RockIt deleteRock(Stage& stage, u8 rockId) {
 	return deleteRock(stage, findRock(stage, rockId));
 }
 
-RockIt findRock(Stage& stage, uint8 rockId) {
-	RockIt rockIt = std::lower_bound(stage.rocks.begin(), stage.rocks.end(), rockId, [](const Rock& r, uint8 id) -> bool { return r.id < id; });
+RockIt findRock(Stage& stage, u8 rockId) {
+	RockIt rockIt = std::lower_bound(stage.rocks.begin(), stage.rocks.end(), rockId, [](const Rock& r, u8 id) -> bool { return r.id < id; });
 	assert(rockIt != stage.rocks.end());
 	return rockIt;
 }

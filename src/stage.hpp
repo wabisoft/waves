@@ -5,18 +5,17 @@
 
 #include <glm/vec2.hpp>
 
-#include "constants.hpp"
+#include "settings.hpp"
 #include "entity.hpp"
 #include "platform.hpp"
 #include "rock.hpp"
 #include "sea.hpp"
 #include "shapes.hpp"
 #include "ship.hpp"
-#include "typedefs.hpp"
 #include "win.hpp"
 
 struct Selection {
-	enum State : uint8 {
+	enum State : u8 {
 		SELECT,
 		PULL,
 	};
@@ -48,7 +47,7 @@ struct StageState {
 		bool win = false;
 	};
 
-	enum StateType : uint8 {
+	enum StateType : u8 {
 		PAUSED,
 		RUNNING,
 		FINISHED,
@@ -70,13 +69,13 @@ struct Stage{
 	std::vector<Platform> platforms;
 	// TODO: move this shit to a struct just for collision stuff maybe? gonna make addressing it longer though
 	std::vector<AABB> aabbs;
-	std::vector<uint8> xAxisOrder;
-	std::vector<uint8> yAxisOrder;
+	std::vector<u8> xAxisOrder;
+	std::vector<u8> yAxisOrder;
 
 	glm::vec2 rockSpawn;
 	Selection selection;
 	StageState state;
-	uint8 id_src = 0;
+	u8 id_src = 0;
 	Rock::Kind rockKind = {Rock::RED};
 
 	static void update(Stage& stage, float deltaTime);

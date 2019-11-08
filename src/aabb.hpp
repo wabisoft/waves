@@ -5,7 +5,7 @@
 #include "entity.hpp"
 #include "prelude.hpp"
 #include "maths.hpp"
-#include "typedefs.hpp"
+#include "settings.hpp"
 
 
 struct AABB{
@@ -19,16 +19,16 @@ struct AABB{
 	glm::vec2 lower = {0.f,0.f};
 	glm::vec2 upper = {0.f,0.f};
 	Entity::Type type = Entity::NONE;
-	uint8 id = 0;
+	u8 id = 0;
 };
 
 typedef std::vector<AABB>::iterator AABBIt;
 
 void updateAABBS(Stage& stage);
-uint8_t createAABB(Stage& stage, AABB aabb);
-AABBIt findAABB(Stage& stage, uint8 aabbId);
+u8 createAABB(Stage& stage, AABB aabb);
+AABBIt findAABB(Stage& stage, u8 aabbId);
 AABBIt deleteAABB(Stage& stage, AABBIt aabbIt);
-AABBIt deleteAABB(Stage& stage, uint8 aabbId);
+AABBIt deleteAABB(Stage& stage, u8 aabbId);
 
 inline float area(const AABB aabb) {
 	return (aabb.upper.x - aabb.lower.x) * (aabb.upper.y - aabb.lower.y);
@@ -38,7 +38,7 @@ inline bool operator==(const AABB& a, const AABB& b) {
 		return a.id == b.id && a.type == b.type; // note that we do not compare vectors because floats are all shitty
 }
 
-enum Axis : uint8 {
+enum Axis : u8 {
 	NO_AXIS = 0,
 	X_AXIS = 1 << 0,
 	Y_AXIS = 1 << 1,

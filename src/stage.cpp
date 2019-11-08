@@ -2,7 +2,7 @@
 #include <limits>
 
 #include "collision.hpp"
-#include "constants.hpp"
+#include "settings.hpp"
 #include "maths.hpp"
 #include "physics.hpp"
 #include "platform.hpp"
@@ -18,7 +18,7 @@ using namespace glm;
 
 
 void Stage::update(Stage& stage, float deltaTime){
-	assert(stage.id_src < (uint8)(-1)); // 255
+	assert(stage.id_src < (u8)(-1)); // 255
 	switch(stage.state.type) {
 		case StageState::PAUSED:
 			stage.state.paused.time += deltaTime;
@@ -75,17 +75,10 @@ void processStartInput(Stage& stage, vec2 position) {
 			makeSelectionAtPosition(stage, position);
 			if (! stage.selection.active) {
 				return;
-			}// else if (stage.selection.entity.type == ROCK) {
-			// 	Rock& rock = findRock(stage, stage.selection.entity.id);
-			// 	if (!rock.sized){
-			// 		stage.selection.state = Selection::RESIZE;
-			// 	} else {
-			// 		stage.selection.state= Selection::PULL;
-			// 	}
-			// }
-			if(stage.state.type == StageState::RUNNING){
-				stage.selection.state= Selection::PULL;
 			}
+			// if(stage.state.type == StageState::RUNNING){
+				stage.selection.state= Selection::PULL;
+			// }
 			break;
 		case Selection::PULL:
 			if(validateAndSetPullPosition(stage, position)){
@@ -115,7 +108,8 @@ void processEndInput(Stage& stage, vec2 position) {
 		assert(stage.selection.active); // I think we should always have a selection in this phase
 		validateAndSetPullPosition(stage, position);
 		Rock& rock = *findRock(stage, stage.selection.entity->id);
-		vec2 pull = rock.position - stage.selection.pull.pullPosition;
+		// vec2 pull = rock.position - stage.selection.pull.pullPosition;
+		vec2 pull = stage.selection.pull.pullPosition - rock.position;
 		float pullLength = std::abs(length(pull));
 		float throwMag = (pullLength / STAGE_MAX_PULL_LENGTH) * ROCK_MAX_SPEED;
 		rock.position += 0.01f * pull; // If you dont so this then to collision get all weird and bad things happen
@@ -133,7 +127,8 @@ void processEndInput(Stage& stage, vec2 position) {
 vec2 getPullForce(Stage& stage) {
 	assert(stage.selection.active && stage.selection.state == Selection::PULL);
 	Rock& rock = *findRock(stage, stage.selection.entity->id);
-	vec2 pull = rock.position - stage.selection.pull.pullPosition;
+	// vec2 pull = rock.position - stage.selection.pull.pullPosition;
+	vec2 pull = stage.selection.pull.pullPosition - rock.position;
 	float pullLength = std::abs(length(pull));
 	float throwMag = (pullLength / STAGE_MAX_PULL_LENGTH) * ROCK_MAX_SPEED;
 	return (pull/pullLength) * throwMag;

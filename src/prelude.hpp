@@ -13,3 +13,5 @@ struct Stage;
 struct Wave;
 struct Win;
 
+#include <cstdint>
+

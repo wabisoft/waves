@@ -12,7 +12,7 @@
 using namespace glm;
 
 
-Entity* getEntity(Stage& stage, uint8 id, Entity::Type type) {
+Entity* getEntity(Stage& stage, u8 id, Entity::Type type) {
 	switch(type) {
 		case Entity::NONE:
 			assert(false); // this should never happen
@@ -38,10 +38,6 @@ Entity* getEntity(Stage& stage, uint8 id, Entity::Type type) {
 	}
 }
 
-// bool pointOnEntity(Stage stage, vec2 point, Entity entity) {
-// 	EntityHandle handle = getEntityHandle(stage, entity);
-// 	return pointInside(point, *handle.pShape);
-// }
 
 Entity* findEntityAtPosition(Stage& stage, vec2 position) {
 	// Adaptation of sweep and prune
@@ -58,7 +54,7 @@ Entity* findEntityAtPosition(Stage& stage, vec2 position) {
 	};
 	std::vector<Candidate> candidates;
 	for(int a = 0; a < 2; ++a) {
-		std::vector<uint8> axisOrder = stage.xAxisOrder;
+		std::vector<u8> axisOrder = stage.xAxisOrder;
 		Axis axis = X_AXIS;
 		if(a>0) {
 			axisOrder = stage.yAxisOrder;

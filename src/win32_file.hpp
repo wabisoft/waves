@@ -17,7 +17,16 @@ inline std::string exePath() {
 
 inline std::string cwd() {
 	char buff[FILENAME_MAX];
-  	_getcwd( buff, FILENAME_MAX );
+  	auto res = _getcwd( buff, FILENAME_MAX );
+	if (res == nullptr) {
+		switch (errno) {
+			case ERANGE:
+				throw "Buffer length to short to get cwd path";
+			default:
+				throw "Unknown error getting cwd path";
+			
+		}
+	}
   	std::string currentWorkingDir(buff);
 	return currentWorkingDir;
 }

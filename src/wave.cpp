@@ -1,12 +1,11 @@
 #include <algorithm>
 
-#include "constants.hpp"
+#include "settings.hpp"
 #include "maths.hpp"
 #include "physics.hpp"
 #include "sea.hpp"
 #include "ship.hpp"
 #include "stage.hpp"
-#include "typedefs.hpp"
 #include "wave.hpp"
 
 using namespace glm;
@@ -48,7 +47,7 @@ void updateWaves(Stage& stage, Sea& sea){
 }
 
 
-uint8 createWave(Sea& sea, vec2 position, float amplitude, int direction, int sign){
+u8 createWave(Sea& sea, vec2 position, float amplitude, int direction, int sign){
 	Wave new_wave;
 	new_wave.position = position;
 	new_wave.amplitude = amplitude;
@@ -66,13 +65,13 @@ WaveIt deleteWave(Sea& sea, WaveIt waveIt) {
 	return sea.waves.erase(waveIt);
 }
 
-WaveIt deleteWave(Sea& sea, uint8 waveId) {
+WaveIt deleteWave(Sea& sea, u8 waveId) {
 	return deleteWave(sea, findWave(sea, waveId));
 }
 
-WaveIt findWave(Sea& sea, uint8 waveId) {
+WaveIt findWave(Sea& sea, u8 waveId) {
 	// waves should be in the waves array in order of their id
-	WaveIt waveIt = std::lower_bound(sea.waves.begin(), sea.waves.end(), waveId, [](const Wave& w, uint8 id) -> bool { return w.id < id; });
+	WaveIt waveIt = std::lower_bound(sea.waves.begin(), sea.waves.end(), waveId, [](const Wave& w, u8 id) -> bool { return w.id < id; });
 	assert(waveIt != sea.waves.end());
 	return waveIt;
 }

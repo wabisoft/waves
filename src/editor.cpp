@@ -187,17 +187,6 @@ void Editor::render(sf::Time deltaTime) {
 		if(selectedEntity) {
 			graphics.drawPolygon(*window, selectedEntity->shape, sf::Color(0, 255, 204), sf::Color::Red);
 		}
-		auto intersections = pointsOfIntersection(stage.ship.shape, stage.seas[0].shape);
-		if(intersections.size() > 1) {
-			auto vertices = intersections;
-			// auto cent = centroid(vertices);
-			// std::sort(vertices.begin(), vertices.end(), [&cent](const vec2& v1, const vec2& v2) {
-			// 	bool res = isClockwise(cent, v1, v2);
-			// 	return res;
-			// });
-			wabi::Polygon p = wabi::Polygon(vertices, 0, true);
-			graphics.drawPolygon(*window, p, sf::Color(255, 153, 153), sf::Color::Green);
-		}
 		drawImGui();
 		ImGui::SFML::Render(*window);
 		window->display();
