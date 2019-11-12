@@ -4,14 +4,6 @@
 #include <stack>
 #include <algorithm>
 
-
-// template <typename T>
-// T rpop(std::stack<T> stk) {
-// 	T t = stk.top();
-// 	stk.pop();
-// 	return t;
-// }
-
 // Data Structures
 template <typename T>
 struct Stack : std::stack<T, std::vector<T>> {
